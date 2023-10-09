@@ -1,1 +1,1 @@
-# DEISI25-aws-management-portal
+# DEISI25-Aws-Management-Portal

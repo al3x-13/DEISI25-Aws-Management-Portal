@@ -1,0 +1,18 @@
+{
+  "name": "DEISI25-Aws-Management-Portal",
+  "version": "1.0.0",
+  "description": "A private and simple collaborative portal for aws resource management.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=16"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
+}
