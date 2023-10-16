@@ -1,0 +1,1 @@
+export const ssr = false;   // makes the application a client-renderend SPA
