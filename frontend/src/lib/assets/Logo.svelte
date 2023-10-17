@@ -1,10 +1,16 @@
-<script>
+<script lang="ts">
 	export let size = 300;
-	export let color = 'black';
+	export let color: string | null = null;
+	
+	let colorClass = 'fill-color-primary-light dark:fill-color-primary-dark';
+	if (color != null) {
+		colorClass = `fill-[${color}]`;
+	}
 </script>
 
-<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width={size} height={size * 0.8818} viewBox="0 0 1778.000000 1568.000000" preserveAspectRatio="xMidYMid meet">
-	<g transform="translate(0.000000,1568.000000) scale(0.100000,-0.100000)" fill={color} stroke="none">
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width={size} height={size * 0.8818} viewBox="0 0 1778.000000
+1568.000000" preserveAspectRatio="xMidYMid meet" class={colorClass}>
+	<g transform="translate(0.000000,1568.000000) scale(0.100000,-0.100000)" stroke="none">
 		<path d="M8525 15075 c-27 -7 -84 -28 -125 -45 -41 -17 -91 -37 -110 -44 -49
 		-19 -237 -105 -420 -193 -85 -41 -190 -90 -232 -109 -43 -18 -111 -49 -150
 		-68 -222 -105 -302 -141 -389 -176 -98 -39 -166 -71 -416 -191 -79 -38 -184
