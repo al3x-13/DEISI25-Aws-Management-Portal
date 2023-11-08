@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import { fromEnv } from '@aws-sdk/credential-providers';
 import { EC2Client, RunInstancesCommand, RunInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from '@aws-sdk/client-ec2';
+import { logger, activateDebugModeLogging } from './logging/logging';
 
 dotenv.config();
 
@@ -15,9 +16,17 @@ const client = new EC2Client({
 });
 let instanceIds: string[] = [];
 
+
+// Logging
+activateDebugModeLogging();
+app.use((req: Request, res: Response, next: NextFunction) => {
+	logger.info(`HTTP Request (${req.method}) for '${req.path}'`);
+	next();
+});
+
+
 app.get('/', (req, res) => {
 	res.send('Hello World!');
-	console.log('LOL', process.env.AWS_ACCESS_KEY_ID);
 });
 
 app.get('/create', async (req, res) => {
