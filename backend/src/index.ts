@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import { fromEnv } from '@aws-sdk/credential-providers';
 import { EC2Client, RunInstancesCommand, RunInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from '@aws-sdk/client-ec2';
 import { logger, activateDebugModeLogging } from './logging/logging';
+import { initializeDbConnection } from './db/db';
+
 
 dotenv.config();
 
@@ -23,6 +25,15 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 	logger.info(`HTTP Request (${req.method}) for '${req.path}'`);
 	next();
 });
+
+
+// Database connection
+if (initializeDbConnection(process.env.DB_URL)) {
+	logger.info('Database connection initialized successfully');
+} else {
+	logger.error('Failed to initialize database connection: verify the connection string');
+	process.exit(1);
+}
 
 
 app.get('/', (req, res) => {
