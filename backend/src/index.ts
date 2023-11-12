@@ -27,6 +27,10 @@ if (!process.env.JWT_SECRET) {
 }
 
 
+// config
+app.use(express.json());
+
+
 // Logging
 activateDebugModeLogging();
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -46,13 +50,8 @@ db.initializeConnection(process.env.DB_URL, (success: boolean) => {
 
 
 // Auth setup
-// TODO: auth controller here
 app.use('/auth', authController);
 app.use(authMiddleware);
-
-
-// config
-app.use(express.json());
 
 
 app.get('/', (req, res) => {

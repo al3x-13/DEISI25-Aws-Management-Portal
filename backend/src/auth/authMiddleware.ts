@@ -33,7 +33,7 @@ function authMiddleware(req: Request, res: Response, next: NextFunction) {
 		return;
 	}
 
-	const jwt_secret = process.env.JWT_SECRET ? process.env.JWT_SECRET : '';	// TODO: review this later
+	// @ts-ignore - TODO: review this later
 	jwt.verify(token, jwt_secret, (err, user) => {
 		if (err) {
 			const error = new ApiError('Unauthorized', 'JWT is invalid');

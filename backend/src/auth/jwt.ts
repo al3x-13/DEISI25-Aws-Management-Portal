@@ -1,4 +1,10 @@
 import { Request } from "express";
+import jwt from 'jsonwebtoken';
+import { JwtUserData } from "../lib/users";
+import dotenv from 'dotenv';
+import { logger } from "../logging/logging";
+
+dotenv.config();
 
 /**
 * Extracts JWT from express request if it exists.
@@ -11,4 +17,21 @@ function extractJwt(req: Request): string | null {
 	return token ? token : null;
 }
 
-export { extractJwt };
+/**
+* Signs a JWT with user data.
+* @param userData User data
+* @returns JWT
+*/
+function signJwt(userData: JwtUserData): string {
+	// TODO: make jwt expiration configurable
+	logger.info(`JWT generated successfully for user '${userData.username}'`);
+
+	return jwt.sign(
+		userData,
+		// @ts-ignore
+		process.env.JWT_SECRET,
+		{ expiresIn: '6h' }
+	);
+}
+
+export { extractJwt, signJwt };
