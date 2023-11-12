@@ -27,3 +27,5 @@ class ApiError {
 		};
 	}
 }
+
+export { ApiError };

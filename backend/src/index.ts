@@ -3,7 +3,9 @@ import dotenv from 'dotenv';
 import { fromEnv } from '@aws-sdk/credential-providers';
 import { EC2Client, RunInstancesCommand, RunInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from '@aws-sdk/client-ec2';
 import { logger, activateDebugModeLogging } from './logging/logging';
-import { initializeDbConnection } from './db/db';
+import db from './db/db';
+import authMiddleware from './auth/authMiddleware';
+import authController from './auth/controller';
 
 
 dotenv.config();
@@ -18,6 +20,12 @@ const client = new EC2Client({
 });
 let instanceIds: string[] = [];
 
+// Checking env variables
+if (!process.env.JWT_SECRET) {
+	logger.error("'JWT_SECRET' environment variable is not set");
+	process.exit(1);
+}
+
 
 // Logging
 activateDebugModeLogging();
@@ -28,17 +36,33 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 
 // Database connection
-if (initializeDbConnection(process.env.DB_URL)) {
+db.initializeConnection(process.env.DB_URL, (success: boolean) => {
+	if (!success) {
+		logger.error('Failed to initialize database connection: verify the connection string');
+		process.exit(1);
+	}
 	logger.info('Database connection initialized successfully');
-} else {
-	logger.error('Failed to initialize database connection: verify the connection string');
-	process.exit(1);
-}
+});
+
+
+// Auth setup
+// TODO: auth controller here
+app.use('/auth', authController);
+app.use(authMiddleware);
+
+
+// config
+app.use(express.json());
 
 
 app.get('/', (req, res) => {
 	res.send('Hello World!');
 });
+
+app.get('/test', (req, res) => {
+	res.send('Big F');
+});
+
 
 app.get('/create', async (req, res) => {
 	const instanceInput: RunInstancesCommandInput = {

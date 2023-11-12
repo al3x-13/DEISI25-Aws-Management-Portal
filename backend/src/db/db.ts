@@ -9,21 +9,21 @@ let pool: Pool;
 * @param connectionString Database connection url
 * @returns Whether connection was successful
 */
-function initializeDbConnection(connectionString: string | undefined): boolean {
-	if (!connectionString) return false;
+function initializeConnection(connectionString: string | undefined, callback: (success: boolean) => void): void {
+	if (!connectionString) callback(false);
 
 	pool = new Pool({
 		connectionString: connectionString,
 	});
 	
 	// veryfying if the connection was created successfully
-	pool.query('SELECT 1', (err, _res) => {
+	pool.query('SELECT 1', async (err, _res) => {
 		if (err) {
-			return false;
+			callback(false);
+		} else {
+			callback(true);
 		}
-		return true;
 	});
-	return false;
 }
 
 /**
@@ -62,4 +62,10 @@ function getQueryTimestamp(): string {
 	return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 }
 
-export { initializeDbConnection, query };
+
+const db = {
+	initializeConnection,
+	query,
+};
+
+export default db;
