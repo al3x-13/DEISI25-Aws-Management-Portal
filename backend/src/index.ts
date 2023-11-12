@@ -6,6 +6,7 @@ import { logger, activateDebugModeLogging } from './logging/logging';
 import db from './db/db';
 import authMiddleware from './auth/authMiddleware';
 import authController from './auth/controller';
+import { dbUrlExists, jwtSecretExists } from './utils/env';
 
 
 dotenv.config();
@@ -20,16 +21,13 @@ const client = new EC2Client({
 });
 let instanceIds: string[] = [];
 
-// Checking env variables
-if (!process.env.JWT_SECRET) {
-	logger.error("'JWT_SECRET' environment variable is not set");
+// Checks for env variables
+if (!jwtSecretExists() || !dbUrlExists()) {
 	process.exit(1);
 }
 
-
 // config
 app.use(express.json());
-
 
 // Logging
 activateDebugModeLogging();
@@ -37,7 +35,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 	logger.info(`HTTP Request (${req.method}) for '${req.path}'`);
 	next();
 });
-
 
 // Database connection
 db.initializeConnection(process.env.DB_URL, (success: boolean) => {
