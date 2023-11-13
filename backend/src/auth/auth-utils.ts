@@ -1,5 +1,4 @@
 import { Request } from "express";
-import db from "../db/db";
 
 /**
 * Checks if the request's 'authorization' header is of scheme type 'Bearer'.

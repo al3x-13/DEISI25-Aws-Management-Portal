@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
-import { ApiError } from "../utils/errors";
-import { JwtUserData, getUserId, getUserPasswordHash, usernameExists } from "../lib/users";
-import { signJwt } from "./jwt";
+import { ApiError } from "../../utils/errors";
+import { JwtUserData, getUserId, getUserPasswordHash, usernameExists } from "../../lib/users";
+import { signJwt } from "../../auth/jwt";
 import bcrypt from 'bcryptjs';
-import { logger } from "../logging/logging";
+import { logger } from "../../logging/logging";
 
 const authController = express.Router();
 

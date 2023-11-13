@@ -4,9 +4,10 @@ import { fromEnv } from '@aws-sdk/credential-providers';
 import { EC2Client, RunInstancesCommand, RunInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from '@aws-sdk/client-ec2';
 import { logger, activateDebugModeLogging } from './logging/logging';
 import db from './db/db';
-import authMiddleware from './auth/authMiddleware';
-import authController from './auth/controller';
-import { dbUrlExists, jwtSecretExists } from './utils/env';
+import authMiddleware from './auth/auth-middleware';
+import { dbUrlExists, jwtSecretExists } from './utils/env-utils';
+import mainController from './routes/controller';
+import authController from './routes/auth/controller';
 
 
 dotenv.config();
@@ -46,11 +47,6 @@ db.initializeConnection(process.env.DB_URL, (success: boolean) => {
 });
 
 
-// Auth setup
-app.use('/auth', authController);
-app.use(authMiddleware);
-
-
 app.get('/', (req, res) => {
 	res.send('Hello World!');
 });
@@ -60,6 +56,17 @@ app.get('/test', (req, res) => {
 });
 
 
+// Auth routes
+app.use('/auth', authController);
+
+// Auth middleware setup
+app.use(authMiddleware);
+
+// Routes (auth required)
+app.use('/', mainController);
+
+
+// TODO: remove this (testing)
 app.get('/create', async (req, res) => {
 	const instanceInput: RunInstancesCommandInput = {
 		ImageId: 'ami-04fb7beeed4da358b',	// Amazon Linux 2023 AMI

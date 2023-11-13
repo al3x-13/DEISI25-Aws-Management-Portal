@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
-import { isBearerAuthScheme } from './authUtils';
+import { isBearerAuthScheme } from './auth-utils';
 import { extractJwt } from './jwt';
 import jwt from 'jsonwebtoken';
 import { ApiError } from '../utils/errors';
