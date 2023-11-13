@@ -10,6 +10,7 @@ dotenv.config();
 function jwtSecretExists(): boolean {
 	if (!process.env.JWT_SECRET) {
 		logger.error("'JWT_SECRET' environment variable is not set");
+		console.log("'JWT_SECRET' environment variable is not set");
 		return false;
 	}
 	return true;
@@ -22,6 +23,7 @@ function jwtSecretExists(): boolean {
 function dbUrlExists(): boolean {
 	if (!process.env.DB_URL) {
 		logger.error("'DB_URL' environment variable is not set");
+		console.log("'DB_URL' environment variable is not set");
 		return false;
 	}
 	return true;
