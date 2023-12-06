@@ -4,6 +4,9 @@ import { JwtUserData, getUserId, getUserPasswordHash, usernameExists } from "../
 import { signJwt } from "../../auth/jwt";
 import bcrypt from 'bcryptjs';
 import { logger } from "../../logging/logging";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const authController = express.Router();
 
@@ -55,10 +58,19 @@ authController.post('/authenticate', async (req: Request, res: Response) => {
 	const userData: JwtUserData = { id: userId ? userId : -1, username: username };
 	const token = signJwt(userData);
 
+	// save token as cookie
+	res.cookie('token', token, {
+		httpOnly: true,
+		secure: process.env.NODE_ENV === 'production',
+		sameSite: 'strict',
+		path: '/',
+		maxAge: 21600000, // 6h in ms (TODO: hardcoded, change later)
+	});
+
 	// logging
 	logger.info(`User '${username}' authenticated successfully`);
 
-	res.json({ "JWT": token });
+	res.send("JWT has been set successfully")
 });
 
 export default authController;
