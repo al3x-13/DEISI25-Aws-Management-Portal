@@ -1,57 +1,39 @@
 import express, { Request, Response } from "express";
 import { ApiError } from "../../utils/errors";
-import { JwtUserData, getUserId, getUserPasswordHash, usernameExists } from "../../lib/users";
+import { JwtUserData, getUserId } from "../../lib/users";
 import { signJwt } from "../../auth/jwt";
-import bcrypt from 'bcryptjs';
 import { logger } from "../../logging/logging";
 import dotenv from "dotenv";
+import { isContentTypeValid, validateAuthCredentials, validateAuthenticationBody } from "../../utils/endpoint-utils";
 
 dotenv.config();
 
 const authController = express.Router();
 
-authController.get('/', (req, res, next) => {
+authController.get('/', (_req, res, _next) => {
 	res.send("NOICE");
 });
 
 authController.post('/authenticate', async (req: Request, res: Response) => {
-	if (req.headers['content-type'] != 'application/json') {
+	if (!isContentTypeValid(req)) {
 		const error = new ApiError('Authentication failed', "Header 'content-type' must be 'application/json'")
 		res.status(401).json(error.toJSON());
 		return;
 	}
 
+	let fieldsValidation = validateAuthenticationBody(req);
+	if (fieldsValidation != 'valid') {
+		const error = new ApiError('Authentication failed', `Missing '${fieldsValidation}' body field`);
+		res.status(401).json(error.toJSON());
+		return;
+	}
+
 	const { username, password } = req.body;
-	if (!username) {
-		const error = new ApiError('Authentication failed', "Missing 'username' body field");
-		res.status(401).json(error.toJSON());
-		return;
-	}
 
-	if (!password) {
-		const error = new ApiError('Authentication failed', "Missing 'password' body field");
-		res.status(401).json(error.toJSON());
-		return;
-	}
-
-	// username validation
-	const validUsername = await usernameExists(username);
-	if (!validUsername) {
+	// credentials validation
+	if (await validateAuthCredentials(username, password)) {
 		const error = new ApiError('Authentication failed');
 		res.status(401).json(error.toJSON());
-		return;
-	}
-
-	// TODO: update this later to compare hashes (dev mode)
-	let userPasswordHash = await getUserPasswordHash(username);
-	userPasswordHash = userPasswordHash ? userPasswordHash : '';
-
-	const validPassword = bcrypt.compareSync(password, userPasswordHash);
-
-	if (!validPassword) {
-		const error = new ApiError('Authentication failed');
-		res.status(401).json(error.toJSON());
-		return;
 	}
 
 	const userId = await getUserId(username);
