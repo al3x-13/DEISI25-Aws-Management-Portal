@@ -3,6 +3,12 @@ import dotenv from 'dotenv';
 import { fromEnv } from '@aws-sdk/credential-providers';
 import { EC2Client, RunInstancesCommand, RunInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from '@aws-sdk/client-ec2';
 import { logger, activateDebugModeLogging } from './logging/logging';
+import db from './db/db';
+import authMiddleware from './auth/auth-middleware';
+import { dbUrlExists, jwtSecretExists } from './utils/env-utils';
+import mainController from './routes/controller';
+import authController from './routes/auth/controller';
+
 
 dotenv.config();
 
@@ -16,6 +22,13 @@ const client = new EC2Client({
 });
 let instanceIds: string[] = [];
 
+// Checks for env variables
+if (!jwtSecretExists() || !dbUrlExists()) {
+	process.exit(1);
+}
+
+// config
+app.use(express.json());
 
 // Logging
 activateDebugModeLogging();
@@ -24,11 +37,36 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 	next();
 });
 
+// Database connection
+db.initializeConnection(process.env.DB_URL, (success: boolean) => {
+	if (!success) {
+		logger.error('Failed to initialize database connection: verify the connection string');
+		process.exit(1);
+	}
+	logger.info('Database connection initialized successfully');
+});
+
 
 app.get('/', (req, res) => {
 	res.send('Hello World!');
 });
 
+app.get('/test', (req, res) => {
+	res.send('Big F');
+});
+
+
+// Auth routes
+app.use('/auth', authController);
+
+// Auth middleware setup
+app.use(authMiddleware);
+
+// Routes (auth required)
+app.use('/', mainController);
+
+
+// TODO: remove this (testing)
 app.get('/create', async (req, res) => {
 	const instanceInput: RunInstancesCommandInput = {
 		ImageId: 'ami-04fb7beeed4da358b',	// Amazon Linux 2023 AMI
