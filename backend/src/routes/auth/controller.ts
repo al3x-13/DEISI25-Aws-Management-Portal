@@ -46,15 +46,14 @@ authController.post('/authenticate', async (req: Request, res: Response) => {
 	res.cookie('token', token, {
 		httpOnly: true,
 		secure: process.env.NODE_ENV === 'production',
-		sameSite: 'lax',
-		path: 'localhost',
+		sameSite: 'strict',
+		path: '/',
 		maxAge: 21600000, // 6h in ms (TODO: hardcoded, change later)
 	});
 
 	// logging
 	logger.info(`User '${username}' authenticated successfully`);
-
-	res.send("JWT has been set successfully")
+	res.send({ token: token });
 });
 
 export default authController;
