@@ -34,4 +34,19 @@ function signJwt(userData: JwtUserData): string {
 	);
 }
 
-export { extractJwt, signJwt };
+function getJwtData(token: string): JwtUserData | null {
+	try {
+		if (!process.env.JWT_SECRET) {
+			return null;
+		}
+
+		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+		console.log(`Decoded token: ${decoded}`)
+
+		return null;
+	} catch (error) {
+		return null;
+	}
+}
+
+export { extractJwt, signJwt, getJwtData };

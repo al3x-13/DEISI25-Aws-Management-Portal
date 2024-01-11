@@ -46,8 +46,8 @@ authController.post('/authenticate', async (req: Request, res: Response) => {
 	res.cookie('token', token, {
 		httpOnly: true,
 		secure: process.env.NODE_ENV === 'production',
-		sameSite: 'strict',
-		path: '/',
+		sameSite: 'lax',
+		path: 'localhost',
 		maxAge: 21600000, // 6h in ms (TODO: hardcoded, change later)
 	});
 
