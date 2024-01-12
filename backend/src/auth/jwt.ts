@@ -63,4 +63,22 @@ function getJwtData(token: string): JwtUserData | null {
 	return { id: userId, username: userUsername, role: userRole };
 }
 
-export { extractJwt, signJwt, getJwtData };
+/**
+* Validates jwt token.
+* @param token jwt
+* @returns Whether the jwt is valid or null if no jwt secret was found
+*/
+function validateJwt(token: string): boolean | null {
+	if (!process.env.JWT_SECRET) {
+		return null;
+	}
+
+	try {
+		jwt.verify(token, process.env.JWT_SECRET);
+		return true;
+	} catch (err) {
+		return false;
+	}
+}
+
+export { extractJwt, signJwt, getJwtData, validateJwt };
