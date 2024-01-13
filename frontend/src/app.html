@@ -9,7 +9,7 @@
 	<body data-sveltekit-preload-data="hover">
 		<script>
 			/* LIGHT/DARK MODE */
-			const LOCAL_STORAGE_KEY = 'light-mode';
+			const LOCAL_STORAGE_KEY = 'theme';
 
 			function getLocalPreference() {
 				return localStorage.getItem(LOCAL_STORAGE_KEY)
@@ -32,8 +32,8 @@
 			window.addEventListener('DOMContentLoaded', () => {
 				let localPreference = getLocalPreference();
 				// Gets dark mode preference from local storage on window load
-				// If there's no preference sets 'light' mode by default
-				if (localPreference === null || localPreference == 'lightlight') {
+				// If there's no preference sets 'dark' mode by default
+				if (localPreference === null || localPreference === 'dark') {
 					setDarkMode();
 				} else {
 					setLightMode();

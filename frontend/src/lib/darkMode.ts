@@ -1,4 +1,4 @@
-const LOCAL_STORAGE_KEY = 'light-mode';
+const LOCAL_STORAGE_KEY = 'theme';
 
 /**
  * Gets the light mode saved preference.
@@ -7,7 +7,7 @@ const LOCAL_STORAGE_KEY = 'light-mode';
 function getLightModePreference(): string | null {
     let preference = window.localStorage.getItem(LOCAL_STORAGE_KEY);
     if (preference == null || preference == 'light' || preference == 'dark') {
-        return preference
+        return preference;
     }
     return null;
 }
