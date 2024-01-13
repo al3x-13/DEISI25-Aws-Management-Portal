@@ -27,13 +27,14 @@
 
 		<form
 			method="POST"
-			action="/login"
+			action="?/login"
 			class="w-[400px] flex flex-col items-center justify-center mt-24"
 		>
 			<div class="relative w-full flex flex-col">
 				<input
 					type="text"
 					id="username"
+					name="username"
 					placeholder=" "
 					class="peer/name px-4 pt-6 pb-1 text-base md:text-lg font-[500] text-[#888888] dark:text-[#777777] bg-[#CCCCCC] dark:bg-[#BDBDBD] rounded-lg border-[3px] border-transparent focus:border-color-primary-light dark:focus:border-color-primary-dark focus:outline-0 focus:outline-offset-0 focus:ring-0 transition-all duration-[250ms] ease-in-out select-none"
 				/>
@@ -49,6 +50,7 @@
 				<input
 					type={passwordHidden ? 'password' : 'text'}
 					id="password"
+					name="password"
 					placeholder=" "
 					class="peer/pw px-4 pt-6 pb-1 text-base md:text-lg font-[500] text-[#888888] dark:text-[#777777] bg-[#CCCCCC] dark:bg-[#BDBDBD] rounded-lg border-[3px] border-transparent focus:border-color-primary-light dark:focus:border-color-primary-dark focus:outline-0 focus:outline-offset-0 focus:ring-0 transition-all duration-[250ms] ease-in-out select-none"
 				/>

@@ -1,4 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { fromEnv } from '@aws-sdk/credential-providers';
 import { EC2Client, RunInstancesCommand, RunInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from '@aws-sdk/client-ec2';
@@ -28,6 +30,11 @@ if (!jwtSecretExists() || !dbUrlExists()) {
 }
 
 // config
+app.use(cors({
+	origin: 'http://localhost:5173',
+	credentials: true,
+}));
+app.use(cookieParser());
 app.use(express.json());
 
 // Logging

@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { ApiError } from "../../utils/errors";
-import { JwtUserData, getUserId } from "../../lib/users";
+import { JwtUserData, getUserId, getUserRole } from "../../lib/users";
 import { signJwt } from "../../auth/jwt";
 import { logger } from "../../logging/logging";
 import dotenv from "dotenv";
@@ -31,13 +31,15 @@ authController.post('/authenticate', async (req: Request, res: Response) => {
 	const { username, password } = req.body;
 
 	// credentials validation
-	if (await validateAuthCredentials(username, password)) {
+	if (!(await validateAuthCredentials(username, password))) {
 		const error = new ApiError('Authentication failed');
 		res.status(401).json(error.toJSON());
+		return;
 	}
 
 	const userId = await getUserId(username);
-	const userData: JwtUserData = { id: userId ? userId : -1, username: username };
+	const userRole = await getUserRole(username);
+	const userData: JwtUserData = { id: userId ? userId : -1, username: username, role: userRole };
 	const token = signJwt(userData);
 
 	// save token as cookie
@@ -51,8 +53,7 @@ authController.post('/authenticate', async (req: Request, res: Response) => {
 
 	// logging
 	logger.info(`User '${username}' authenticated successfully`);
-
-	res.send("JWT has been set successfully")
+	res.send({ token: token });
 });
 
 export default authController;

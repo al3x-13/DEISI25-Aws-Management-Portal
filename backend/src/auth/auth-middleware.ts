@@ -1,7 +1,5 @@
-import express, { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
-import { isBearerAuthScheme } from './auth-utils';
-import { extractJwt } from './jwt';
 import jwt from 'jsonwebtoken';
 import { ApiError } from '../utils/errors';
 
@@ -14,33 +12,30 @@ dotenv.config();
 * @param next Express next function
 */
 function authMiddleware(req: Request, res: Response, next: NextFunction) {
-	if (!req.headers['authorization']) {
-		const error = new ApiError('Unauthorized', "Missing 'authorization' header");
+	const JWT_SECRET = process.env.JWT_SECRET;
+
+	if (!JWT_SECRET) {
+		const error = new ApiError('Server error', 'Missing jwt secret');
+		res.status(500).json(error.toJSON());
+		return;
+	}
+
+	const authToken = req.cookies.token;
+	if (!authToken) {
+		const error = new ApiError('Unauthorized', "Missing authorization cookies");
 		res.status(401).json(error.toJSON());
 		return;
 	}
 
-	if (!isBearerAuthScheme(req)) {
-		const error = new ApiError('Unauthorized', "Authorization header should use 'Bearer' scheme");
+	try {
+		// validate jwt
+		jwt.verify(authToken, JWT_SECRET);
+	} catch (err) {
+		const error = new ApiError('Unauthorized', 'Token is not valid');
 		res.status(401).json(error.toJSON());
 		return;
 	}
-
-	const token = extractJwt(req);
-	if (!token) {
-		const error = new ApiError('Unauthorized', "Invalid 'authorization' header format");
-		res.status(401).json(error.toJSON());
-		return;
-	}
-
-	// @ts-ignore - TODO: review this later
-	jwt.verify(token, jwt_secret, (err, user) => {
-		if (err) {
-			const error = new ApiError('Unauthorized', 'JWT is invalid');
-			return res.status(401).json(error.toJSON());
-		}
-		next();
-	});
+	next();
 }
 
 export default authMiddleware;

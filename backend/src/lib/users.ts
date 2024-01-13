@@ -1,17 +1,23 @@
 import db from "../db/db";
 
+export type Role = {
+	id: number;
+	role: string;
+}
+
 export type User = {
 	id: number;
 	username: string;
 	passwordHash: string;
 	email: string | undefined;
-	admin: boolean;
+	role: Role;
 	created_at: number;
 };
 
 export interface JwtUserData {
 	id: number;
 	username: string;
+	role: string;
 };
 
 /**
@@ -67,6 +73,14 @@ export async function getUserId(username: string): Promise<number | null> {
 	);
 	const id = result.rows[0].id;
 	return id ? id : null;
+}
+
+export async function getUserRole(username: string): Promise<string> {
+	const result = await db.query(
+		'SELECT roles.role FROM roles INNER JOIN users ON roles.id = users.role WHERE users.username = $1',
+		[username]
+	);
+	return result.rows[0].role;
 }
 
 /**

@@ -34,4 +34,51 @@ function signJwt(userData: JwtUserData): string {
 	);
 }
 
-export { extractJwt, signJwt };
+/**
+* Gets jason web token payload.
+* @param token jwt
+* @returns Token payload or null on fail
+*/
+function getJwtData(token: string): JwtUserData | null {
+	if (!process.env.JWT_SECRET) {
+		return null;
+	}
+
+	let decodedToken;
+
+	try {
+		decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+	} catch (error) {
+		return null;
+	}
+
+	if (typeof decodedToken === 'string') {
+		return null;
+	}
+
+	const userId = decodedToken.id;
+	const userUsername = decodedToken.username;
+	const userRole = decodedToken.role;
+
+	return { id: userId, username: userUsername, role: userRole };
+}
+
+/**
+* Validates jwt token.
+* @param token jwt
+* @returns Whether the jwt is valid or null if no jwt secret was found
+*/
+function validateJwt(token: string): boolean | null {
+	if (!process.env.JWT_SECRET) {
+		return null;
+	}
+
+	try {
+		jwt.verify(token, process.env.JWT_SECRET);
+		return true;
+	} catch (err) {
+		return false;
+	}
+}
+
+export { extractJwt, signJwt, getJwtData, validateJwt };
