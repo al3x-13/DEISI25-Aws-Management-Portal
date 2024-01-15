@@ -26,7 +26,11 @@ export const actions = {
 				console.log(JSON.stringify(data));
 			} else {
 				// set token cookie
-				cookies.set('token', data.token);
+				cookies.set('token', data.token, {
+					path: '/',
+					sameSite: 'strict',
+					secure: process.env.NODE_ENV === 'production',
+				});
 
 				const userData: User | null = getUserDataFromJwt(data.token);
 

@@ -4,8 +4,9 @@ async function validateUserToken(token: string): Promise<boolean> {
 		{
 			method: "GET",
 			headers: {
-				"Content-Type": "application/json"
-			}
+				"Content-Type": "application/json",
+				"Cookie": `token=${token}`,
+			},
 		}
 	).then(async (res) => {
 		const data = await res.json();
