@@ -2,6 +2,7 @@ import { getUserDataFromJwt, type User } from "$lib/domain/user";
 import { validateUserToken } from "$lib/utils/auth-validation";
 import { routeIsProtected, userCanAccessRoute } from "$lib/utils/route-validation";
 import { redirect, type Handle } from "@sveltejs/kit";
+import { sequence } from "@sveltejs/kit/hooks";
 
 const authorizeRouteAccess: Handle = async ({ event, resolve }) => {
 	const reqPath = event.url.pathname;
@@ -10,19 +11,14 @@ const authorizeRouteAccess: Handle = async ({ event, resolve }) => {
 	const validToken = token ? await validateUserToken(token) : false;
 	const user: User | null | undefined = token ? getUserDataFromJwt(token) : undefined;
 
-	console.log(`Route: ${reqPath}`);
-	console.log(`Valid token: ${validToken}`);
-	console.log(`User: ${user}`);
-
 	// set user info on 'locals'
 	if (validToken && user) {
-		console.log('user done');
 		event.locals.user = user;
 	}
 
-	// invalidate cookies and user info if token is not valid when trying to access a protected route
+	// invalidate cookies and user info if token is not valid 
+	// when trying to access a protected route
 	if (!validToken && protectedRoute) {
-		console.log('here');
 		event.cookies.delete('token');
 		event.locals.user = undefined;
 	}
@@ -41,19 +37,41 @@ const authorizeRouteAccess: Handle = async ({ event, resolve }) => {
 }
 
 // redirects that improve UX
-/*const smartRedirects: Handle = async ({ event, resolve }) => {
+const smartRedirects: Handle = async ({ event, resolve }) => {
 	const reqPath = event.url.pathname;
 	const token = event.cookies.get('token');
+	const user: User | null = token ? getUserDataFromJwt(token) : null;
+
+	// if the user is not authenticated just resolve the request as usual
+	if (!user) {
+		return resolve(event);
+	}
+
+	// TODO: update this when all account types are fully implemented
 
 	// redirect authenticated users away from login page
-	// TODO: improve this when all account types are fully implemented
-	if (userIsAuthenticated(token)) {
-		// TODO: finish this
-		// implement this based on the account role
-		throw redirect(303, '/');
+	// they will be redirected to their dashboards
+	if (reqPath === '/login') {
+		console.log('WORKED');
+
+		switch (user.role) {
+			case 'root': {
+				throw redirect(303, '/root');
+			}
+			case 'admin': {
+				// TODO: implement this
+				break;
+			}
+			default: {
+				throw redirect(303, '/dashboard');
+			}
+		}
 	}
 
 	return resolve(event);
-}*/
+}
 
-export const handle: Handle = authorizeRouteAccess;
+export const handle: Handle = sequence(
+	authorizeRouteAccess,
+	smartRedirects
+);
