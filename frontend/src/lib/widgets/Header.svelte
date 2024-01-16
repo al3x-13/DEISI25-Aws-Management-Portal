@@ -8,7 +8,7 @@
 </script>
 
 <nav
-	class="fixed flex items-center justify-end w-full h-[60px] bg-bg2-light dark:bg-bg2-dark border-b-[1.5px] border-border-light dark:border-border-dark px-4 py-1"
+	class="w-full h-[60px] flex items-center justify-end bg-bg2-light dark:bg-bg2-dark border-b-[1.5px] border-border-light dark:border-border-dark px-4 py-1 z-20"
 >
 	<div class="fixed w-full mx-auto">
 		<NavbarLogo />
