@@ -14,7 +14,7 @@
 
 <div class="bg-bg-light dark:bg-bg-dark min-h-screen w-full flex">
 	<Sidebar on:open={updateSidebarState}>
-		<SidebarItem ionIcon="grid" label="testing" open={sidebarOpen} />
+		<SidebarItem ionIcon="grid-outline" label="Dashboard" href="/dashboard" open={sidebarOpen} />
 	</Sidebar>
 	<div class="w-full">
 		<Header username={data.props.user.username} role={data.props.user.role} />
