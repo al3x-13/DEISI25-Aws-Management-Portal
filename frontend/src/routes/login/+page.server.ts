@@ -1,4 +1,4 @@
-import { getUserDataFromJwt, type User } from "$lib/domain/user";
+import { getDashboardRoute, getUserDataFromJwt, type User } from "$lib/domain/user";
 import { redirect } from "@sveltejs/kit";
 import type { Actions } from "./$types";
 
@@ -34,16 +34,9 @@ export const actions = {
 
 				const userData: User | null = getUserDataFromJwt(data.token);
 
-				// successful login redirect based on user
-				if (userData && userData.role == 'root') {
-					throw redirect(303, '/root');
-				} else if (userData && userData.role == 'admin') {
-					// TODO: update this when admin acc is fully implemented
-					throw redirect(303, '/');
-				} else {
-					// TODO: update this when user acc is fully implemented
-					throw redirect(303, '/');
-				}
+				// successful login redirect based on user role
+				const dashboardRoute = getDashboardRoute(userData ? userData.role : '/');
+				throw redirect(303, dashboardRoute);
 			}
 		});
 	}

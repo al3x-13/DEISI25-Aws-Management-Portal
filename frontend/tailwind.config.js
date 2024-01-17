@@ -15,10 +15,12 @@ export default {
 		'bg2-light': '#DFDFDF',
         'color-primary-dark': '#0B79DE',
         'color-primary-light': '#3D97EA',
+	    'color-hover-dark': '#1160A9',
+	    'color-hover-light': '#317ABE',
 		'border-dark': '#283245',
 		'border-light': '#CFCFCF',
 		'hover-dark': '#26334B',
-		'hover-light': '',
+		'hover-light': '#C4C4C4',
       },
 	  borderRadius: {
 		  'custom': '6px',
