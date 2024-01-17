@@ -22,13 +22,13 @@
 		<DarkModeButton />
 	</div>
 
-	<div class="w-full flex flex-col items-center justify-center">
+	<div class="w-full flex flex-col items-center justify-center font-oxygen">
 		<LogoWithText />
 
 		<form
 			method="POST"
 			action="?/login"
-			class="w-[400px] flex flex-col items-center justify-center mt-24"
+			class="w-[350px] flex flex-col items-center justify-center mt-12 md:mt-24"
 		>
 			<div class="relative w-full flex flex-col">
 				<input
@@ -36,11 +36,11 @@
 					id="username"
 					name="username"
 					placeholder=" "
-					class="peer/name px-4 pt-6 pb-1 text-base md:text-lg font-[500] text-[#888888] dark:text-[#777777] bg-[#CCCCCC] dark:bg-[#BDBDBD] rounded-lg border-[3px] border-transparent focus:border-color-primary-light dark:focus:border-color-primary-dark focus:outline-0 focus:outline-offset-0 focus:ring-0 transition-all duration-[250ms] ease-in-out select-none"
+					class="peer/name px-4 pt-5 pb-1 text-base md:text-lg font-[500] text-[#888888] dark:text-[#777777] bg-[#CCCCCC] dark:bg-[#BDBDBD] rounded-lg border-[3px] border-transparent focus:border-color-primary-light dark:focus:border-color-primary-dark focus:outline-0 focus:outline-offset-0 focus:ring-0 transition-all duration-[250ms] ease-in-out select-none"
 				/>
 				<label
 					for="username"
-					class="absolute text-lg md:text-xl text-[#888888] dark:text-[#777777] duration-[250ms] transform -translate-x-4 translate-y-0.5 px-5 scale-[0.7] bg-bg rounded-xl peer-placeholder-shown/name:scale-100 peer-focus/name:scale-[0.7] peer-placeholder-shown/name:translate-y-[1.15rem] peer-placeholder-shown/name:translate-x-0 peer-focus/name:translate-y-0.5 peer-focus/name:-translate-x-4 peer-focus/name:text-color-primary-light dark:peer-focus/name:text-color-primary-dark select-none"
+					class="absolute text-base md:text-lg text-[#888888] dark:text-[#777777] duration-[250ms] transform -translate-x-4 translate-y-0.5 px-5 scale-[0.7] bg-bg rounded-xl peer-placeholder-shown/name:scale-100 peer-focus/name:scale-[0.7] peer-placeholder-shown/name:translate-y-[1rem] peer-placeholder-shown/name:translate-x-0 peer-focus/name:translate-y-0.5 peer-focus/name:-translate-x-4 peer-focus/name:text-color-primary-light dark:peer-focus/name:text-color-primary-dark select-none"
 				>
 					Username
 				</label>
@@ -56,13 +56,15 @@
 				/>
 				<label
 					for="password"
-					class="absolute text-lg md:text-xl text-[#888888] dark:text-[#717171] duration-[250ms] transform -translate-x-4 translate-y-0.5 px-5 scale-[0.7] bg-bg rounded-xl peer-placeholder-shown/pw:scale-100 peer-focus/pw:scale-[0.7] peer-placeholder-shown/pw:translate-y-[1.15rem] peer-placeholder-shown/pw:translate-x-0 peer-focus/pw:translate-y-0.5 peer-focus/pw:-translate-x-4 peer-focus/pw:text-color-primary-light dark:peer-focus/pw:text-color-primary-dark select-none"
+					class="absolute text-base md:text-lg text-[#888888] dark:text-[#777777] duration-[250ms] transform -translate-x-4 translate-y-0.5 px-5 scale-[0.7] bg-bg rounded-xl peer-placeholder-shown/pw:scale-100 peer-focus/pw:scale-[0.7] peer-placeholder-shown/pw:translate-y-[1rem] peer-placeholder-shown/pw:translate-x-0 peer-focus/pw:translate-y-0.5 peer-focus/pw:-translate-x-4 peer-focus/pw:text-color-primary-light dark:peer-focus/pw:text-color-primary-dark select-none"
 				>
 					Password
 				</label>
 				<button
-					class="absolute inset-y-0 right-0 flex items-center justify-center text-[#888888] dark:text-[#777777] rounded-r-lg px-4"
+					type="button"
+					class="absolute inset-y-0 right-0 flex items-center justify-center text-[#888888] dark:text-[#777777] rounded-r-lg px-4 hover:bg-[#B6B6B6] dark:hover:bg-[#9E9E9E] border-y-[3px] border-r-[3px] border-transparent peer-focus/pw:hover:border-color-primary-light peer-focus/pw:hover:dark:border-color-primary-dark transition duration-100"
 					on:click|preventDefault={() => (passwordHidden = !passwordHidden)}
+					tabindex={-1}
 				>
 					{#if passwordHidden}
 						<Eye size={25} />
@@ -73,7 +75,7 @@
 			</div>
 
 			<button
-				class="w-40 flex items-cente justify-center text-lg text-zinc-200 bg-color-primary-light dark:bg-color-primary-dark rounded-md py-2.5 px-4 mt-12 shadow-xl active:shadow-md hover:brightness-110"
+				class="w-36 flex items-center justify-center text-base md:text-lg text-zinc-200 bg-color-primary-light dark:bg-color-primary-dark rounded-md py-2.5 px-4 mt-12 shadow-xl active:shadow-md hover:brightness-110"
 			>
 				Login
 			</button>
@@ -82,7 +84,7 @@
 
 	<div class="w-full flex items-center justify-end">
 		<div
-			class="w-[40px] h-[40px] flex items-center justify-center text-2xl font-[700]
+			class="w-[34px] h-[34px] flex items-center justify-center text-xl font-[700]
         text-zinc-500 bg-[#CCCCCC] rounded-full m-8 select-none"
 		>
 			<p>?</p>

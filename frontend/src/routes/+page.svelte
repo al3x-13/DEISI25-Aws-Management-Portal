@@ -21,17 +21,17 @@
 dark:from-[#19212E] to-[#F3F3F3] dark:to-[#253144]"
 >
 	<LogoWithText />
+
 	<a
 		href="/login"
-		class="text-lg font-[500] text-zinc-200 bg-color-primary-light dark:bg-color-primary-dark
-    rounded-md py-2 px-4 mt-16 select-none"
+		class="w-28 flex items-center justify-center text-lg md:text-xl font-[500] text-zinc-200 bg-color-primary-light dark:bg-color-primary-dark rounded-md py-2 mt-16 select-none"
 	>
 		Login
 	</a>
 </div>
 
 <div
-	class="fixed w-[40px] h-[40px] flex items-center justify-center right-0 bottom-0 text-2xl font-[700] text-zinc-500
+	class="fixed w-[35px] h-[35px] flex items-center justify-center right-0 bottom-0 text-xl font-[700] text-zinc-500
 bg-[#CCCCCC] rounded-full m-8 select-none"
 >
 	<p>?</p>
