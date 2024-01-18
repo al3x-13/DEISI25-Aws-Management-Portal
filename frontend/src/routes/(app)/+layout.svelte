@@ -20,11 +20,19 @@
 	{:else}
 		<Sidebar on:open={updateSidebarState}>
 			<SidebarItem ionIcon="grid-outline" label="Dashboard" href="/dashboard" open={sidebarOpen} />
+			<SidebarItem
+				ionIcon="hardware-chip-outline"
+				label="EC2"
+				href="/resources/compute/ec2"
+				open={sidebarOpen}
+			/>
 		</Sidebar>
 	{/if}
 
 	<div class="w-full">
 		<Header username={data.props.user.username} role={data.props.user.role} />
-		<slot />
+		<div class="w-full h-full px-24 mt-12">
+			<slot />
+		</div>
 	</div>
 </div>

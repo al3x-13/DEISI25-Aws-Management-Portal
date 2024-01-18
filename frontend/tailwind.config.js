@@ -21,6 +21,10 @@ export default {
 		'border-light': '#CFCFCF',
 		'hover-dark': '#26334B',
 		'hover-light': '#C4C4C4',
+		'text-dark': '#596B89',
+		'text-light': '#7F7F7F',
+		'details-dark': '#323D4F',
+		'details-light': '#A8A8A8',
       },
 	  borderRadius: {
 		  'custom': '6px',

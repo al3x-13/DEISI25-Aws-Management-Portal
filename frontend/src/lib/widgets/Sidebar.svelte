@@ -54,7 +54,7 @@
 	</div>
 
 	<div
-		class="w-full h-full border-r-[1.5px] border-border-light dark:border-border-dark px-1 pt-[80px]"
+		class="w-full h-full border-r-[1.5px] border-border-light dark:border-border-dark px-1 pt-[80px] space-y-6"
 	>
 		<slot />
 	</div>
