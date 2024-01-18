@@ -13,9 +13,16 @@
 </script>
 
 <div class="bg-bg-light dark:bg-bg-dark min-h-screen w-full flex">
-	<Sidebar on:open={updateSidebarState}>
-		<SidebarItem ionIcon="grid-outline" label="Dashboard" href="/dashboard" open={sidebarOpen} />
-	</Sidebar>
+	{#if data.props.user.role === 'root'}
+		<Sidebar on:open={updateSidebarState}>
+			<SidebarItem ionIcon="grid-outline" label="Dashboard" href="/root" open={sidebarOpen} />
+		</Sidebar>
+	{:else}
+		<Sidebar on:open={updateSidebarState}>
+			<SidebarItem ionIcon="grid-outline" label="Dashboard" href="/dashboard" open={sidebarOpen} />
+		</Sidebar>
+	{/if}
+
 	<div class="w-full">
 		<Header username={data.props.user.username} role={data.props.user.role} />
 		<slot />
