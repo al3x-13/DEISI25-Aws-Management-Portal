@@ -18,7 +18,6 @@
 	</Sidebar>
 	<div class="w-full">
 		<Header username={data.props.user.username} role={data.props.user.role} />
-		<div class="w-full h-[60px]" />
 		<slot />
 	</div>
 </div>
