@@ -2,6 +2,10 @@
 	import PageTitle from '$lib/assets/PageTitle.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Select from '$lib/components/ui/select';
+	import { applyAction, enhance } from '$app/forms';
+	import type { ActionData } from './$types';
+
+	let formSuccess: ActionData;
 
 	const amis = [
 		{ value: 'ami-0500f74cc2b89fb6b', label: 'Amazon Linux 2023 AMI (ami-0500f74cc2b89fb6b)' },
@@ -13,7 +17,7 @@
 		{ value: 'gp2', label: 'General Purpose SSD (gp2)' },
 		{ value: 'io1', label: 'Provisioned IOPS SSD (io1)' },
 		{ value: 'io2', label: 'Provisioned IOPS SSD (io2)' },
-		{ value: 'standart', label: 'Magnetic (standard)' }
+		{ value: 'standard', label: 'Magnetic (standard)' }
 	];
 
 	let nameValue = '';
@@ -34,7 +38,7 @@
 <div class="w-full flex flex-col items-start justify-center space-y-12">
 	<PageTitle title="New EC2 Instance" />
 
-	<form action="" class="flex flex-col space-y-12">
+	<form method="POST" action="?/createInstance" class="flex flex-col space-y-12">
 		<div>
 			<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">
 				Instance Name
@@ -42,6 +46,7 @@
 			<input
 				type="text"
 				bind:value={nameValue}
+				name="name"
 				placeholder="Web Server"
 				class="w-[350px] text-base text-text-light dark:text-text-dark bg-transparent border-2 rounded-custom border-border-light dark:border-border-dark focus:border-color-primary-light dark:focus:border-color-primary-dark outline-none placeholder:text-details-light dark:placeholder:text-details-dark px-2 py-1"
 			/>
@@ -66,7 +71,7 @@
 				Amazon Machine Image (AMI)
 			</h2>
 
-			<Select.Root portal={null} bind:selected={amiValue}>
+			<Select.Root portal={null} name="ami" bind:selected={amiValue}>
 				<Select.Trigger
 					class="w-[450px] text-base text-text-light dark:text-text-dark border-2 rounded-custom border-border-light dark:border-border-dark focus:border-color-primary-light dark:focus:border-color-primary-dark"
 				>
@@ -87,7 +92,7 @@
 			<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">
 				Instance Type
 			</h1>
-			<Select.Root portal={null} bind:selected={instanceTypeValue}>
+			<Select.Root portal={null} name="instanceType" bind:selected={instanceTypeValue}>
 				<Select.Trigger
 					class="w-[250px] text-base text-text-light dark:text-text-dark border-2 rounded-custom border-border-light dark:border-border-dark focus:border-color-primary-light dark:focus:border-color-primary-dark"
 				>
@@ -113,7 +118,7 @@
 
 			<div class="flex items-center justify-center space-x-10">
 				<div class="flex items-center justiyf-center">
-					<Select.Root portal={null} bind:selected={volumeTypeValue}>
+					<Select.Root portal={null} name="storageType" bind:selected={volumeTypeValue}>
 						<Select.Trigger
 							id="storage"
 							class="w-[300px] text-base text-text-light dark:text-text-dark border-2 rounded-custom border-border-light dark:border-border-dark focus:border-color-primary-light dark:focus:border-color-primary-dark"
@@ -129,7 +134,7 @@
 								{/each}
 							</Select.Group>
 						</Select.Content>
-						<Select.Input name="instanceType" />
+						<Select.Input name="storageType" />
 					</Select.Root>
 					<label for="storage" class="ml-3 text-text-light dark:text-text-dark">
 						Root Volume Type
@@ -139,7 +144,7 @@
 				<div class="flex items-center justiyf-center">
 					<input
 						id="storage"
-						name="storage"
+						name="storageSize"
 						type="number"
 						min="1"
 						max="10000"
