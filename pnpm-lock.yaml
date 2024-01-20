@@ -93,6 +93,12 @@ importers:
       lucide-svelte:
         specifier: ^0.287.0
         version: 0.287.0(svelte@4.2.1)
+      mode-watcher:
+        specifier: ^0.1.2
+        version: 0.1.2(svelte@4.2.1)
+      svelte-sonner:
+        specifier: ^0.3.11
+        version: 0.3.11(svelte@4.2.1)
       tailwind-merge:
         specifier: ^2.2.0
         version: 2.2.0
@@ -3489,6 +3495,14 @@ packages:
       minimist: 1.2.8
     dev: true
 
+  /mode-watcher@0.1.2(svelte@4.2.1):
+    resolution: {integrity: sha512-XTdPCdqC3kqSvB+Q262Kor983YJkkB2Z3vj9uqg5IqKQpOdiz+xB99Jihp8sWbyM67drC7KKp0Nt5FzCypZi2g==}
+    peerDependencies:
+      svelte: ^4.0.0
+    dependencies:
+      svelte: 4.2.1
+    dev: false
+
   /mri@1.2.0:
     resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}
     engines: {node: '>=4'}
@@ -4383,6 +4397,14 @@ packages:
       svelte: 4.2.1
       typescript: 5.2.2
     dev: true
+
+  /svelte-sonner@0.3.11(svelte@4.2.1):
+    resolution: {integrity: sha512-TkjgDC7zr0waky81Z9CShXMD+4NQ7UASuRx0BhgQo8ZTDQQYk8X8MzJa3zVtZVa6RYJEiahHBXx8Zt/Ie9G5hg==}
+    peerDependencies:
+      svelte: '>=3 <5'
+    dependencies:
+      svelte: 4.2.1
+    dev: false
 
   /svelte@4.2.1:
     resolution: {integrity: sha512-LpLqY2Jr7cRxkrTc796/AaaoMLF/1ax7cto8Ot76wrvKQhrPmZ0JgajiWPmg9mTSDqO16SSLiD17r9MsvAPTmw==}
