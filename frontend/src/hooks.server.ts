@@ -52,8 +52,6 @@ const smartRedirects: Handle = async ({ event, resolve }) => {
 	// redirect authenticated users away from login page
 	// they will be redirected to their dashboards
 	if (reqPath === '/login') {
-		console.log('WORKED');
-
 		switch (user.role) {
 			case 'root': {
 				throw redirect(303, '/root');

@@ -13,12 +13,26 @@
 </script>
 
 <div class="bg-bg-light dark:bg-bg-dark min-h-screen w-full flex">
-	<Sidebar on:open={updateSidebarState}>
-		<SidebarItem ionIcon="grid-outline" label="Dashboard" href="/dashboard" open={sidebarOpen} />
-	</Sidebar>
+	{#if data.props.user.role === 'root'}
+		<Sidebar on:open={updateSidebarState}>
+			<SidebarItem ionIcon="grid-outline" label="Dashboard" href="/root" open={sidebarOpen} />
+		</Sidebar>
+	{:else}
+		<Sidebar on:open={updateSidebarState}>
+			<SidebarItem ionIcon="grid-outline" label="Dashboard" href="/dashboard" open={sidebarOpen} />
+			<SidebarItem
+				ionIcon="hardware-chip-outline"
+				label="EC2"
+				href="/resources/compute/ec2"
+				open={sidebarOpen}
+			/>
+		</Sidebar>
+	{/if}
+
 	<div class="w-full">
 		<Header username={data.props.user.username} role={data.props.user.role} />
-		<div class="w-full h-[60px]" />
-		<slot />
+		<div class="w-full h-full px-24 mt-12">
+			<slot />
+		</div>
 	</div>
 </div>

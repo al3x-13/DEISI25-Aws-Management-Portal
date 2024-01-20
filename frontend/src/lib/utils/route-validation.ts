@@ -3,7 +3,8 @@ import type { User } from "$lib/domain/user";
 // TODO: update this
 const UNPROTECTED_ROUTES = [
 	"/",
-	"/login"
+	"/login",
+	"/logout"
 ];
 
 function userCanAccessRoute(route: string, user: User | undefined): boolean {
@@ -14,12 +15,19 @@ function userCanAccessRoute(route: string, user: User | undefined): boolean {
 		return true;
 	}
 
-	if (user.role === 'admin') {
-		if (isRootRoute(route)) {
-			return false;
+	if (user.role === 'root') {
+		if (isRootRoute(route) || !routeIsProtected(route)) {
+			return true;
 		}
-		return true;
+		return false;
 	}
+
+	if (user.role !== 'root') {
+		return !isRootRoute(route);
+	}
+
+	// TODO: update this when more routes are added
+	// handle 'admin' routes as well when those are added
 
 	return true;
 }
