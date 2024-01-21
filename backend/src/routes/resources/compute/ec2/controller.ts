@@ -4,6 +4,8 @@ import { ApiError } from "../../../../utils/errors";
 import { fromEnv } from "@aws-sdk/credential-providers";
 import { logger } from "../../../../logging/logging";
 import dotenv from "dotenv";
+import { createEC2Instance } from "../../../../lib/resources/ec2/ec2-manager";
+import { CreateInstanceInput } from "../../../../lib/resources/ec2/ec2-types";
 
 const ec2Controller = express.Router();
 
@@ -21,47 +23,60 @@ ec2Controller.get('/', (_req: Request, res: Response) => {
 
 ec2Controller.post('/create', async (req: Request, res: Response) => {
 	const { name, ami, instance_type, storage_type, storage_size_GiB } = req.body;
-	// TODO: body params validation
 
-	const instanceInput: RunInstancesCommandInput = {
-		ImageId: ami,
-		InstanceType: instance_type,
-		BlockDeviceMappings: [
-			{
-				DeviceName: '/dev/sda1',
-				Ebs: {
-					VolumeType: storage_type,
-					VolumeSize: storage_size_GiB
-				}
-			}
-		],
-		TagSpecifications: [
-			{
-				ResourceType: 'instance',
-				Tags: [
-					{
-						Key: 'name',
-						Value: name,
-					},
-				],
-			},
-		],
-		MinCount: 1,
-		MaxCount: 1
+	if (!name) {
+		const error = new ApiError('EC2 Request Failed', "Missing 'name' field");
+		res.status(400).json(error.toJSON());
+		return;
 	}
 
-	const instanceCommand = new RunInstancesCommand(instanceInput);
-	try {
-		const response = await client.send(instanceCommand);
-		const instances: Instance[] | undefined = response.Instances;
-		res.status(200).json({ instance: instances?.at(0) });
+	if (!instance_type) {
+		const error = new ApiError('EC2 Request Failed', "Missing 'instance_type' field");
+		res.status(400).json(error.toJSON());
 		return;
-	} catch (err) {
-		console.log(err);
+	}
+
+	if (!ami) {
+		const error = new ApiError('EC2 Request Failed', "Missing 'ami' field");
+		res.status(400).json(error.toJSON());
+		return;
+	}
+
+	if (!storage_type) {
+		const error = new ApiError('EC2 Request Failed', "Missing 'storage_type' field");
+		res.status(400).json(error.toJSON());
+		return;
+	}
+
+	if (!storage_size_GiB) {
+		const error = new ApiError('EC2 Request Failed', "Missing 'storage_size_GiB' field");
+		res.status(400).json(error.toJSON());
+		return;
+	}
+
+	const instanceInput: CreateInstanceInput = {
+		InstanceName: name,
+		InstanceType: instance_type,
+		AMI: ami,
+		StorageDevices: [
+			{
+				Name: '/dev/sda1',
+				VolumeType: storage_type,
+				VolumeSizeGiB: storage_size_GiB,
+			},
+		]
+	};
+
+	const createdInstance = await createEC2Instance(instanceInput);
+
+	if (!createdInstance) {
 		const error = new ApiError('EC2 Instance Creation Failed', 'Could not create instance');
 		res.status(500).json(error.toJSON());
 		return;
 	}
+
+	res.status(200).json({ instance: createdInstance });
+	return;
 });
 
 ec2Controller.post('/terminate', async (req: Request, res: Response) => {
@@ -72,7 +87,7 @@ ec2Controller.post('/terminate', async (req: Request, res: Response) => {
 
 	const terminateCommand = new TerminateInstancesCommand(terminateInput);
 	try {
-		const response = await client.send(terminateCommand);
+		await client.send(terminateCommand);
 		res.send(`Instances [${instance_ids}] successfully terminated.`);
 		return;
 	} catch (err) {
