@@ -1,4 +1,4 @@
-import { EC2Client, Instance, RunInstancesCommand, RunInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from "@aws-sdk/client-ec2";
+import { DescribeInstancesCommand, DescribeInstancesCommandInput, DescribeInstancesCommandOutput, EC2Client, Instance, Reservation, TerminateInstancesCommand, TerminateInstancesCommandInput } from "@aws-sdk/client-ec2";
 import express, { Request, Response } from "express";
 import { ApiError } from "../../../../utils/errors";
 import { fromEnv } from "@aws-sdk/credential-providers";
@@ -75,6 +75,7 @@ ec2Controller.post('/create', async (req: Request, res: Response) => {
 		return;
 	}
 
+	logger.info(`New EC2 instance created (${createdInstance.InstanceId})`);
 	res.status(200).json({ instance: createdInstance });
 	return;
 });
@@ -87,7 +88,8 @@ ec2Controller.post('/terminate', async (req: Request, res: Response) => {
 
 	const terminateCommand = new TerminateInstancesCommand(terminateInput);
 	try {
-		await client.send(terminateCommand);
+		const data = await client.send(terminateCommand);
+		logger.info(`Terminate EC2 instances (${instance_ids})`);
 		res.send(`Instances [${instance_ids}] successfully terminated.`);
 		return;
 	} catch (err) {
@@ -96,6 +98,70 @@ ec2Controller.post('/terminate', async (req: Request, res: Response) => {
 		res.status(500).json(error.toJSON());
 		return;
 	}
+});
+
+ec2Controller.get('/listInstances', async (req, res) => {
+	const maxResultsParam = Number(req.query.maxResults);
+	const validMaxResults = Number.isInteger(maxResultsParam) && maxResultsParam >= 1 && maxResultsParam < 100;
+	const maxResults = validMaxResults ? maxResultsParam : 30;
+
+	// return error when 'maxResults' is set but its format is not valid
+	if (req.query.maxResults && !validMaxResults) {
+		const error = new ApiError('Failed to get EC2 instances', "Invalid 'maxResults' query parameter format");
+		res.status(400).json(error.toJSON());
+		return;
+	}
+
+	const describeInstancesInput: DescribeInstancesCommandInput = {
+		MaxResults: maxResults,
+	};
+
+	const describeInstancesCommand = new DescribeInstancesCommand(describeInstancesInput);
+	const listedInstances: Instance[] = [];
+
+	try {
+		const output: DescribeInstancesCommandOutput = await client.send(describeInstancesCommand);
+		const reservations: Reservation[] = output.Reservations || [];
+		
+		for (let i = 0; i < reservations.length; i++) {
+			const reservationInstances = reservations[i].Instances || [];
+
+			for (let j = 0; j < reservationInstances.length; j++) {
+				listedInstances.push(reservationInstances[j]);
+			}
+		}
+	} catch (err) {
+		logger.error(`Failed to get EC2 instances: ${err}`);
+		const error = new ApiError('EC2 Instance Listing Failed', 'Could not get instances');
+		res.status(500).json(error.toJSON());
+		return;
+	}
+
+	// temp type
+	type OutInstance = {
+		Id: string | undefined;
+		InstanceName: string | undefined;
+		InstanceType: string | undefined;
+		AMI: string | undefined;
+		State: string | undefined;
+	}
+
+	const tempOut: OutInstance[] = [];
+	for (let i = 0; i < listedInstances.length; i++) {
+		const current = listedInstances[i];
+
+		tempOut.push({
+			Id: current.InstanceId,
+			InstanceName: current.Tags ? current.Tags[0].Value : '',
+			InstanceType: current.InstanceType,
+			AMI: current.ImageId,
+			State: current.State?.Name,
+		});
+	}
+
+	logger.info(`Listed EC2 instances (results: ${maxResults})`);
+	res.status(200).json({ instances: tempOut });
+	return;
 });
 
 export default ec2Controller;

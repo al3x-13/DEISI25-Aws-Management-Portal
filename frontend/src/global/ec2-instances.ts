@@ -10,6 +10,15 @@ export type EC2_DATA = {
 };
 
 
+export type OutInstance = {
+	Id: string | undefined;
+	InstanceName: string | undefined;
+	InstanceType: string | undefined;
+	AMI: string | undefined;
+	State: string | undefined;
+}
+
+
 const ec2Instances = writable<Array<EC2_DATA>>([]);
 
 function addInstance(instance: EC2_DATA) {

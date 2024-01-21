@@ -31,7 +31,7 @@
 
 	<div class="w-full">
 		<Header username={data.props.user.username} role={data.props.user.role} />
-		<div class="w-full h-full px-24 mt-12">
+		<div class="w-full px-24 mt-12 flex items-start justify-center">
 			<slot />
 		</div>
 	</div>
