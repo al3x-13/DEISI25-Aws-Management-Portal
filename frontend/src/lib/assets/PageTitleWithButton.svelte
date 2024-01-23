@@ -8,7 +8,7 @@
 	<h1 class="text-3xl text-color-primary-light dark:text-color-primary-dark">{title}</h1>
 	<a
 		href={buttonHref}
-		class="text-lg text-white bg-color-primary-light dark:bg-color-primary-dark hover:bg-color-hover-light dark:hover:bg-color-hover-dark rounded-custom px-3 py-2 transition duration-100"
+		class="text-lg text-color-primary-light dark:text-color-primary-dark border-[2px] border-color-primary-light dark:border-color-primary-dark hover:text-white dark:hover:text-white hover:bg-color-primary-light dark:hover:bg-color-primary-dark rounded-custom px-2.5 py-1.5 transition duration-100"
 	>
 		{buttonText}
 	</a>
