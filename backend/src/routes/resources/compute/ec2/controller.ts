@@ -1,4 +1,4 @@
-import { DescribeInstancesCommand, DescribeInstancesCommandInput, DescribeInstancesCommandOutput, EC2Client, Instance, InstanceStateChange, Reservation, StartInstancesCommand, StartInstancesCommandInput, StopInstancesCommand, StopInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from "@aws-sdk/client-ec2";
+import { DescribeInstancesCommand, DescribeInstancesCommandInput, DescribeInstancesCommandOutput, EC2Client, Instance, InstanceStateChange, RebootInstancesCommand, RebootInstancesCommandInput, Reservation, StartInstancesCommand, StartInstancesCommandInput, StopInstancesCommand, StopInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from "@aws-sdk/client-ec2";
 import express, { Request, Response } from "express";
 import { ApiError } from "../../../../utils/errors";
 import { fromEnv } from "@aws-sdk/credential-providers";
@@ -234,10 +234,37 @@ ec2Controller.post('/stop', async (req: Request, res: Response) => {
 		return;
 	}
 
-	console.log(`NEW STATE: ${JSON.stringify(updatedInstances.at(0)?.CurrentState?.Name)}`);
-
 	logger.info(`EC2 instance state changed to 'stopped'`);
 	res.status(201).json({ instance_state: updatedInstances.at(0)?.CurrentState?.Name });
+	return;
+});
+
+ec2Controller.post('/reboot', async (req: Request, res: Response) => {
+	const { instance_id } = req.body;
+
+	if (!instance_id) {
+		const error = new ApiError('Failed to reboot EC2 instances', "'instance_id' body parameter was not found");
+		res.status(400).json(error.toJSON());
+		return;
+	}
+
+	const rebootInstacesInput: RebootInstancesCommandInput = {
+		InstanceIds: [instance_id],
+	};
+
+	const rebootInstancesCommand = new RebootInstancesCommand(rebootInstacesInput);
+
+	try {
+		await client.send(rebootInstancesCommand);
+	} catch (err) {
+		logger.error(`Failed to reboot EC2 instances: ${err}`);
+		const error = new ApiError('EC2 Instance Reboot Failed', 'Could not reboot instance');
+		res.status(500).json(error.toJSON());
+		return;
+	}
+
+	logger.info(`EC2 instance state changed to 'rebooting'`);
+	res.status(201).json({ instance_state: 'running' });
 	return;
 });
 
