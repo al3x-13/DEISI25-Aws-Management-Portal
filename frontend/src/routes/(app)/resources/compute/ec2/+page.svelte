@@ -25,7 +25,7 @@
 	async function terminateEC2(id: string) {
 		if (await terminateInstance(id)) {
 			toast.success('EC2 instance deleted successfullly');
-			window.location.reload();
+			await updateInstances();
 		} else {
 			toast.error('Failed to terminate EC2 instance');
 		}
@@ -83,6 +83,7 @@
 							disabled={instance.State != Ec2State.STOPPED}
 							on:click={async () => {
 								instance.State = await startInstance(instance.Id || '');
+								toast.success('EC2 instance successfullly started');
 							}}
 							class="text-green-500 dark:text-green-500 disabled:text-bg2-light dark:disabled:text-bg2-dark"
 						>
@@ -93,6 +94,7 @@
 							disabled={instance.State != Ec2State.RUNNING && instance.State != Ec2State.PENDING}
 							on:click={async () => {
 								instance.State = await stopInstance(instance.Id || '');
+								toast.success('EC2 instance successfullly stopped');
 							}}
 							class="text-red-500 dark:text-red-500 disabled:text-bg2-light dark:disabled:text-bg2-dark"
 						>
@@ -103,6 +105,7 @@
 							disabled={instance.State != Ec2State.RUNNING && instance.State != Ec2State.PENDING}
 							on:click={async () => {
 								instance.State = await rebootInstance(instance.Id || '');
+								toast.success('EC2 instance successfullly rebooted');
 							}}
 							class="text-text-light dark:text-text-dark disabled:text-bg2-light dark:disabled:text-bg2-dark"
 						>

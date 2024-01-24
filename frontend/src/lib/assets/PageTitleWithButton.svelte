@@ -13,4 +13,4 @@
 		{buttonText}
 	</a>
 </div>
-<div class="w-full h-0.5 bg-hover-light dark:bg-hover-dark mt-3" />
+<div class="w-full h-1 bg-hover-light dark:bg-hover-dark mt-3" />
