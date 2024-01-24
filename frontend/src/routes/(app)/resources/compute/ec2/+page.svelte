@@ -11,7 +11,8 @@
 		Ec2State,
 		listInstancesClientSide,
 		startInstance,
-		stopInstance
+		stopInstance,
+		rebootInstance
 	} from '../../../../../global/ec2-instances';
 	import { toast } from 'svelte-sonner';
 	import { Toaster } from '$lib/components/ui/sonner';
@@ -100,6 +101,9 @@
 
 						<button
 							disabled={instance.State != Ec2State.RUNNING && instance.State != Ec2State.PENDING}
+							on:click={async () => {
+								instance.State = await rebootInstance(instance.Id || '');
+							}}
 							class="text-text-light dark:text-text-dark disabled:text-bg2-light dark:disabled:text-bg2-dark"
 						>
 							<RotateCw size={25} />

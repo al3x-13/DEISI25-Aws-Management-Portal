@@ -95,6 +95,26 @@ export async function stopInstance(instanceId: string): Promise<Ec2State | undef
 	});
 }
 
+export async function rebootInstance(instanceId: string): Promise<Ec2State | undefined> {
+	return await fetch(
+		'http://localhost:3000/resources/compute/ec2/reboot',
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ instance_id: instanceId }),
+			credentials: 'include',
+		},
+	).then(async (res) => {
+		if (res.status !== 201) return undefined;
+
+		const data: { instance_state: Ec2State } = await res.json();
+		console.log(`state: ${data.instance_state}`);
+		return data.instance_state;
+	});
+}
+
 
 async function terminateInstance(id: string): Promise<boolean> {
 	return await fetch(
