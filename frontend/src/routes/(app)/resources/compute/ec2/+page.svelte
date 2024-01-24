@@ -10,7 +10,8 @@
 		type OutInstance,
 		Ec2State,
 		listInstancesClientSide,
-		startInstance
+		startInstance,
+		stopInstance
 	} from '../../../../../global/ec2-instances';
 	import { toast } from 'svelte-sonner';
 	import { Toaster } from '$lib/components/ui/sonner';
@@ -89,6 +90,9 @@
 
 						<button
 							disabled={instance.State != Ec2State.RUNNING && instance.State != Ec2State.PENDING}
+							on:click={async () => {
+								instance.State = await stopInstance(instance.Id || '');
+							}}
 							class="text-red-500 dark:text-red-500 disabled:text-bg2-light dark:disabled:text-bg2-dark"
 						>
 							<Square size={25} />
