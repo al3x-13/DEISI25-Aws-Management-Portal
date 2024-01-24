@@ -1,4 +1,4 @@
-import { DescribeInstancesCommand, DescribeInstancesCommandInput, DescribeInstancesCommandOutput, EC2Client, Instance, InstanceStateChange, Reservation, StartInstancesCommand, StartInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from "@aws-sdk/client-ec2";
+import { DescribeInstancesCommand, DescribeInstancesCommandInput, DescribeInstancesCommandOutput, EC2Client, Instance, InstanceStateChange, Reservation, StartInstancesCommand, StartInstancesCommandInput, StopInstancesCommand, StopInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from "@aws-sdk/client-ec2";
 import express, { Request, Response } from "express";
 import { ApiError } from "../../../../utils/errors";
 import { fromEnv } from "@aws-sdk/credential-providers";
@@ -197,9 +197,46 @@ ec2Controller.post('/start', async (req: Request, res: Response) => {
 		return;
 	}
 
+	logger.info(`EC2 instance state changed to 'running'`);
+	res.status(201).json({ instance_state: updatedInstances.at(0)?.CurrentState?.Name });
+	return;
+});
+
+ec2Controller.post('/stop', async (req: Request, res: Response) => {
+	const { instance_id } = req.body;
+
+	if (!instance_id) {
+		const error = new ApiError('Failed to stop EC2 instances', "'instance_id' body parameter was not found");
+		res.status(400).json(error.toJSON());
+		return;
+	}
+
+	const stopInstacesInput: StopInstancesCommandInput = {
+		InstanceIds: [instance_id],
+	};
+
+	const stopInstancesCommand = new StopInstancesCommand(stopInstacesInput);
+	let updatedInstances: InstanceStateChange[] | undefined;
+
+	try {
+		const output = await client.send(stopInstancesCommand);
+		updatedInstances = output.StoppingInstances;
+	} catch (err) {
+		logger.error(`Failed to stop EC2 instances: ${err}`);
+		const error = new ApiError('EC2 Instance Stop Failed', 'Could not stop instance');
+		res.status(500).json(error.toJSON());
+		return;
+	}
+
+	if (!updatedInstances) {
+		const error = new ApiError('EC2 Instance Stop Failed', 'Could not stop instance');
+		res.status(500).json(error.toJSON());
+		return;
+	}
+
 	console.log(`NEW STATE: ${JSON.stringify(updatedInstances.at(0)?.CurrentState?.Name)}`);
 
-	logger.info(`EC2 instance state changed to 'running'`);
+	logger.info(`EC2 instance state changed to 'stopped'`);
 	res.status(201).json({ instance_state: updatedInstances.at(0)?.CurrentState?.Name });
 	return;
 });
