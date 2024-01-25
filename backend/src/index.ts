@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
+import { createExpressEndpoints, initServer } from "@ts-rest/express";
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
@@ -10,6 +11,7 @@ import authMiddleware from './auth/auth-middleware';
 import { dbUrlExists, jwtSecretExists } from './utils/env-utils';
 import mainController from './routes/controller';
 import authController from './routes/auth/controller';
+import { baseContract } from 'types/lib/api/contracts/base-contract';
 
 
 dotenv.config();
@@ -62,6 +64,23 @@ app.get('/test', (req, res) => {
 	res.send('Big F');
 });
 
+
+// Testing
+const server = initServer();
+const baseRouter = server.router(baseContract, {
+	auth: {
+		authenticate: async ({ body }) => {
+			return {
+				status: 200,
+				body: {
+					token: 'test'
+				}
+			}
+		},
+	},
+});
+
+createExpressEndpoints(baseContract, baseRouter, app);
 
 // Auth routes
 app.use('/auth', authController);
