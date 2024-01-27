@@ -32,6 +32,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@deisi25/types": "^1.0.0",
 		"@ts-rest/open-api": "^3.33.0",
 		"@types/jsonwebtoken": "^9.0.5",
 		"bits-ui": "^0.14.0",
