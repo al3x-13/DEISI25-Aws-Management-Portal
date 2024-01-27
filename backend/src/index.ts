@@ -11,7 +11,8 @@ import authMiddleware from './auth/auth-middleware';
 import { dbUrlExists, jwtSecretExists } from './utils/env-utils';
 import mainController from './routes/controller';
 import authController from './routes/auth/controller';
-import { baseContract } from 'types/lib/api/contracts/base-contract';
+import { ApiError } from './utils/errors';
+import { baseContract } from '@deisi25/types/lib/api/contracts/base-contract';
 
 
 dotenv.config();
@@ -56,29 +57,49 @@ db.initializeConnection(process.env.DB_URL, (success: boolean) => {
 });
 
 
-app.get('/', (req, res) => {
-	res.send('Hello World!');
-});
+// app.get('/', (req, res) => {
+// 	res.send('Hello World!');
+// });
+//
+// app.get('/test', (req, res) => {
+// 	res.send('Big F');
+// });
 
-app.get('/test', (req, res) => {
-	res.send('Big F');
-});
 
-
-// Testing
+// contract endpoints
 const server = initServer();
 const baseRouter = server.router(baseContract, {
+	test: {
+		default: async ({}) => {
+			return {
+				status: 200,
+				body: 'test',
+			}
+		},
+		test: async () => {
+			return {
+				status: 200,
+				body: {
+					test: 'testing',
+				},
+			}
+		},
+	},
 	auth: {
 		authenticate: async ({ body }) => {
 			return {
 				status: 200,
 				body: {
-					token: 'test'
+					token: 'todo'
 				}
 			}
 		},
 	},
 });
+
+function validateContentType(req: Request): boolean {
+	return req.headers['content-type'] == 'application/json';
+}
 
 createExpressEndpoints(baseContract, baseRouter, app);
 
