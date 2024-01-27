@@ -47,36 +47,5 @@ export const actions = {
 		const dashboardRoute = getDashboardRoute(userData ? userData.role : '/');
 
 		return { success: true, redirectRoute: dashboardRoute };
-
-		// await fetch(
-		// 	"http://localhost:3000/auth/authenticate",
-		// 	{
-		// 		method: "POST",
-		// 		headers: {
-		// 			"Content-Type": "application/json"
-		// 		},
-		// 		body: JSON.stringify({ username: username, password: password }),
-		// 	},
-		// ).then(async (res) => {
-		// 	const data = await res.json();
-		//
-		// 	if (res.status != 200) {
-		// 		// TODO: add notification on failed request
-		// 		console.log(JSON.stringify(data));
-		// 	} else {
-		// 		// set token cookie
-		// 		cookies.set('token', data.token, {
-		// 			path: '/',
-		// 			sameSite: 'strict',
-		// 			secure: process.env.NODE_ENV === 'production',
-		// 		});
-		//
-		// 		const userData: User | null = getUserDataFromJwt(data.token);
-		//
-		// 		// successful login redirect based on user role
-		// 		const dashboardRoute = getDashboardRoute(userData ? userData.role : '/');
-		// 		throw redirect(303, dashboardRoute);
-		// 	}
-		// });
 	}
 } satisfies Actions;
