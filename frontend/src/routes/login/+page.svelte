@@ -42,6 +42,7 @@
 						if (form.success) {
 							toast.success('Authenticated successfully');
 							goto(form.redirectRoute);
+							return;
 						} else {
 							toast.error('Invalid credentials');
 						}
