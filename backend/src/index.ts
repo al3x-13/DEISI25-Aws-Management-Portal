@@ -101,7 +101,24 @@ function validateContentType(req: Request): boolean {
 	return req.headers['content-type'] == 'application/json';
 }
 
-createExpressEndpoints(baseContract, baseRouter, app);
+createExpressEndpoints(baseContract, baseRouter, app, {
+	globalMiddleware: [
+		(req: Request, res: Response, next: NextFunction) => {
+			if (!req.headers['content-type']) {
+				const error = new ApiError("Bad Request", "Missing 'Content-Type' header", "Set the 'Content-Type' header to 'application/json'");
+				res.status(400).json(error.toJSON());
+				return;
+			}
+
+			if (!validateContentType(req)) {
+				const error = new ApiError("Bad Request", "Invalid 'Content-Type' header", "The 'Contet-Type' header must be set to 'application/json'");
+				res.status(400).json(error.toJSON());
+				return;
+			}
+			next();
+		}
+	]
+});
 
 // Auth routes
 app.use('/auth', authController);
