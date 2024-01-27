@@ -5,16 +5,18 @@ import { signJwt } from "../../auth/jwt";
 import { logger } from "../../logging/logging";
 import dotenv from "dotenv";
 import { isContentTypeValid, validateAuthCredentials, validateAuthenticationBody } from "../../utils/endpoint-utils";
+import { initServer } from "@ts-rest/express";
+import { authContract } from "@deisi25/types/lib/api/contracts/auth-contract";
 
 dotenv.config();
 
-const authController = express.Router();
+const authControllerDeprecated = express.Router();
 
-authController.get('/', (_req, res, _next) => {
+authControllerDeprecated.get('/', (_req, res, _next) => {
 	res.send("NOICE");
 });
 
-authController.post('/authenticate', async (req: Request, res: Response) => {
+authControllerDeprecated.post('/authenticate', async (req: Request, res: Response) => {
 	if (!isContentTypeValid(req)) {
 		const error = new ApiError('Authentication failed', "Header 'content-type' must be 'application/json'")
 		res.status(401).json(error.toJSON());
@@ -54,6 +56,38 @@ authController.post('/authenticate', async (req: Request, res: Response) => {
 	// logging
 	logger.info(`User '${username}' authenticated successfully`);
 	res.send({ token: token });
+});
+
+const server = initServer();
+
+const authController = server.router(authContract, {
+	authenticate: async ({ body }) => {
+		const { username, password } = body;
+
+		// credentials validation
+		if (!(await validateAuthCredentials(username, password))) {
+			const error = new ApiError('Authentication failed');
+			return {
+				status: 401,
+				body: error.toJSON()
+			};
+		}
+
+		const userId = await getUserId(username);
+		const userRole = await getUserRole(username);
+		const userData: JwtUserData = { id: userId ? userId : -1, username: username, role: userRole };
+		const token = signJwt(userData);
+
+		// logging
+		logger.info(`User '${username}' authenticated successfully`);
+
+		return {
+			status: 200,
+			body: {
+				token: token,
+			},
+		}
+	}
 });
 
 export default authController;

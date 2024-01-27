@@ -10,9 +10,10 @@ import db from './db/db';
 import authMiddleware from './auth/auth-middleware';
 import { dbUrlExists, jwtSecretExists } from './utils/env-utils';
 import mainController from './routes/controller';
-import authController from './routes/auth/controller';
+import authControllerOld from './routes/auth/controller';
 import { ApiError } from './utils/errors';
 import { baseContract } from '@deisi25/types/lib/api/contracts/base-contract';
+import authController from './routes/auth/controller';
 
 
 dotenv.config();
@@ -85,16 +86,7 @@ const baseRouter = server.router(baseContract, {
 			}
 		},
 	},
-	auth: {
-		authenticate: async ({ body }) => {
-			return {
-				status: 200,
-				body: {
-					token: 'todo'
-				}
-			}
-		},
-	},
+	auth: authController,
 });
 
 function validateContentType(req: Request): boolean {
@@ -121,7 +113,7 @@ createExpressEndpoints(baseContract, baseRouter, app, {
 });
 
 // Auth routes
-app.use('/auth', authController);
+// app.use('/auth', authControllerOld);
 
 // Auth middleware setup
 app.use(authMiddleware);
