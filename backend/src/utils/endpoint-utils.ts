@@ -1,9 +1,21 @@
 import { Request } from "express";
 import { getUserPasswordHash, usernameExists } from "../lib/users";
 import bcrypt from "bcryptjs";
+import { ApiError } from "./errors";
 
 export function isContentTypeValid(req: Request) {
 	return req.headers['content-type'] == 'application/json';
+}
+
+export function validateRequestHeaders(req: Request): ApiError | null {
+	if (!req.headers['content-type']) {
+		return new ApiError("Bad Request", "Missing 'Content-Type' header", "Set the 'Content-Type' header to 'application/json'");
+	}
+
+	if (!isContentTypeValid(req)) {
+		return new ApiError("Bad Request", "Invalid 'Content-Type' header", "The 'Contet-Type' header must be set to 'application/json'");
+	}
+	return null;
 }
 
 export function validateAuthenticationBody(req: Request): string {

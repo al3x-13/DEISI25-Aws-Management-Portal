@@ -12,8 +12,10 @@ import { dbUrlExists, jwtSecretExists } from './utils/env-utils';
 import mainController from './routes/controller';
 import authControllerOld from './routes/auth/controller';
 import { ApiError } from './utils/errors';
-import { baseContract } from '@deisi25/types/lib/api/contracts/base-contract';
+import { protectedContract, unprotectedContract } from '@deisi25/types/index';
 import authController from './routes/auth/controller';
+import { isContentTypeValid, validateRequestHeaders } from './utils/endpoint-utils';
+import userController from './routes/user/controller';
 
 
 dotenv.config();
@@ -69,7 +71,8 @@ db.initializeConnection(process.env.DB_URL, (success: boolean) => {
 
 // contract endpoints
 const server = initServer();
-const baseRouter = server.router(baseContract, {
+
+const unprotectedRoutesRouter = server.router(unprotectedContract, {
 	test: {
 		default: async ({}) => {
 			return {
@@ -89,26 +92,36 @@ const baseRouter = server.router(baseContract, {
 	auth: authController,
 });
 
-function validateContentType(req: Request): boolean {
-	return req.headers['content-type'] == 'application/json';
-}
-
-createExpressEndpoints(baseContract, baseRouter, app, {
+createExpressEndpoints(unprotectedContract, unprotectedRoutesRouter, app, {
 	globalMiddleware: [
+		// validate 'Content-Type' header
 		(req: Request, res: Response, next: NextFunction) => {
-			if (!req.headers['content-type']) {
-				const error = new ApiError("Bad Request", "Missing 'Content-Type' header", "Set the 'Content-Type' header to 'application/json'");
-				res.status(400).json(error.toJSON());
-				return;
-			}
-
-			if (!validateContentType(req)) {
-				const error = new ApiError("Bad Request", "Invalid 'Content-Type' header", "The 'Contet-Type' header must be set to 'application/json'");
-				res.status(400).json(error.toJSON());
+			const validateHeadersResult = validateRequestHeaders(req);
+			if (validateHeadersResult != null) {
+				res.status(400).json(validateHeadersResult.toJSON());
 				return;
 			}
 			next();
-		}
+		},
+	]
+});
+
+
+const protectedRoutesRouter = server.router(protectedContract, {
+	user: userController,
+});
+
+createExpressEndpoints(protectedContract, protectedRoutesRouter, app, {
+	globalMiddleware: [
+		// validate 'Content-Type' header
+		(req: Request, res: Response, next: NextFunction) => {
+			const validateHeadersResult = validateRequestHeaders(req);
+			if (validateHeadersResult != null) {
+				res.status(400).json(validateHeadersResult.toJSON());
+				return;
+			}
+			next();
+		},
 	]
 });
 
@@ -116,7 +129,7 @@ createExpressEndpoints(baseContract, baseRouter, app, {
 // app.use('/auth', authControllerOld);
 
 // Auth middleware setup
-app.use(authMiddleware);
+// app.use(authMiddleware);
 
 // Routes (auth required)
 app.use('/', mainController);
