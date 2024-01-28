@@ -1,5 +1,5 @@
 import express from 'express';
-import userController from './user/controller';
+import userControllerDeprecated from './user/controller';
 import resourcesController from './resources/controller';
 
 
@@ -8,6 +8,6 @@ const mainController = express.Router();
 
 // add new controllers here
 // mainController.use('/user', userController);
-mainController.use('/resources', resourcesController);
+// mainController.use('/resources', resourcesController);
 
 export default mainController;

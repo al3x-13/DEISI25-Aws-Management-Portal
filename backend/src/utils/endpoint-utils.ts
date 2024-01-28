@@ -2,12 +2,13 @@ import { Request } from "express";
 import { getUserPasswordHash, usernameExists } from "../lib/users";
 import bcrypt from "bcryptjs";
 import { ApiError, ApiErrorData } from "./errors";
+import { TsRestRequest } from "@ts-rest/express";
 
-export function isContentTypeValid(req: Request) {
+export function isContentTypeValid(req: TsRestRequest<any>) {
 	return req.headers['content-type'] == 'application/json';
 }
 
-export function validateRequestHeaders(req: Request): ApiErrorData | null {
+export function validateRequestHeaders(req: TsRestRequest<any>): ApiErrorData | null {
 	if (!req.headers['content-type']) {
 		const error = new ApiError(
 			"Bad Request", 

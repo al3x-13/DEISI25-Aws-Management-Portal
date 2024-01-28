@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import { ApiError, ApiErrorData } from '../utils/errors';
+import { TsRestRequest } from '@ts-rest/express';
 
 dotenv.config();
 
@@ -11,7 +12,7 @@ dotenv.config();
 * @param res Express response
 * @param next Express next function
 */
-function authMiddlewareValidation(req: Request): ApiErrorData | null {
+function authMiddlewareValidation(req: TsRestRequest<any>): ApiErrorData | null {
 	const JWT_SECRET = process.env.JWT_SECRET;
 
 	if (!JWT_SECRET) {

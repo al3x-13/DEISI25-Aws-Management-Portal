@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { createExpressEndpoints, initServer } from "@ts-rest/express";
+import { TsRestRequest, createExpressEndpoints, initServer } from "@ts-rest/express";
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
@@ -17,6 +17,7 @@ import authController from './routes/auth/controller';
 import { isContentTypeValid, validateRequestHeaders } from './utils/endpoint-utils';
 import userController from './routes/user/controller';
 import authMiddlewareValidation from './auth/auth-middleware';
+import ec2Controller from './routes/resources/compute/ec2/controller';
 
 
 dotenv.config();
@@ -96,7 +97,7 @@ const unprotectedRoutesRouter = server.router(unprotectedContract, {
 createExpressEndpoints(unprotectedContract, unprotectedRoutesRouter, app, {
 	globalMiddleware: [
 		// validate 'Content-Type' header
-		(req: Request, res: Response, next: NextFunction) => {
+		(req: TsRestRequest<any>, res, next) => {
 			const validateHeadersResult = validateRequestHeaders(req);
 			if (validateHeadersResult != null) {
 				res.status(validateHeadersResult.status)
@@ -111,12 +112,17 @@ createExpressEndpoints(unprotectedContract, unprotectedRoutesRouter, app, {
 
 const protectedRoutesRouter = server.router(protectedContract, {
 	user: userController,
+	resources: {
+		compute: {
+			ec2: ec2Controller,
+		}
+	}
 });
 
 createExpressEndpoints(protectedContract, protectedRoutesRouter, app, {
 	globalMiddleware: [
 		// validate 'Content-Type' header
-		(req: Request, res: Response, next: NextFunction) => {
+		(req: TsRestRequest<any>, res , next) => {
 			const validateHeadersResult = validateRequestHeaders(req);
 			if (validateHeadersResult != null) {
 				res.status(validateHeadersResult.status)
@@ -127,7 +133,7 @@ createExpressEndpoints(protectedContract, protectedRoutesRouter, app, {
 		},
 
 		// auth middleware
-		(req: Request, res: Response, next: NextFunction) => {
+		(req: TsRestRequest<any>, res, next) => {
 			const authMiddleware = authMiddlewareValidation(req);
 			if (authMiddleware != null) {
 				res.status(authMiddleware.status).json(authMiddleware.error);
@@ -145,7 +151,7 @@ createExpressEndpoints(protectedContract, protectedRoutesRouter, app, {
 // app.use(authMiddleware);
 
 // Routes (auth required)
-app.use('/', mainController);
+// app.use('/', mainController);
 
 
 // TODO: remove this (testing)
