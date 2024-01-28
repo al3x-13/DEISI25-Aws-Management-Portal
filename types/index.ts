@@ -21,3 +21,6 @@ export * from './lib/api/contracts/protected-contract';
 
 // User contract
 export * from './lib/api/contracts/user-contract';
+
+// EC2 contract
+export * from './lib/api/contracts/resources/ec2-contract';
