@@ -31,8 +31,6 @@ export const actions = {
 			}
 		});
 
-		console.log(`Status: ${status}, Body: ${JSON.stringify(body)}`);
-
 		if (status !== 200) {
 			return fail(400, { username, missingField: null });
 		}
