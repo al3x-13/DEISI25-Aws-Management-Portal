@@ -99,7 +99,8 @@ createExpressEndpoints(unprotectedContract, unprotectedRoutesRouter, app, {
 		(req: Request, res: Response, next: NextFunction) => {
 			const validateHeadersResult = validateRequestHeaders(req);
 			if (validateHeadersResult != null) {
-				res.status(400).json(validateHeadersResult.toJSON());
+				res.status(validateHeadersResult.status)
+					.json(validateHeadersResult.error);
 				return;
 			}
 			next();
@@ -118,7 +119,8 @@ createExpressEndpoints(protectedContract, protectedRoutesRouter, app, {
 		(req: Request, res: Response, next: NextFunction) => {
 			const validateHeadersResult = validateRequestHeaders(req);
 			if (validateHeadersResult != null) {
-				res.status(400).json(validateHeadersResult.toJSON());
+				res.status(validateHeadersResult.status)
+					.json(validateHeadersResult.error);
 				return;
 			}
 			next();
