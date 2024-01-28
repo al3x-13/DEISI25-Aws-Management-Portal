@@ -16,6 +16,7 @@ import { protectedContract, unprotectedContract } from '@deisi25/types/index';
 import authController from './routes/auth/controller';
 import { isContentTypeValid, validateRequestHeaders } from './utils/endpoint-utils';
 import userController from './routes/user/controller';
+import authMiddlewareValidation from './auth/auth-middleware';
 
 
 dotenv.config();
@@ -122,6 +123,16 @@ createExpressEndpoints(protectedContract, protectedRoutesRouter, app, {
 			}
 			next();
 		},
+
+		// auth middleware
+		(req: Request, res: Response, next: NextFunction) => {
+			const authMiddleware = authMiddlewareValidation(req);
+			if (authMiddleware != null) {
+				res.status(authMiddleware.status).json(authMiddleware.error);
+				return;
+			}
+			next();
+		}
 	]
 });
 

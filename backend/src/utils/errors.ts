@@ -1,5 +1,10 @@
 import { ApiError as ApiErrorJson } from "@deisi25/types/lib/api/types/error";
 
+type ApiErrorData = {
+	status: number;
+	error: ApiErrorJson;
+};
+
 class ApiError {
 	private _type: string;
 	private _message?: string;
@@ -32,4 +37,4 @@ class ApiError {
 	}
 }
 
-export { ApiError };
+export { ApiError, type ApiErrorData };
