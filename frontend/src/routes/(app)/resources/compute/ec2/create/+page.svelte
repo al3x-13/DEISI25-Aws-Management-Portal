@@ -4,8 +4,10 @@
 	import * as Select from '$lib/components/ui/select';
 	import { applyAction, enhance } from '$app/forms';
 	import type { ActionData } from './$types';
+	import { toast } from 'svelte-sonner';
+	import { goto } from '$app/navigation';
 
-	let formSuccess: ActionData;
+	export let form: ActionData;
 
 	const amis = [
 		{ value: 'ami-0500f74cc2b89fb6b', label: 'Amazon Linux 2023 AMI (ami-0500f74cc2b89fb6b)' },
@@ -38,7 +40,29 @@
 <div class="w-full flex flex-col items-start justify-center space-y-12">
 	<PageTitle title="New EC2 Instance" />
 
-	<form method="POST" action="?/createInstance" class="flex flex-col space-y-12">
+	<form
+		method="POST"
+		action="?/createInstance"
+		use:enhance={() => {
+			return async ({ result, update }) => {
+				await applyAction(result);
+
+				if (form) {
+					if (form.success) {
+						console.log('this working');
+						toast.success('EC2 instance created successfully');
+						goto('/resources/compute/ec2');
+						return;
+					} else {
+						toast.error('Failed to create EC2 instance');
+					}
+				}
+
+				await update();
+			};
+		}}
+		class="flex flex-col space-y-12"
+	>
 		<div>
 			<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">
 				Instance Name
