@@ -106,7 +106,8 @@ createExpressEndpoints(unprotectedContract, unprotectedRoutesRouter, app, {
 			}
 			next();
 		},
-	]
+	],
+	jsonQuery: true
 });
 
 
@@ -141,7 +142,8 @@ createExpressEndpoints(protectedContract, protectedRoutesRouter, app, {
 			}
 			next();
 		}
-	]
+	],
+	jsonQuery: true
 });
 
 // Auth routes

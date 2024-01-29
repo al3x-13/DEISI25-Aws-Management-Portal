@@ -85,8 +85,8 @@ const ec2Contract = c.router(
 		listInstaces: {
 			method: 'GET',
 			path: '/listInstances',
-			pathParams: z.object({
-				maxResults: z.number()
+			query: z.object({
+				maxResults: z.number().optional()
 			}),
 			responses: {
 				200: z.object({
