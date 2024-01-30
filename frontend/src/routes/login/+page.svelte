@@ -2,6 +2,12 @@
 	import DarkModeButton from '$lib/assets/DarkModeButton.svelte';
 	import LogoWithText from '$lib/assets/LogoWithText.svelte';
 	import { Eye, EyeOff } from 'lucide-svelte';
+	import type { ActionData } from './$types';
+	import { applyAction, enhance } from '$app/forms';
+	import { toast } from 'svelte-sonner';
+	import { goto } from '$app/navigation';
+
+	export let form: ActionData;
 
 	let passwordHidden = true;
 </script>
@@ -28,6 +34,23 @@
 		<form
 			method="POST"
 			action="?/login"
+			use:enhance={() => {
+				return async ({ result, update }) => {
+					await applyAction(result);
+
+					if (form) {
+						if (form.success) {
+							toast.success('Authenticated successfully');
+							goto(form.redirectRoute);
+							return;
+						} else {
+							toast.error('Invalid credentials');
+						}
+					}
+
+					await update();
+				};
+			}}
 			class="w-[350px] flex flex-col items-center justify-center mt-12 md:mt-24"
 		>
 			<div class="relative w-full flex flex-col">
@@ -35,6 +58,7 @@
 					type="text"
 					id="username"
 					name="username"
+					value={form?.username ?? ''}
 					placeholder=" "
 					class="peer/name px-4 pt-5 pb-1 text-base md:text-lg font-[500] text-[#888888] dark:text-[#777777] bg-[#CCCCCC] dark:bg-[#BDBDBD] rounded-lg border-[3px] border-transparent focus:border-color-primary-light dark:focus:border-color-primary-dark focus:outline-0 focus:outline-offset-0 focus:ring-0 transition-all duration-[250ms] ease-in-out select-none"
 				/>
@@ -44,6 +68,10 @@
 				>
 					Username
 				</label>
+
+				{#if form?.missingUsername}
+					<p class="text-sm text-red-500 mt-2">Username field is required</p>
+				{/if}
 			</div>
 
 			<div class="relative w-full flex flex-col mt-6">
@@ -72,6 +100,10 @@
 						<EyeOff size={25} />
 					{/if}
 				</button>
+
+				{#if form?.missingPassword}
+					<p class="text-sm text-red-500 mt-2">Password field is required</p>
+				{/if}
 			</div>
 
 			<button

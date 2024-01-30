@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
-import { ApiError } from '../utils/errors';
+import { ApiError, ApiErrorData } from '../utils/errors';
+import { TsRestRequest } from '@ts-rest/express';
 
 dotenv.config();
 
@@ -11,20 +12,24 @@ dotenv.config();
 * @param res Express response
 * @param next Express next function
 */
-function authMiddleware(req: Request, res: Response, next: NextFunction) {
+function authMiddlewareValidation(req: TsRestRequest<any>): ApiErrorData | null {
 	const JWT_SECRET = process.env.JWT_SECRET;
 
 	if (!JWT_SECRET) {
-		const error = new ApiError('Server error', 'Missing jwt secret');
-		res.status(500).json(error.toJSON());
-		return;
+		const error = new ApiError('Server error', 'Could not validate auth token');
+		return {
+			status: 500,
+			error: error.toJSON()
+		};
 	}
 
 	const authToken = req.cookies.token;
 	if (!authToken) {
 		const error = new ApiError('Unauthorized', "Missing authorization cookies");
-		res.status(401).json(error.toJSON());
-		return;
+		return {
+			status: 401,
+			error: error.toJSON()
+		}
 	}
 
 	try {
@@ -32,10 +37,12 @@ function authMiddleware(req: Request, res: Response, next: NextFunction) {
 		jwt.verify(authToken, JWT_SECRET);
 	} catch (err) {
 		const error = new ApiError('Unauthorized', 'Token is not valid');
-		res.status(401).json(error.toJSON());
-		return;
+		return {
+			status: 401,
+			error: error.toJSON()
+		}
 	}
-	next();
+	return null;
 }
 
-export default authMiddleware;
+export default authMiddlewareValidation;

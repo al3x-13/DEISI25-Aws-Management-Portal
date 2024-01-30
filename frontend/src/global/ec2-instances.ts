@@ -1,3 +1,5 @@
+import { ec2Contract } from "@deisi25/types";
+import { initClient } from "@ts-rest/core";
 import { get, writable } from "svelte/store";
 
 export type EC2_DATA = {
@@ -38,106 +40,76 @@ function getInstances(): EC2_DATA[] {
 	return get(ec2Instances);
 }
 
-export async function listInstancesClientSide(): Promise<OutInstance[] | []> {
-	return await fetch(
-		'http://localhost:3000/resources/compute/ec2/listInstances',
-		{
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			credentials: 'include',
-		},
-	).then(async (res) => {
-		if (res.status !== 200) return [];
+const client = initClient(ec2Contract, {
+	baseUrl: 'http://localhost:3000',
+	baseHeaders: {
+		'Content-Type': 'application/json'
+	},
+	credentials: 'include'
+});
 
-		const data: {instances: OutInstance[]} = await res.json();
-		const instances: OutInstance[] = data.instances;
-		return instances;
+
+export async function listInstancesClientSide(): Promise<OutInstance[] | []> {
+	const { status, body } = await client.listInstaces({
+		query: {
+			maxResults: 30
+		}
 	});
+
+	if (status !== 200) {
+		return [];
+	}
+	return body.instances as OutInstance[];
 }
 
 export async function startInstance(instanceId: string): Promise<Ec2State | undefined> {
-	return await fetch(
-		'http://localhost:3000/resources/compute/ec2/start',
-		{
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({ instance_id: instanceId }),
-			credentials: 'include',
-		},
-	).then(async (res) => {
-		if (res.status !== 201) return undefined;
-
-		const data: { instance_state: Ec2State } = await res.json();
-		return data.instance_state;
+	const { status, body } = await client.start({
+		body: {
+			instanceId: instanceId
+		}
 	});
+
+	if (status !== 201) {
+		return undefined;
+	}
+	return body.instanceState as Ec2State;
 }
 
 export async function stopInstance(instanceId: string): Promise<Ec2State | undefined> {
-	return await fetch(
-		'http://localhost:3000/resources/compute/ec2/stop',
-		{
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({ instance_id: instanceId }),
-			credentials: 'include',
-		},
-	).then(async (res) => {
-		if (res.status !== 201) return undefined;
-
-		const data: { instance_state: Ec2State } = await res.json();
-		return data.instance_state;
+	const { status, body } = await client.stop({
+		body: {
+			instanceId: instanceId
+		}
 	});
+
+	if (status !== 201) {
+		return undefined;
+	}
+	return body.instanceState as Ec2State;
 }
 
 export async function rebootInstance(instanceId: string): Promise<Ec2State | undefined> {
-	return await fetch(
-		'http://localhost:3000/resources/compute/ec2/reboot',
-		{
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({ instance_id: instanceId }),
-			credentials: 'include',
-		},
-	).then(async (res) => {
-		if (res.status !== 201) return undefined;
-
-		const data: { instance_state: Ec2State } = await res.json();
-		console.log(`state: ${data.instance_state}`);
-		return data.instance_state;
+	const { status, body } = await client.reboot({
+		body: {
+			instanceId: instanceId
+		}
 	});
+
+	if (status !== 201) {
+		return undefined;
+	}
+	return body.instanceState as Ec2State;
 }
 
 
-async function terminateInstance(id: string): Promise<boolean> {
-	return await fetch(
-		"http://localhost:3000/resources/compute/ec2/terminate",
-		{
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				instance_ids: [id],
-			}),
-			credentials: 'include',
-		},
-	).then(async (res) => {
-		console.log('terminating');
-		if (res.status === 200) {
-			ec2Instances.update(data => data.filter(item => item.id !== id))
-			console.log(getInstances());
-			return true;
+async function terminateInstance(instanceId: string): Promise<boolean> {
+	const { status } = await client.terminate({
+		body: {
+			instanceIds: [instanceId]
 		}
-		return false;
 	});
+
+	return status === 201;
 }
 
 export { ec2Instances, addInstance, getInstances, terminateInstance };

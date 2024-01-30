@@ -15,5 +15,10 @@
   "devDependencies": {
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+	"@deisi25/types": "^1.0.0",
+    "@ts-rest/core": "^3.33.0",
+    "zod": "^3.22.4"
   }
 }

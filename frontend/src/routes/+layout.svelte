@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Toaster } from '$lib/components/ui/sonner';
 	import '../app.css';
 </script>
 
@@ -25,4 +26,7 @@
 
 <div class="font-lato">
 	<slot />
+	<div class="fixed">
+		<Toaster />
+	</div>
 </div>

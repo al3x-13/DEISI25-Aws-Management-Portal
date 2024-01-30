@@ -123,6 +123,4 @@
 			{/each}
 		</Table.Body>
 	</Table.Root>
-
-	<Toaster />
 </div>

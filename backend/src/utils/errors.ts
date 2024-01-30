@@ -1,31 +1,40 @@
-interface ApiErrorJson {
-	error: string;
-	description?: string;
+import { ApiError as ApiErrorJson } from "@deisi25/types/lib/api/types/error";
+
+type ApiErrorData = {
+	status: number;
+	error: ApiErrorJson;
 };
 
 class ApiError {
-	private _error: string;
-	private _description?: string;
+	private _type: string;
+	private _message?: string;
+	private _hint?: string;
 
-	constructor(error: string, description?: string) {
-		this._error = error;
-		this._description = description;
+	constructor(type: string, message?: string, hint?: string) {
+		this._type = type;
+		this._message = message;
+		this._hint = hint;
 	}
 
-	public get error() : string {
-		return this._error;
+	public get type() : string {
+		return this._type;
 	}
 
-	public get description() : string | undefined {
-		return this._description;
+	public get message() : string | undefined {
+		return this._message;
+	}
+
+	public get hint() : string | undefined {
+		return this._hint;
 	}
 
 	public toJSON(): ApiErrorJson {
 		return {
-			error: this._error,
-			description: this._description,
+			type: this._type,
+			message: this._message,
+			hint: this._hint,
 		};
 	}
 }
 
-export { ApiError };
+export { ApiError, type ApiErrorData };

@@ -1,35 +1,26 @@
+import { initClient } from "@ts-rest/core";
 import type { OutInstance } from "../../../../../global/ec2-instances";
 import type { PageServerLoad } from "./$types";
+import { ec2Contract } from "@deisi25/types";
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	const token = cookies.get('token');
-
-	// temp type
-	type EC2Instance = {
-		Id: string;
-		InstanceName: string;
-		InstanceType: string;
-		AMI: string;
-		StorageType: string;
-		StorageSize: number | string;
-	};
-
-	const instances: OutInstance[] | null = await fetch(
-		'http://localhost:3000/resources/compute/ec2/listInstances',
-		{
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
-				"Cookie": `token=${token}`,
-			},
+	
+	const client = initClient(ec2Contract, {
+		baseUrl: 'http://localhost:3000',
+		baseHeaders: {
+			'Content-Type': 'application/json',
+			'Cookie': `token=${token}`
 		},
-	).then(async (res) => {
-		if (res.status !== 200) return null;
-
-		const data: {instances: OutInstance[]} = await res.json();
-		const instances: OutInstance[] = data.instances;
-		return instances;
 	});
+
+	const { status, body } = await client.listInstaces({
+		query: {
+			maxResults: 30
+		}
+	});
+
+	const instances = status === 200 ? body.instances as OutInstance[] : null;
 
 	return {
 		instances: instances,
