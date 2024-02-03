@@ -1,0 +1,41 @@
+name: Generate Backend API Docs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-docs:
+    name: Generate backend API docs
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Node setup
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Install TypeScript
+        run: npm install -g typescript
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install ts-node
+        run: npm install ts-node
+
+      - name: Generate API docs
+        run: ts-node docs/generate-oas-json.ts
+
+      - name: Commit and push updated API docs
+        run: |
+          git config --local user.email "no-reply@github.com"
+          git config --local user.username "Github Actions"
+          git add docs/oas-schema.json
+          git commit -m "Update backend API docs (github action)"
+          git push -u origin main

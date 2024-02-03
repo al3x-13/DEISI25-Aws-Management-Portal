@@ -6,12 +6,16 @@ import dotenv from 'dotenv';
 import { logger, activateDebugModeLogging } from './logging/logging';
 import db from './db/db';
 import { dbUrlExists, jwtSecretExists } from './utils/env-utils';
-import { protectedContract, unprotectedContract } from '@deisi25/types/index';
+import { protectedContract, unprotectedContract, apiDocsContract } from '@deisi25/types/index';
 import authController from './routes/auth/controller';
 import { validateRequestHeaders } from './utils/endpoint-utils';
 import userController from './routes/user/controller';
 import authMiddlewareValidation from './auth/auth-middleware';
 import ec2Controller from './routes/resources/compute/ec2/controller';
+import * as swaggerui from "swagger-ui-express";
+import { generateOpenApi } from "@ts-rest/open-api";
+import { buildDocsFromTSRestOAS } from '../docs/docs';
+import { OpenAPIObject } from 'openapi3-ts/oas31';
 
 
 dotenv.config();
@@ -123,6 +127,24 @@ createExpressEndpoints(protectedContract, protectedRoutesRouter, app, {
 	],
 	jsonQuery: true
 });
+
+const docs = generateOpenApi(apiDocsContract,
+	{
+		info: {
+			title: 'API Docs',
+			description: 'API documentation for AWS Management Portal bakcend API.',
+			version: '1.0.0',
+		},
+	},
+	{
+		jsonQuery: true,
+	}
+);
+
+
+const docsOAS = buildDocsFromTSRestOAS(docs as OpenAPIObject);
+
+app.use('/docs', swaggerui.serve, swaggerui.setup(docsOAS));
 
 app.listen(port, () => {
 	console.log(`Listening on port ${port}`);
