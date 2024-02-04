@@ -1,6 +1,8 @@
-import { OpenAPIObject, OperationObject, SecuritySchemeObject } from "openapi3-ts/oas31";
-import { addAuthenticationErrorResponseToPathMethods, addBadRequestResponseToPathMethods, addSecuritySchemeToPathOptions, addServerErrorResponseToPathMethods } from "./docs-helpers";
-import { apiErrorSchema, securityConfig } from "./object-schemas";
+import { OpenAPIObject } from "openapi3-ts/oas31";
+import { addAuthenticationErrorResponseToPathMethods, addBadRequestResponseToPathMethods, addResponseSchemas, addSecuritySchemeToPathOptions, addServerErrorResponseToPathMethods } from "./docs-helpers";
+import { securityConfig } from "./object-schemas";
+import { generateSchema } from "@anatine/zod-openapi";
+import { SchemaID, apiSchemas } from "@deisi25/types";
 
 function buildDocsFromTSRestOAS(tsRestOAS: OpenAPIObject): OpenAPIObject {
 	const docsOAS: OpenAPIObject = {
@@ -14,7 +16,8 @@ function buildDocsFromTSRestOAS(tsRestOAS: OpenAPIObject): OpenAPIObject {
 		tags: tsRestOAS.tags,
 		components: {
 			schemas: {
-				ApiError: apiErrorSchema,
+				ApiError: generateSchema(apiSchemas[SchemaID.ApiError]),
+				UserInfo: generateSchema(apiSchemas[SchemaID.UserInfo]),
 			},
 			parameters: {
 				ContentTypeHeader: {
@@ -32,6 +35,9 @@ function buildDocsFromTSRestOAS(tsRestOAS: OpenAPIObject): OpenAPIObject {
 			},
 		},
 	};
+
+	// DEBUG
+	// addResponseSchemas(docsOAS);
 
 	if (docsOAS.paths != undefined) {
 		const unprotectedPaths = [

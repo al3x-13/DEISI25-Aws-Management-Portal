@@ -1,6 +1,24 @@
-import { OperationObject, PathItemObject } from "openapi3-ts/oas31";
+import { OpenAPIObject, OperationObject, PathItemObject } from "openapi3-ts/oas31";
 import { authenticationErrorResponse, badRequestResponse, serverErrorResponse } from "./object-schemas";
+import { generateSchema } from "@anatine/zod-openapi";
+import { apiSchemas, SchemaID } from "@deisi25/types";
 
+
+export function addResponseSchemas(openApiObject: OpenAPIObject): OpenAPIObject {
+
+	const test = generateSchema(apiSchemas[SchemaID.ApiError]);
+	console.log(`Testing shit: ${JSON.stringify(test)}`);
+
+	const schemas = {};
+
+	return {
+		// components: {
+		// 	schemas: ,
+		// 	...openApiObject.components
+		// },
+		...openApiObject
+	};
+}
 
 /**
  * Add 400 response (bad request) for all methods in a path if the 400 response is not already set.

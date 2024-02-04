@@ -132,7 +132,7 @@ const docs = generateOpenApi(apiDocsContract,
 	{
 		info: {
 			title: 'API Docs',
-			description: 'API documentation for AWS Management Portal bakcend API.',
+			description: 'API documentation for AWS Management Portal backend API.',
 			version: '1.0.0',
 		},
 	},
@@ -143,6 +143,7 @@ const docs = generateOpenApi(apiDocsContract,
 
 
 const docsOAS = buildDocsFromTSRestOAS(docs as OpenAPIObject);
+// console.log(`DOCS: ${JSON.stringify(docsOAS, null, 2)}`);
 
 app.use('/docs', swaggerui.serve, swaggerui.setup(docsOAS));
 

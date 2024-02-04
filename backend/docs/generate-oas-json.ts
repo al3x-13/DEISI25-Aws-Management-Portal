@@ -8,13 +8,14 @@ import { OpenAPIObject } from "openapi3-ts/oas31";
 const docs = generateOpenApi(apiDocsContract,
 	{
 		info: {
-			title: 'API Docs',
-			description: 'API documentation for AWS Management Portal bakcend API.',
+			title: 'Backend API Docs',
+			description: 'API documentation for AWS Management Portal backend API.',
 			version: '1.0.0',
 		},
 	},
 	{
 		jsonQuery: true,
+		setOperationId: true
 	}
 );
 

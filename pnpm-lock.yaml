@@ -27,6 +27,9 @@ importers:
 
   backend:
     dependencies:
+      '@anatine/zod-openapi':
+        specifier: ^2.2.3
+        version: 2.2.3(openapi3-ts@4.2.1)(zod@3.22.4)
       '@aws-sdk/client-ec2':
         specifier: ^3.427.0
         version: 3.427.0
@@ -192,7 +195,11 @@ importers:
         specifier: ^4.4.2
         version: 4.4.11
 
-  types: {}
+  types:
+    dependencies:
+      '@anatine/zod-openapi':
+        specifier: ^2.2.3
+        version: 2.2.3(openapi3-ts@4.2.1)(zod@3.22.4)
 
 packages:
 
@@ -219,6 +226,17 @@ packages:
       zod: ^3.20.0
     dependencies:
       openapi3-ts: 2.0.2
+      ts-deepmerge: 6.2.1
+      zod: 3.22.4
+    dev: false
+
+  /@anatine/zod-openapi@2.2.3(openapi3-ts@4.2.1)(zod@3.22.4):
+    resolution: {integrity: sha512-6trBwIszayH9yYQcIFZnnD3kwlDrMkRw5yiOLL3c74Brxa1kC3rcMk1UPH9gxlDwau6mX1g7A24X3HqJG88MKA==}
+    peerDependencies:
+      openapi3-ts: ^4.1.2
+      zod: ^3.20.0
+    dependencies:
+      openapi3-ts: 4.2.1
       ts-deepmerge: 6.2.1
       zod: 3.22.4
     dev: false
