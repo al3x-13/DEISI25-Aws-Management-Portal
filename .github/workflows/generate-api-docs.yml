@@ -19,15 +19,19 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '16'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Install TypeScript
-        run: npm install -g typescript
+        run: pnpm install -g typescript
 
       - name: Install ts-node
-        run: npm install -g ts-node
+        run: pnpm install -g ts-node
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Generate API docs
         run: ts-node docs/generate-oas-json.ts
