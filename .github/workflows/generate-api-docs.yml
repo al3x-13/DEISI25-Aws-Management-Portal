@@ -23,11 +23,11 @@ jobs:
       - name: Install TypeScript
         run: npm install -g typescript
 
+      - name: Install ts-node
+        run: npm install -g ts-node
+
       - name: Install dependencies
         run: npm install
-
-      - name: Install ts-node
-        run: npm install ts-node
 
       - name: Generate API docs
         run: ts-node docs/generate-oas-json.ts
