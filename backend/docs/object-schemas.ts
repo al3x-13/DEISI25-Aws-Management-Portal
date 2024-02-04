@@ -1,5 +1,10 @@
-import { ResponseObject, SchemaObject, SecuritySchemeObject } from "openapi3-ts/oas31";
+import { ResponseObject, SecuritySchemeObject } from "openapi3-ts/oas31";
+import { extendZodWithOpenApi } from "@anatine/zod-openapi";
+import { ZodObject, z } from "zod";
 
+extendZodWithOpenApi(z);
+
+// Security Scheme
 export const securityConfig: SecuritySchemeObject = {
 	type: 'apiKey',
 	name: 'token',
@@ -7,20 +12,8 @@ export const securityConfig: SecuritySchemeObject = {
 	description: 'Json Web Token (JWT) that identifies the subject'
 };
 
-export const apiErrorSchema: SchemaObject = {
-	type: 'object',
-	properties: {
-		type: {
-			type: 'string'
-		},
-		message: {
-			type: 'string'
-		},
-		hint: {
-			type: 'string'
-		}
-	}
-};
+
+/* ### General Response Objects ### */
 
 export const badRequestResponse: ResponseObject = {
 	description: 'Bad request',
