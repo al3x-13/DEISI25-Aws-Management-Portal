@@ -1,6 +1,7 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import { ApiErrorSchema } from "../types/error";
+import { SchemaID, apiSchemas } from "../schemas/response-objects";
 
 const c = initContract();
 
@@ -10,14 +11,10 @@ const userContract = c.router(
 			method: 'GET',
 			path: '/info',
 			responses: {
-				200: z.object({
-					id: z.number(),
-					username: z.string(),
-					role: z.string(),
-				}),
+				200: apiSchemas[SchemaID.UserInfo],
 				401: ApiErrorSchema,
 			},
-			summary: 'Get user info'
+			summary: 'Get user info',
 		},
 		id: {
 			method: 'GET',
