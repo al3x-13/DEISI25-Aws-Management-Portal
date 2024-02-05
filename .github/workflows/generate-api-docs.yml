@@ -43,7 +43,7 @@ jobs:
       - name: Commit and push updated API docs
         run: |
           git config --local user.email "action@github.com"
-          git config --local user.username "Github Actions"
+          git config --local user.name "Github Actions"
           git add docs/oas-schema.json
           git commit -m "Update backend API docs (github action)"
           git push -u origin main
