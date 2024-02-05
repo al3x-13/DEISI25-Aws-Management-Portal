@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "API Docs",
-    "description": "API documentation for AWS Management Portal bakcend API.",
+    "title": "Backend API Docs",
+    "description": "API documentation for AWS Management Portal backend API.",
     "version": "1.0.0"
   },
   "paths": {
@@ -13,6 +13,7 @@
           "test"
         ],
         "parameters": [],
+        "operationId": "default",
         "responses": {
           "200": {
             "description": "200",
@@ -53,6 +54,7 @@
           "test"
         ],
         "parameters": [],
+        "operationId": "test",
         "responses": {
           "200": {
             "description": "200",
@@ -103,6 +105,7 @@
           "auth"
         ],
         "parameters": [],
+        "operationId": "authenticate",
         "requestBody": {
           "description": "Body",
           "content": {
@@ -111,10 +114,12 @@
                 "type": "object",
                 "properties": {
                   "username": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "john"
                   },
                   "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "p4s$w0rd"
                   }
                 },
                 "required": [
@@ -139,7 +144,9 @@
                   },
                   "required": [
                     "token"
-                  ]
+                  ],
+                  "title": "Auth Token",
+                  "description": "Json Web Token (JWT)"
                 }
               }
             }
@@ -173,7 +180,8 @@
                   },
                   "required": [
                     "type"
-                  ]
+                  ],
+                  "title": "API Error"
                 }
               }
             }
@@ -198,6 +206,7 @@
           "ec2"
         ],
         "parameters": [],
+        "operationId": "create",
         "requestBody": {
           "description": "Body",
           "content": {
@@ -297,6 +306,7 @@
           "ec2"
         ],
         "parameters": [],
+        "operationId": "terminate",
         "requestBody": {
           "description": "Body",
           "content": {
@@ -374,6 +384,7 @@
           "ec2"
         ],
         "parameters": [],
+        "operationId": "start",
         "requestBody": {
           "description": "Body",
           "content": {
@@ -456,6 +467,7 @@
           "ec2"
         ],
         "parameters": [],
+        "operationId": "stop",
         "requestBody": {
           "description": "Body",
           "content": {
@@ -538,6 +550,7 @@
           "ec2"
         ],
         "parameters": [],
+        "operationId": "reboot",
         "requestBody": {
           "description": "Body",
           "content": {
@@ -632,6 +645,7 @@
             }
           }
         ],
+        "operationId": "listInstaces",
         "responses": {
           "200": {
             "description": "200",
@@ -692,6 +706,344 @@
           }
         ]
       }
+    },
+    "/user/info": {
+      "get": {
+        "summary": "Get user info",
+        "tags": [
+          "user"
+        ],
+        "parameters": [],
+        "operationId": "info",
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1337
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "j0hn.w3ak"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "user"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "username",
+                    "role"
+                  ],
+                  "title": "User Info",
+                  "description": "General information about a user."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/user/id": {
+      "get": {
+        "summary": "Get user id",
+        "tags": [
+          "user"
+        ],
+        "parameters": [],
+        "operationId": "id",
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/user/username": {
+      "get": {
+        "summary": "Get user username",
+        "tags": [
+          "user"
+        ],
+        "parameters": [],
+        "operationId": "username",
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "username": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "username"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/user/role": {
+      "get": {
+        "summary": "Get user role",
+        "tags": [
+          "user"
+        ],
+        "parameters": [],
+        "operationId": "role",
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "role": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "role"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/user/validate": {
+      "get": {
+        "summary": "Validate user JWT",
+        "tags": [
+          "user"
+        ],
+        "parameters": [],
+        "operationId": "validate",
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "valid"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -708,7 +1060,38 @@
           "hint": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "type",
+          "message",
+          "hint"
+        ],
+        "title": "API Error",
+        "description": "Describes an error from the backend API."
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1337
+          },
+          "username": {
+            "type": "string",
+            "example": "j0hn.w3ak"
+          },
+          "role": {
+            "type": "string",
+            "example": "user"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "role"
+        ],
+        "title": "User Info",
+        "description": "General information about a user."
       }
     },
     "parameters": {
