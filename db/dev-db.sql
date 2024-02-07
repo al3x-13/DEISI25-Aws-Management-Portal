@@ -21,6 +21,81 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: resource_types; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.resource_types (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    description text,
+    category character varying(255) NOT NULL
+);
+
+
+ALTER TABLE public.resource_types OWNER TO admin;
+
+--
+-- Name: resource_types_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.resource_types_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.resource_types_id_seq OWNER TO admin;
+
+--
+-- Name: resource_types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.resource_types_id_seq OWNED BY public.resource_types.id;
+
+
+--
+-- Name: resources; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.resources (
+    id integer NOT NULL,
+    type integer NOT NULL,
+    name character varying(300) NOT NULL,
+    aws_resource_id character varying(300) NOT NULL,
+    tags text[],
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_by integer NOT NULL
+);
+
+
+ALTER TABLE public.resources OWNER TO admin;
+
+--
+-- Name: resources_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.resources_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.resources_id_seq OWNER TO admin;
+
+--
+-- Name: resources_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.resources_id_seq OWNED BY public.resources.id;
+
+
+--
 -- Name: roles; Type: TABLE; Schema: public; Owner: admin
 --
 
@@ -93,6 +168,20 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: resource_types id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.resource_types ALTER COLUMN id SET DEFAULT nextval('public.resource_types_id_seq'::regclass);
+
+
+--
+-- Name: resources id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.resources ALTER COLUMN id SET DEFAULT nextval('public.resources_id_seq'::regclass);
+
+
+--
 -- Name: roles id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -104,6 +193,22 @@ ALTER TABLE ONLY public.roles ALTER COLUMN id SET DEFAULT nextval('public.roles_
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Data for Name: resource_types; Type: TABLE DATA; Schema: public; Owner: admin
+--
+
+COPY public.resource_types (id, name, description, category) FROM stdin;
+\.
+
+
+--
+-- Data for Name: resources; Type: TABLE DATA; Schema: public; Owner: admin
+--
+
+COPY public.resources (id, type, name, aws_resource_id, tags, created_at, created_by) FROM stdin;
+\.
 
 
 --
@@ -129,6 +234,20 @@ COPY public.users (id, username, password_hash, email, role, created_at) FROM st
 
 
 --
+-- Name: resource_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
+--
+
+SELECT pg_catalog.setval('public.resource_types_id_seq', 1, false);
+
+
+--
+-- Name: resources_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
+--
+
+SELECT pg_catalog.setval('public.resources_id_seq', 1, false);
+
+
+--
 -- Name: roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
@@ -140,6 +259,38 @@ SELECT pg_catalog.setval('public.roles_id_seq', 3, true);
 --
 
 SELECT pg_catalog.setval('public.users_id_seq', 3, true);
+
+
+--
+-- Name: resource_types resource_types_name_key; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.resource_types
+    ADD CONSTRAINT resource_types_name_key UNIQUE (name);
+
+
+--
+-- Name: resource_types resource_types_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.resource_types
+    ADD CONSTRAINT resource_types_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: resources resources_aws_resource_id_key; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.resources
+    ADD CONSTRAINT resources_aws_resource_id_key UNIQUE (aws_resource_id);
+
+
+--
+-- Name: resources resources_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.resources
+    ADD CONSTRAINT resources_pkey PRIMARY KEY (id);
 
 
 --
@@ -172,6 +323,22 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_username_key UNIQUE (username);
+
+
+--
+-- Name: resources resources_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.resources
+    ADD CONSTRAINT resources_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id);
+
+
+--
+-- Name: resources resources_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.resources
+    ADD CONSTRAINT resources_type_fkey FOREIGN KEY (type) REFERENCES public.resource_types(id);
 
 
 --
