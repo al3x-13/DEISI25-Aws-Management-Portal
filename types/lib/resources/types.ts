@@ -1,9 +1,9 @@
 export enum ResourceType {
-	EC2 = "Amazon Elastic Compute Cloud (Amazon EC2)",
-	RDS = "Amazon Relational Database Service (Amazon RDS)",
-	S3 = "Amazon Simple Storage Service (Amazon S3)",
-	EBS = "Amazon Elastic Block Store (Amazon EBS)",
-	ECS = "Amazon Elastic Container Service (Amazon ECS)",
+	EC2 = "Amazon EC2",
+	RDS = "Amazon RDS",
+	S3 = "Amazon S3",
+	EBS = "Amazon EBS",
+	ECS = "Amazon ECS",
 	LAMBDA = "AWS Lambda"
 };
 

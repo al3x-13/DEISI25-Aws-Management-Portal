@@ -32,7 +32,7 @@ function initializeConnection(connectionString: string | undefined, callback: (s
  * @param values Query values
  * @returns Query result
  */
-async function query(query: string, values?: string[]): Promise<QueryResult<any>> {
+async function query(query: string, values?: any[]): Promise<QueryResult<any>> {
 	const timerStart = Date.now();
 	const queryResponse = await pool.query(query, values);
 	const timerEnd = Date.now();
