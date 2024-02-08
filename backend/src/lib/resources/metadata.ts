@@ -79,22 +79,47 @@ export async function addResourceTags(resourceId: number | string, tags: string[
 * @param tags Resource tags to be removed
 * @returns Whether tags were succesfully removed
 */
-function removeResourceTags(localResourceId: number, tags: string[]): boolean;
+export async function removeResourceTags(localResourceId: number, tags: string[]): Promise<boolean>;
 /**
 * Remove tags from a resource using the AWS Resource ID.
 * @param awsResourceId AWS Resource ID
 * @param tags Resource tags to be removed
 * @returns Whether tags were succesfully removed
 */
-function removeResourceTags(awsResourceId: string, tags: string[]): boolean;
-function removeResourceTags(resourceId: number | string, tags: string[]): boolean {
+export async function removeResourceTags(awsResourceId: string, tags: string[]): Promise<boolean>;
+export async function removeResourceTags(resourceId: number | string, tags: string[]): Promise<boolean> {
 	const usingLocalResourceId = typeof resourceId === 'number';
+	let operationSucceded = false;
+
+	let tagsToRemovePlaceholders = tags.map((_, index) => `$${index + 2}`).join(', ');
 
 	if (usingLocalResourceId) {
-		// TODO: implement using local id
+		const query = await db.query(
+			`UPDATE resources
+			SET tags = (
+				SELECT ARRAY_AGG(item) FROM UNNEST(tags) AS t(item)
+				WHERE item NOT IN (${tagsToRemovePlaceholders})
+			)
+			WHERE id = $1
+			`,
+			[ resourceId, ...tags ]
+		);
+
+		operationSucceded = query.rowCount === 1;
 	} else {
-		// TODO: implement using aws id
+		const query = await db.query(
+			`UPDATE resources
+			SET tags = (
+				SELECT ARRAY_AGG(item) FROM UNNEST(tags) AS t(item)
+				WHERE item NOT IN (${tagsToRemovePlaceholders})
+			)
+			WHERE aws_resource_id = $1
+			`,
+			[ resourceId, ...tags ]
+		);
+
+		operationSucceded = query.rowCount === 1;
 	}
 
-	return false;
+	return operationSucceded;
 }
