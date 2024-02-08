@@ -41,24 +41,35 @@ export async function createResourceMetadata(
 * @param tags Resource tags to be added
 * @returns Whether tags were succesfully added
 */
-function addResourceTags(localResourceId: number, tags: string[]): boolean;
+export async function addResourceTags(localResourceId: number, tags: string[]): Promise<boolean>;
 /**
 * Add tags to a resource using the AWS Resource ID.
 * @param resourceId Application Resource Id
 * @param tags Resource tags to be added
 * @returns Whether tags were succesfully added
 */
-function addResourceTags(awsResourceId: string, tags: string[]): boolean;
-function addResourceTags(resourceId: number | string, tags: string[]): boolean {
+export async function addResourceTags(awsResourceId: string, tags: string[]): Promise<boolean>;
+export async function addResourceTags(resourceId: number | string, tags: string[]): Promise<boolean> {
 	const usingLocalResourceId = typeof resourceId === 'number';
+	let operationSucceded = false;
 
 	if (usingLocalResourceId) {
-		// TODO: implement using local id
+		const query = await db.query(
+			'UPDATE resources SET tags = tags || $1 WHERE id = $2',
+			[ tags, resourceId ],
+		);
+
+		operationSucceded = query.rowCount === 1;
 	} else {
-		// TODO: implement using aws id
+		const query = await db.query(
+			'UPDATE resources SET tags = tags || $1 WHERE aws_resource_id = $2',
+			[ tags, resourceId ],
+		);
+
+		operationSucceded = query.rowCount === 1;
 	}
 
-	return false;
+	return operationSucceded;
 }
 
 
