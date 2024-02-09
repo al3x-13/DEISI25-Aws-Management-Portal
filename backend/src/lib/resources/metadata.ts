@@ -123,3 +123,41 @@ export async function removeResourceTags(resourceId: number | string, tags: stri
 
 	return operationSucceded;
 }
+
+
+/**
+ * Update resource name using the Application Resource ID (ARI).
+ * @param localResourceId Application Resource ID
+ * @param name New resource name
+ * @returns Whether the resource name was successfully updated
+ */
+export async function updateResourceName(localResourceId: number, name: string): Promise<boolean>;
+/**
+ * Update resource name using the AWS Resource ID.
+ * @param awsResourceId AWS Resource ID
+ * @param name New resource name
+ * @returns Whether the resource name aws successfully updated
+ */
+export async function updateResourceName(awsResourceId: string, name: string): Promise<boolean>;
+export async function updateResourceName(resourceId: number | string, name: string): Promise<boolean> {
+	const usingLocalResourceId = typeof resourceId === 'number';
+	let operationSucceded = false;
+
+	if (usingLocalResourceId) {
+		const query = await db.query(
+			'UPDATE resources SET name = $1 WHERE id = $2',
+			[ name, resourceId ]
+		);
+
+		operationSucceded = query.rowCount === 1;
+	} else {
+		const query = await db.query(
+			'UPDATE resources SET name = $1 WHERE aws_resource_id = $2',
+			[ name, resourceId ]
+		);
+
+		operationSucceded = query.rowCount === 1;
+	}
+
+	return operationSucceded;
+}
