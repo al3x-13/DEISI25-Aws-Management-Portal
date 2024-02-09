@@ -200,12 +200,12 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 --
 
 COPY public.resource_types (id, name, description, category) FROM stdin;
-2	Amazon EC2	Amazon Elastic Compute Cloud (Amazon EC2) is a cloud service that provides resizable virtual servers to run applications. It allows users to configure capacity with minimal friction and provides control of computing resources.	Compute
-3	Amazon RDS	Amazon Relational Database Service (Amazon RDS) is a managed service that makes it easier to set up, operate, and scale a relational database in the cloud. It automates time-consuming tasks such as hardware provisioning, database setup, patching, and backups.	Database
-4	Amazon S3	Amazon Simple Storage Service (Amazon S3) is a scalable storage service that allows users to store and retrieve any amount of data, at any time, from anywhere on the web. It offers a simple web interface for storing and managing data with high durability and availability.	Storage
-5	AWS Lambda	AWS Lambda is a serverless computing service that runs code in response to events and automatically manages the computing resources required by that code. It allows users to run code for virtually any type of application or backend service with zero administration.	Compute
-6	Amazon ECS	Amazon Elastic Container Service (Amazon ECS) is a fully managed container orchestration service that makes it easy to deploy, manage, and scale containerized applications. It allows you to run and maintain a specified number of instances of a containerized application across a cluster of Amazon EC2 instances.	Containers
-7	Amazon EBS	Amazon Elastic Block Store (Amazon EBS) provides persistent block storage volumes for use with Amazon EC2 instances. These volumes can be attached to any running EC2 instance, making it easier to scale storage capacity and preserve data beyond the life of a single EC2 instance.	Storage
+1	Amazon EC2	Amazon Elastic Compute Cloud (Amazon EC2) is a cloud service that provides resizable virtual servers to run applications. It allows users to configure capacity with minimal friction and provides control of computing resources.	Compute
+2	Amazon RDS	Amazon Relational Database Service (Amazon RDS) is a managed service that makes it easier to set up, operate, and scale a relational database in the cloud. It automates time-consuming tasks such as hardware provisioning, database setup, patching, and backups.	Database
+3	Amazon S3	Amazon Simple Storage Service (Amazon S3) is a scalable storage service that allows users to store and retrieve any amount of data, at any time, from anywhere on the web. It offers a simple web interface for storing and managing data with high durability and availability.	Storage
+4	AWS Lambda	AWS Lambda is a serverless computing service that runs code in response to events and automatically manages the computing resources required by that code. It allows users to run code for virtually any type of application or backend service with zero administration.	Compute
+5	Amazon ECS	Amazon Elastic Container Service (Amazon ECS) is a fully managed container orchestration service that makes it easy to deploy, manage, and scale containerized applications. It allows you to run and maintain a specified number of instances of a containerized application across a cluster of Amazon EC2 instances.	Containers
+6	Amazon EBS	Amazon Elastic Block Store (Amazon EBS) provides persistent block storage volumes for use with Amazon EC2 instances. These volumes can be attached to any running EC2 instance, making it easier to scale storage capacity and preserve data beyond the life of a single EC2 instance.	Storage
 \.
 
 
@@ -243,7 +243,7 @@ COPY public.users (id, username, password_hash, email, role, created_at) FROM st
 -- Name: resource_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
-SELECT pg_catalog.setval('public.resource_types_id_seq', 7, true);
+SELECT pg_catalog.setval('public.resource_types_id_seq', 6, true);
 
 
 --
