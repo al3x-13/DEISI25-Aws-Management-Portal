@@ -1,15 +1,16 @@
 import { ResourceType } from "@deisi25/types";
 import db from "../../db/db";
+import { QueryResult } from "pg";
 
 /**
-* Creates metadata for an application resource (AWS resource) and stores it
+* Create metadata for an application resource (AWS resource) and stores it
 * in the database.
 *
-* @param type Resource type
 * @param name Resource name (in the application)
+* @param type Resource type
+* @param awsResourceId Aws resource id
 * @param tags Resource tags
 * @param userId Id of the user who created the resource
-* @param awsResourceId Aws resource id
 * @returns Whether the resource metadata was created successfully
 */
 export async function createResourceMetadata(
@@ -32,6 +33,37 @@ export async function createResourceMetadata(
 	);
 
 	return data.rowCount === 1;
+}
+
+
+/**
+ * Delete metadata for application resources (AWS resources) from the database
+ * using Application Resource IDs (ARIs) or the AWS Resource IDs.
+ *
+ * @param resourceIds Resource IDs
+ * @returns Whether the metadata deletion was successful
+ */
+export async function deleteResourceMetadata(resourceIds: number[] | string[]): Promise<boolean> {
+	if (resourceIds.length === 0) return false;
+
+	const usingLocalResourceId = typeof resourceIds === 'number';
+	const idPlaceholders = resourceIds.map((_, idx) => `$${idx + 1}`).join(', ');
+
+	let query: QueryResult<any>;
+
+	if (usingLocalResourceId) {
+		query = await db.query(
+			`DELETE FROM resources WHERE id IN (${idPlaceholders})`,
+			resourceIds
+		);
+	} else {
+		query = await db.query(
+			`DELETE FROM resources WHERE aws_resource_id IN (${idPlaceholders})`,
+			resourceIds
+		);
+	}
+
+	return query.rowCount === resourceIds.length;
 }
 
 
