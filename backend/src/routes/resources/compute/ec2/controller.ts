@@ -3,11 +3,13 @@ import { ApiError } from "../../../../utils/errors";
 import { fromEnv } from "@aws-sdk/credential-providers";
 import { logger } from "../../../../logging/logging";
 import dotenv from "dotenv";
-import { createEC2Instance } from "../../../../lib/resources/ec2/ec2-manager";
+import { createEC2Instance, getEC2Instances } from "../../../../lib/resources/ec2/ec2-manager";
 import { CreateInstanceInput } from "../../../../lib/resources/ec2/ec2-types";
 import { initServer } from "@ts-rest/express";
-import { ec2Contract } from "@deisi25/types/index";
-import { EbsVolumeType } from "backend/src/lib/resources/ebs/ebs-types";
+import { ResourceType, ec2Contract } from "@deisi25/types/index";
+import { EbsVolumeType } from "../../../../lib/resources/ebs/ebs-types";
+import { createResourceMetadata, deleteResourceMetadata } from "../../../../lib/resources/metadata";
+import { getUserIdFromRequestCookies } from "../../../../auth/auth-utils";
 
 
 dotenv.config();
@@ -83,6 +85,7 @@ const ec2Controller = server.router(ec2Contract, {
 		};
 
 		const createdInstance = await createEC2Instance(instanceInput);
+		const createdInstanceId = createdInstance?.InstanceId;
 
 		if (!createdInstance) {
 			const error = new ApiError('EC2 Instance Creation Failed', 'Could not create instance');
@@ -91,6 +94,11 @@ const ec2Controller = server.router(ec2Contract, {
 				body: error.toJSON()
 			}
 		}
+
+		const userId = getUserIdFromRequestCookies(req);
+
+		// application metadata
+		createResourceMetadata(ResourceType.EC2, name, createdInstanceId || '', undefined, userId);
 
 		logger.info(`New EC2 instance created (${createdInstance.InstanceId})`);
 		return {
@@ -118,7 +126,12 @@ const ec2Controller = server.router(ec2Contract, {
 		const terminateCommand = new TerminateInstancesCommand(terminateInput);
 		try {
 			const data = await client.send(terminateCommand);
+			
+			// delete metadata
+			deleteResourceMetadata(instanceIds);
+
 			logger.info(`Terminate EC2 instances (${instanceIds})`);
+
 			return {
 				status: 201,
 				body: `Instances [${instanceIds}] successfully terminated.`
@@ -298,26 +311,10 @@ const ec2Controller = server.router(ec2Contract, {
 			}
 		}
 
-		const describeInstancesInput: DescribeInstancesCommandInput = {
-			MaxResults: maxResults,
-		};
+		// get instances
+		const instancesData = await getEC2Instances(maxResults);
 
-		const describeInstancesCommand = new DescribeInstancesCommand(describeInstancesInput);
-		const listedInstances: Instance[] = [];
-
-		try {
-			const output: DescribeInstancesCommandOutput = await client.send(describeInstancesCommand);
-			const reservations: Reservation[] = output.Reservations || [];
-			
-			for (let i = 0; i < reservations.length; i++) {
-				const reservationInstances = reservations[i].Instances || [];
-
-				for (let j = 0; j < reservationInstances.length; j++) {
-					listedInstances.push(reservationInstances[j]);
-				}
-			}
-		} catch (err) {
-			logger.error(`Failed to get EC2 instances: ${err}`);
+		if (instancesData == null) {
 			const error = new ApiError('EC2 Instance Listing Failed', 'Could not get instances');
 			return {
 				status: 500,
@@ -325,34 +322,12 @@ const ec2Controller = server.router(ec2Contract, {
 			}
 		}
 
-		// temp type
-		type OutInstance = {
-			Id: string | undefined;
-			InstanceName: string | undefined;
-			InstanceType: string | undefined;
-			AMI: string | undefined;
-			State: string | undefined;
-		}
-
-		const tempOut: OutInstance[] = [];
-		for (let i = 0; i < listedInstances.length; i++) {
-			const current = listedInstances[i];
-
-			tempOut.push({
-				Id: current.InstanceId,
-				InstanceName: current.Tags ? current.Tags[0].Value : '',
-				InstanceType: current.InstanceType,
-				AMI: current.ImageId,
-				State: current.State?.Name,
-			});
-		}
-
 		logger.info(`Listed EC2 instances (results: ${maxResults})`);
 
 		return {
 			status: 200,
 			body: {
-				instances: tempOut
+				instances: instancesData
 			}
 		}
 	}
