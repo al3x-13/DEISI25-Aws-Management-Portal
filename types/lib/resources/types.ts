@@ -7,4 +7,4 @@ export enum ResourceType {
 	LAMBDA = "AWS Lambda"
 };
 
-export default ResourceType;
+export * from "./ec2/ec2";
