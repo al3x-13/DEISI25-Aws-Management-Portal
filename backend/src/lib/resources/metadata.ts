@@ -38,7 +38,7 @@ export async function createResourceMetadata(
 
 /**
  * Delete metadata for application resources (AWS resources) from the database
- * using Application Resource IDs (ARIs) or the AWS Resource IDs.
+ * using Local Resource IDs (LRIs) or the AWS Resource IDs (ARIs).
  *
  * @param resourceIds Resource IDs
  * @returns Whether the metadata deletion was successful
@@ -68,15 +68,15 @@ export async function deleteResourceMetadata(resourceIds: number[] | string[]): 
 
 
 /**
-* Add tags to a resource using the Application Resource ID (ARI).
-* @param localResourceId Application Resource Id
+* Add tags to a resource using the Local Resource ID (LRI).
+* @param localResourceId Local Resource Id
 * @param tags Resource tags to be added
 * @returns Whether tags were succesfully added
 */
 export async function addResourceTags(localResourceId: number, tags: string[]): Promise<boolean>;
 /**
-* Add tags to a resource using the AWS Resource ID.
-* @param resourceId Application Resource Id
+* Add tags to a resource using the AWS Resource ID (ARI).
+* @param resourceId AWS Resource Id
 * @param tags Resource tags to be added
 * @returns Whether tags were succesfully added
 */
@@ -106,8 +106,8 @@ export async function addResourceTags(resourceId: number | string, tags: string[
 
 
 /**
-* Remove tags from a resource using the Application Resource ID (ARI).
-* @param localResourceId Application Resource ID
+* Remove tags from a resource using the Local Resource ID (LRI).
+* @param localResourceId Local Resource ID
 * @param tags Resource tags to be removed
 * @returns Whether tags were succesfully removed
 */
@@ -158,14 +158,14 @@ export async function removeResourceTags(resourceId: number | string, tags: stri
 
 
 /**
- * Update resource name using the Application Resource ID (ARI).
- * @param localResourceId Application Resource ID
+ * Update resource name using the Local Resource ID (LRI).
+ * @param localResourceId Local Resource ID
  * @param name New resource name
  * @returns Whether the resource name was successfully updated
  */
 export async function updateResourceName(localResourceId: number, name: string): Promise<boolean>;
 /**
- * Update resource name using the AWS Resource ID.
+ * Update resource name using the AWS Resource ID (ARI).
  * @param awsResourceId AWS Resource ID
  * @param name New resource name
  * @returns Whether the resource name aws successfully updated
