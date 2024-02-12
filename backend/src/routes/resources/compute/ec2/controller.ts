@@ -6,12 +6,11 @@ import dotenv from "dotenv";
 import { createEC2Instance, getEC2Instances } from "../../../../lib/resources/ec2/ec2-manager";
 import { CreateInstanceInput } from "../../../../lib/resources/ec2/ec2-types";
 import { initServer } from "@ts-rest/express";
-import { ResourceType, ec2Contract } from "@deisi25/types/index";
+import { Ec2State, ResourceType, ec2Contract } from "@deisi25/types/index";
 import { EbsVolumeType } from "../../../../lib/resources/ebs/ebs-types";
 import { createResourceMetadata, deleteResourceMetadata } from "../../../../lib/resources/metadata";
 import { getUserIdFromRequestCookies } from "../../../../auth/auth-utils";
-import { awsEc2InstanceStateToLocalState, localResourceIdToAwsResourceId, mapAwsEc2InstancesToLocal } from "backend/src/lib/resources/ec2/ec2-utils";
-import { Ec2State } from "frontend/src/global/ec2-instances";
+import { awsEc2InstanceStateToLocalState, localResourceIdToAwsResourceId, mapAwsEc2InstancesToLocal } from "../../../../lib/resources/ec2/ec2-utils";
 
 
 dotenv.config();

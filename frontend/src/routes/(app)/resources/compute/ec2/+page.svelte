@@ -2,27 +2,22 @@
 	import PageTitleWithButton from '$lib/assets/PageTitleWithButton.svelte';
 	import type { PageData } from './$types';
 	import * as Table from '$lib/components/ui/table';
-	import Button from '$lib/components/ui/button/button.svelte';
 	import {
-		ec2Instances,
-		getInstances,
 		terminateInstance,
-		type OutInstance,
-		Ec2State,
 		listInstancesClientSide,
 		startInstance,
 		stopInstance,
 		rebootInstance
 	} from '../../../../../global/ec2-instances';
 	import { toast } from 'svelte-sonner';
-	import { Toaster } from '$lib/components/ui/sonner';
 	import { Play, RotateCw, Square, Trash2 } from 'lucide-svelte';
+	import { Ec2State, type Ec2Instance } from '@deisi25/types';
 
 	export let data: PageData;
 
-	let instances: OutInstance[] = data.instances || [];
+	let instances: Ec2Instance[] = data.instances || [];
 
-	async function terminateEC2(id: string) {
+	async function terminateEC2(id: number) {
 		if (await terminateInstance(id)) {
 			toast.success('EC2 instance deleted successfullly');
 			await updateInstances();
@@ -53,11 +48,10 @@
 	<Table.Root class="mt-4 text-base text-text-light dark:text-text-dark">
 		<Table.Header>
 			<Table.Row class="border-border-light dark:border-border-dark">
-				<Table.Head class="text-color-primary-light dark:text-color-primary-dark">ID</Table.Head>
-				<Table.Head class="text-color-primary-light dark:text-color-primary-dark">Name</Table.Head>
-				<Table.Head class="text-color-primary-light dark:text-color-primary-dark"
-					>Instance Type</Table.Head
+				<Table.Head class="text-color-primary-light dark:text-color-primary-dark">Aws ID</Table.Head
 				>
+				<Table.Head class="text-color-primary-light dark:text-color-primary-dark">Name</Table.Head>
+				<Table.Head class="text-color-primary-light dark:text-color-primary-dark">Tags</Table.Head>
 				<Table.Head class="text-color-primary-light dark:text-color-primary-dark">State</Table.Head>
 				<Table.Head class="text-right text-color-primary-light dark:text-color-primary-dark"
 					>Actions</Table.Head
@@ -69,20 +63,19 @@
 				<Table.Row class="text-lg">
 					<Table.Cell
 						class="w-[300px] font-bold text-color-primary-light dark:text-color-primary-dark"
-						>{instance.Id}</Table.Cell
+						>{instance.AwsInstanceId}</Table.Cell
 					>
 					<Table.Cell class="text-text-light dark:text-text-dark"
 						>{instance.InstanceName}</Table.Cell
 					>
-					<Table.Cell class="text-text-light dark:text-text-dark"
-						>{instance.InstanceType}</Table.Cell
-					>
+					<Table.Cell class="text-text-light dark:text-text-dark">{instance.Tags}</Table.Cell>
 					<Table.Cell class="text-text-light dark:text-text-dark">{instance.State}</Table.Cell>
 					<Table.Cell class="text-right flex items-center justify-end space-x-2">
 						<button
 							disabled={instance.State != Ec2State.STOPPED}
 							on:click={async () => {
-								instance.State = await startInstance(instance.Id || '');
+								instance.State =
+									(await startInstance(instance.LocalInstanceId)) || Ec2State.UNKNOWN;
 								toast.success('EC2 instance successfullly started');
 							}}
 							class="text-green-500 dark:text-green-500 disabled:text-bg2-light dark:disabled:text-bg2-dark"
@@ -93,7 +86,7 @@
 						<button
 							disabled={instance.State != Ec2State.RUNNING && instance.State != Ec2State.PENDING}
 							on:click={async () => {
-								instance.State = await stopInstance(instance.Id || '');
+								instance.State = (await stopInstance(instance.LocalInstanceId)) || Ec2State.UNKNOWN;
 								toast.success('EC2 instance successfullly stopped');
 							}}
 							class="text-red-500 dark:text-red-500 disabled:text-bg2-light dark:disabled:text-bg2-dark"
@@ -104,7 +97,8 @@
 						<button
 							disabled={instance.State != Ec2State.RUNNING && instance.State != Ec2State.PENDING}
 							on:click={async () => {
-								instance.State = await rebootInstance(instance.Id || '');
+								instance.State =
+									(await rebootInstance(instance.LocalInstanceId)) || Ec2State.UNKNOWN;
 								toast.success('EC2 instance successfullly rebooted');
 							}}
 							class="text-text-light dark:text-text-dark disabled:text-bg2-light dark:disabled:text-bg2-dark"
@@ -113,7 +107,7 @@
 						</button>
 
 						<button
-							on:click={async () => await terminateEC2(instance.Id || '')}
+							on:click={async () => await terminateEC2(instance.LocalInstanceId)}
 							class="text-text-light dark:text-text-dark disabled:text-bg2-light dark:disabled:text-bg2-dark hover:text-red-600 dark:hover:text-red-600"
 						>
 							<Trash2 size={25} />

@@ -1,7 +1,6 @@
 import { initClient } from "@ts-rest/core";
-import type { OutInstance } from "../../../../../global/ec2-instances";
 import type { PageServerLoad } from "./$types";
-import { ec2Contract } from "@deisi25/types";
+import { ec2Contract, type Ec2Instance } from "@deisi25/types";
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	const token = cookies.get('token');
@@ -20,7 +19,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 		}
 	});
 
-	const instances = status === 200 ? body.instances as OutInstance[] : null;
+	const instances = status === 200 ? body.instances as Ec2Instance[] : null;
 
 	return {
 		instances: instances,
