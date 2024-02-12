@@ -1,4 +1,4 @@
-import { DescribeInstancesCommand, DescribeInstancesCommandInput, DescribeInstancesCommandOutput, EC2Client, Instance, InstanceStateChange, RebootInstancesCommand, RebootInstancesCommandInput, Reservation, StartInstancesCommand, StartInstancesCommandInput, StopInstancesCommand, StopInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from "@aws-sdk/client-ec2";
+import { EC2Client, InstanceStateChange, RebootInstancesCommand, RebootInstancesCommandInput, StartInstancesCommand, StartInstancesCommandInput, StopInstancesCommand, StopInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from "@aws-sdk/client-ec2";
 import { ApiError } from "../../../../utils/errors";
 import { fromEnv } from "@aws-sdk/credential-providers";
 import { logger } from "../../../../logging/logging";
@@ -10,6 +10,8 @@ import { ResourceType, ec2Contract } from "@deisi25/types/index";
 import { EbsVolumeType } from "../../../../lib/resources/ebs/ebs-types";
 import { createResourceMetadata, deleteResourceMetadata } from "../../../../lib/resources/metadata";
 import { getUserIdFromRequestCookies } from "../../../../auth/auth-utils";
+import { awsEc2InstanceStateToLocalState, localResourceIdToAwsResourceId, mapAwsEc2InstancesToLocal } from "backend/src/lib/resources/ec2/ec2-utils";
+import { Ec2State } from "frontend/src/global/ec2-instances";
 
 
 dotenv.config();
@@ -99,12 +101,13 @@ const ec2Controller = server.router(ec2Contract, {
 
 		// application metadata
 		createResourceMetadata(ResourceType.EC2, name, createdInstanceId || '', undefined, userId);
+		const localInstace = (await mapAwsEc2InstancesToLocal([ createdInstance ]))[0];
 
 		logger.info(`New EC2 instance created (${createdInstance.InstanceId})`);
 		return {
-			status: 200,
+			status: 201,
 			body: {
-				instance: createdInstance
+				instance: localInstace
 			}
 		}
 	},
@@ -129,6 +132,7 @@ const ec2Controller = server.router(ec2Contract, {
 			
 			// delete metadata
 			deleteResourceMetadata(instanceIds);
+			// TODO: updates this to access LRI instead of ARI
 
 			logger.info(`Terminate EC2 instances (${instanceIds})`);
 
@@ -149,15 +153,25 @@ const ec2Controller = server.router(ec2Contract, {
 		const { instanceId } = req.body;
 
 		if (!instanceId) {
-			const error = new ApiError('Failed to start EC2 instances', "'instance_id' body parameter was not found");
+			const error = new ApiError('Failed to start EC2 instance', "'instance_id' body parameter was not found");
 			return {
 				status: 400,
 				body: error.toJSON()
 			}
 		}
 
+		// get aws resource id
+		const awsResourceId = await localResourceIdToAwsResourceId(instanceId)
+		if (!awsResourceId) {
+			const error = new ApiError('Failed to start EC2 instance', "The proviced 'instance_id' does not exist");
+			return {
+				status: 404,
+				body: error.toJSON()
+			}
+		}
+
 		const startInstacesInput: StartInstancesCommandInput = {
-			InstanceIds: [instanceId],
+			InstanceIds: [ awsResourceId ],
 		};
 
 		const startInstancesCommand = new StartInstancesCommand(startInstacesInput);
@@ -184,8 +198,8 @@ const ec2Controller = server.router(ec2Contract, {
 		}
 
 		// validate instance
-		const instance = updatedInstances.at(0)?.CurrentState?.Name;
-		if (instance === undefined) {
+		const instanceState = awsEc2InstanceStateToLocalState(updatedInstances.at(0)?.CurrentState);
+		if (instanceState === undefined) {
 			const error = new ApiError('EC2 Instance Start Failed', 'Could not start instance');
 			return {
 				status: 500,
@@ -197,7 +211,7 @@ const ec2Controller = server.router(ec2Contract, {
 		return {
 			status: 201,
 			body: {
-				instanceState: instance
+				instanceState: instanceState
 			}
 		}
 	},
@@ -212,8 +226,18 @@ const ec2Controller = server.router(ec2Contract, {
 			}
 		}
 
+		// get aws resource id
+		const awsResourceId = await localResourceIdToAwsResourceId(instanceId)
+		if (!awsResourceId) {
+			const error = new ApiError('Failed to stop EC2 instance', "The proviced 'instance_id' does not exist");
+			return {
+				status: 404,
+				body: error.toJSON()
+			}
+		}
+
 		const stopInstacesInput: StopInstancesCommandInput = {
-			InstanceIds: [instanceId],
+			InstanceIds: [ awsResourceId ],
 		};
 
 		const stopInstancesCommand = new StopInstancesCommand(stopInstacesInput);
@@ -240,8 +264,8 @@ const ec2Controller = server.router(ec2Contract, {
 		}
 
 		// validate instance
-		const instance = updatedInstances.at(0)?.CurrentState?.Name;
-		if (instance === undefined) {
+		const instanceState = awsEc2InstanceStateToLocalState(updatedInstances.at(0)?.CurrentState);
+		if (instanceState === undefined) {
 			const error = new ApiError('EC2 Instance Start Failed', 'Could not start instance');
 			return {
 				status: 500,
@@ -253,7 +277,7 @@ const ec2Controller = server.router(ec2Contract, {
 		return {
 			status: 201,
 			body: {
-				instanceState: updatedInstances.at(0)?.CurrentState?.Name ?? ''
+				instanceState: instanceState
 			}
 		}
 	},
@@ -268,8 +292,18 @@ const ec2Controller = server.router(ec2Contract, {
 			}
 		}
 
+		// get aws resource id
+		const awsResourceId = await localResourceIdToAwsResourceId(instanceId)
+		if (!awsResourceId) {
+			const error = new ApiError('Failed to reboot EC2 instance', "The proviced 'instance_id' does not exist");
+			return {
+				status: 404,
+				body: error.toJSON()
+			}
+		}
+
 		const rebootInstacesInput: RebootInstancesCommandInput = {
-			InstanceIds: [instanceId],
+			InstanceIds: [ awsResourceId ],
 		};
 
 		const rebootInstancesCommand = new RebootInstancesCommand(rebootInstacesInput);
@@ -285,12 +319,12 @@ const ec2Controller = server.router(ec2Contract, {
 			}
 		}
 
-		logger.info(`EC2 instance state changed to 'rebooting'`);
+		logger.info(`EC2 instance state changed to 'pending'`);
 
 		return {
 			status: 201,
 			body: {
-				instanceState: 'running'
+				instanceState: Ec2State.PENDING
 			}
 		}
 	},

@@ -1,6 +1,6 @@
 import { Instance, InstanceBlockDeviceMapping, InstanceState, InstanceStateName } from "@aws-sdk/client-ec2";
 import db from "../../../db/db";
-import { BlockStorageDevice, Ec2Instance, Ec2State } from "@deisi25/types";
+import { BlockStorageDevice, BlockStorageDeviceSchema, Ec2Instance, Ec2InstanceSchema, Ec2State } from "@deisi25/types";
 
 /**
  * Map AWS EC2 instances data to local EC2 instances data.
@@ -28,7 +28,6 @@ export async function mapAwsEc2InstancesToLocal(instances: Instance[]): Promise<
 		);
 	}
 
-
 	// parse instances to local type
 	const localInstances: Ec2Instance[] = [];
 
@@ -36,7 +35,7 @@ export async function mapAwsEc2InstancesToLocal(instances: Instance[]): Promise<
 		const inst = instances[i];
 		const localInstData = localInstancesData.get(inst.InstanceId || '');
 
-		localInstances.push({
+		localInstances.push(Ec2InstanceSchema.parse({
 			LocalInstanceId: localInstData?.id || -1,
 			AwsInstanceId: inst.InstanceId || '',
 			InstanceName: localInstData?.name || '',
@@ -45,7 +44,7 @@ export async function mapAwsEc2InstancesToLocal(instances: Instance[]): Promise<
 			BlockStorageDevices: awsEc2InstanceVolumesToLocalEc2Volumes(inst.BlockDeviceMappings),
 			LaunchTime: inst.LaunchTime || new Date(Date.now()),
 			Tags: localInstData?.tags || [],
-		});
+		}));
 	}
 	return localInstances;
 }
@@ -56,7 +55,7 @@ export async function mapAwsEc2InstancesToLocal(instances: Instance[]): Promise<
 * @param instanceState AWS EC2 InstanceState
 * @returns Local EC2 instance state
 */
-function awsEc2InstanceStateToLocalState(instanceState: InstanceState | undefined): Ec2State {
+export function awsEc2InstanceStateToLocalState(instanceState: InstanceState | undefined): Ec2State {
 	switch (instanceState?.Name) {
 		case InstanceStateName.pending || "pending":
 			return Ec2State.PENDING;
@@ -90,11 +89,41 @@ function awsEc2InstanceVolumesToLocalEc2Volumes(
 	for (let i = 0; i < instanceVolumes.length; i++) {
 		const volume = instanceVolumes[i];
 
-		storageDevices.push({
+		storageDevices.push(BlockStorageDeviceSchema.parse({
 			Name: volume.DeviceName || 'N/A',
 			EbsVolumeId: volume.Ebs?.VolumeId || ''
-		});
+		}));
 	}
 
 	return storageDevices;
+}
+
+
+/**
+ * Get Local Resource ID (LRI) from AWS Resource ID (ARI).
+ * @param awsResourceId AWS Resource ID
+ * @returns Local Resource ID
+ */
+export async function awsResourceIdToLocalResourceId(awsResourceId: string): Promise<number | null> {
+	const query = await db.query(
+		'SELECT id FROM resources WHERE aws_resource_id = $1',
+		[ awsResourceId ]
+	);
+
+	return query.rows[0] ? query.rows[0].id : null;
+}
+
+
+/**
+ * Get AWS Resource ID (ARI) from Local Resource ID (LRI).
+ * @param awsResourceId Local Resource ID
+ * @returns AWS Resource ID
+ */
+export async function localResourceIdToAwsResourceId(localResourceId: number): Promise<string | null> {
+	const query = await db.query(
+		'SELECT aws_resource_id FROM resources WHERE id = $1',
+		[ localResourceId ]
+	);
+
+	return query.rows[0] ? query.rows[0].aws_resource_id : null;
 }

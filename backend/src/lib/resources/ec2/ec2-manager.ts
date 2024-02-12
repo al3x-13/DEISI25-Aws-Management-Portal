@@ -3,7 +3,6 @@ import { fromEnv } from "@aws-sdk/credential-providers";
 import { CreateInstanceInput } from "./ec2-types";
 import { elasticBlockStoresToBlockDeviceMappings } from "../ebs/ebs-types";
 import { logger } from "../../../logging/logging";
-import { QueryResult } from "pg";
 import db from "../../../db/db";
 import { Ec2Instance } from "@deisi25/types";
 import { mapAwsEc2InstancesToLocal } from "./ec2-utils";
@@ -58,7 +57,7 @@ export async function createEC2Instance(input: CreateInstanceInput): Promise<Ins
  * @param maxResults Max number of instances to return
  * @returns List of EC2 instances
  */
-export async function getEC2Instances(maxResults: number | undefined): Promise<Ec2Instance[]> {
+export async function getEC2Instances(maxResults: number | undefined): Promise<Ec2Instance[] | null> {
 	// get instances AWS IDs from the database
 	const query = await db.query(
 		'SELECT aws_resource_id FROM resources LIMIT $1',
@@ -86,6 +85,7 @@ export async function getEC2Instances(maxResults: number | undefined): Promise<E
 		}
 	} catch (err) {
 		logger.error(`Failed to get EC2 instances: ${err}`);
+		return null;
 	}
 
 	// parse instances data
