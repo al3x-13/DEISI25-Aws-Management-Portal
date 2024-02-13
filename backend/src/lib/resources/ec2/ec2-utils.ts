@@ -104,13 +104,15 @@ function awsEc2InstanceVolumesToLocalEc2Volumes(
  * @param awsResourceId AWS Resource ID
  * @returns Local Resource ID
  */
-export async function awsResourceIdToLocalResourceId(awsResourceId: string): Promise<number | null> {
+export async function awsResourceIdsToLocalResourceIds(awsResourceIds: string[]): Promise<number[]> {
+	const queryPlaceholders = awsResourceIds.map((_, idx) => `$${idx + 1}`).join(', ');
+
 	const query = await db.query(
-		'SELECT id FROM resources WHERE aws_resource_id = $1',
-		[ awsResourceId ]
+		`SELECT id FROM resources WHERE aws_resource_id IN (${queryPlaceholders})`,
+		[ awsResourceIds ]
 	);
 
-	return query.rows[0] ? query.rows[0].id : null;
+	return query.rows.map((row) => row.id as number);
 }
 
 
@@ -119,11 +121,13 @@ export async function awsResourceIdToLocalResourceId(awsResourceId: string): Pro
  * @param awsResourceId Local Resource ID
  * @returns AWS Resource ID
  */
-export async function localResourceIdToAwsResourceId(localResourceId: number): Promise<string | null> {
+export async function localResourceIdsToAwsResourceIds(localResourceIds: number[]): Promise<string[]> {
+	const queryPlaceholders = localResourceIds.map((_, idx) => `$${idx + 1}`).join(', ');
+
 	const query = await db.query(
-		'SELECT aws_resource_id FROM resources WHERE id = $1',
-		[ localResourceId ]
+		`SELECT aws_resource_id FROM resources WHERE id IN (${queryPlaceholders})`,
+		[ localResourceIds ]
 	);
 
-	return query.rows[0] ? query.rows[0].aws_resource_id : null;
+	return query.rows.map((row) => row.aws_resource_id as string);
 }

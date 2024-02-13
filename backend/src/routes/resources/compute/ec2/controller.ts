@@ -10,7 +10,7 @@ import { Ec2State, ResourceType, ec2Contract } from "@deisi25/types/index";
 import { EbsVolumeType } from "../../../../lib/resources/ebs/ebs-types";
 import { createResourceMetadata, deleteResourceMetadata } from "../../../../lib/resources/metadata";
 import { getUserIdFromRequestCookies } from "../../../../auth/auth-utils";
-import { awsEc2InstanceStateToLocalState, localResourceIdToAwsResourceId, mapAwsEc2InstancesToLocal } from "../../../../lib/resources/ec2/ec2-utils";
+import { awsEc2InstanceStateToLocalState, localResourceIdsToAwsResourceIds, mapAwsEc2InstancesToLocal } from "../../../../lib/resources/ec2/ec2-utils";
 
 
 dotenv.config();
@@ -121,8 +121,18 @@ const ec2Controller = server.router(ec2Contract, {
 			}
 		}
 
+		// get aws resource id
+		const awsResourceIds = await localResourceIdsToAwsResourceIds(instanceIds);
+		if (!awsResourceIds) {
+			const error = new ApiError('Failed to start EC2 instance', "The proviced 'instance_id' does not exist");
+			return {
+				status: 404,
+				body: error.toJSON()
+			}
+		}
+
 		const terminateInput: TerminateInstancesCommandInput = {
-			InstanceIds: instanceIds,
+			InstanceIds: awsResourceIds,
 		};
 
 		const terminateCommand = new TerminateInstancesCommand(terminateInput);
@@ -160,7 +170,7 @@ const ec2Controller = server.router(ec2Contract, {
 		}
 
 		// get aws resource id
-		const awsResourceId = await localResourceIdToAwsResourceId(instanceId)
+		const awsResourceId = (await localResourceIdsToAwsResourceIds([ instanceId ]))[0];
 		if (!awsResourceId) {
 			const error = new ApiError('Failed to start EC2 instance', "The proviced 'instance_id' does not exist");
 			return {
@@ -226,7 +236,7 @@ const ec2Controller = server.router(ec2Contract, {
 		}
 
 		// get aws resource id
-		const awsResourceId = await localResourceIdToAwsResourceId(instanceId)
+		const awsResourceId = (await localResourceIdsToAwsResourceIds([ instanceId ]))[0];
 		if (!awsResourceId) {
 			const error = new ApiError('Failed to stop EC2 instance', "The proviced 'instance_id' does not exist");
 			return {
@@ -292,7 +302,7 @@ const ec2Controller = server.router(ec2Contract, {
 		}
 
 		// get aws resource id
-		const awsResourceId = await localResourceIdToAwsResourceId(instanceId)
+		const awsResourceId = (await localResourceIdsToAwsResourceIds([ instanceId ]))[0];
 		if (!awsResourceId) {
 			const error = new ApiError('Failed to reboot EC2 instance', "The proviced 'instance_id' does not exist");
 			return {

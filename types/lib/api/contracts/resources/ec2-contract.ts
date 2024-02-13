@@ -35,7 +35,7 @@ const ec2Contract = c.router(
 			method: 'POST',
 			path: '/terminate',
 			body: z.object({
-				instanceIds: z.array(z.string())
+				instanceIds: z.array(z.number())
 			}),
 			responses: {
 				201: z.string(),
