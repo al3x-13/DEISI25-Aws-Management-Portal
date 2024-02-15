@@ -26,6 +26,17 @@ export const badRequestResponse: ResponseObject = {
 	}
 }
 
+export const notFoundRequestResponse: ResponseObject = {
+	description: 'Resource not found',
+	content: {
+		'application/json': {
+			schema: {
+				$ref: '#/components/schemas/ApiError'
+			}
+		}
+	}
+}
+
 export const serverErrorResponse: ResponseObject = {
 	description: 'Server error',
 	content: {

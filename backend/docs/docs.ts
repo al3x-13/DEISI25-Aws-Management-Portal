@@ -1,5 +1,5 @@
 import { OpenAPIObject } from "openapi3-ts/oas31";
-import { addAuthenticationErrorResponseToPathMethods, addBadRequestResponseToPathMethods, addResponseSchemas, addSecuritySchemeToPathOptions, addServerErrorResponseToPathMethods } from "./docs-helpers";
+import { addAuthenticationErrorResponseToPathMethods, addBadRequestResponseToPathMethods, addResponseSchemas, addSecuritySchemeToPathOptions, addServerErrorResponseToPathMethods, updateResourceNotFoundRequestResponseToPathMethods } from "./docs-helpers";
 import { securityConfig } from "./object-schemas";
 import { generateSchema } from "@anatine/zod-openapi";
 import { SchemaID, apiSchemas } from "@deisi25/types";
@@ -36,9 +36,6 @@ function buildDocsFromTSRestOAS(tsRestOAS: OpenAPIObject): OpenAPIObject {
 		},
 	};
 
-	// DEBUG
-	// addResponseSchemas(docsOAS);
-
 	if (docsOAS.paths != undefined) {
 		const unprotectedPaths = [
 			'/',
@@ -49,6 +46,7 @@ function buildDocsFromTSRestOAS(tsRestOAS: OpenAPIObject): OpenAPIObject {
 		for (let [path, data] of Object.entries(docsOAS.paths)) {
 			data = addBadRequestResponseToPathMethods(data);
 			data = addServerErrorResponseToPathMethods(data);
+			data = updateResourceNotFoundRequestResponseToPathMethods(data);
 
 			if (!unprotectedPaths.includes(path)) {
 				data = addAuthenticationErrorResponseToPathMethods(data);

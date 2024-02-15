@@ -1,5 +1,5 @@
 import { OpenAPIObject, OperationObject, PathItemObject } from "openapi3-ts/oas31";
-import { authenticationErrorResponse, badRequestResponse, serverErrorResponse } from "./object-schemas";
+import { authenticationErrorResponse, badRequestResponse, notFoundRequestResponse, serverErrorResponse } from "./object-schemas";
 import { generateSchema } from "@anatine/zod-openapi";
 import { apiSchemas, SchemaID } from "@deisi25/types";
 
@@ -65,6 +65,66 @@ export function addBadRequestResponseToPathMethods(pathItem: PathItemObject): Pa
 
 	if (patch) {
 		patch.responses['400'] = badRequestResponse;
+	}
+
+	return {
+		get: get,
+		head: head,
+		post: post,
+		put: put,
+		delete: deletem,
+		options: options,
+		trace: trace,
+		patch: patch,
+		...pathItem
+	};
+}
+
+/**
+ * Update 404 response (resource not found) to the correct schema for all methods in a path if the 404 response is set.
+ * @param pathItem path item
+ * @returns Path item with 404 responses
+ */
+export function updateResourceNotFoundRequestResponseToPathMethods(pathItem: PathItemObject): PathItemObject {
+	const get: OperationObject | undefined = pathItem.get;
+	const head: OperationObject | undefined = pathItem.head;
+	const post: OperationObject | undefined = pathItem.post;
+	const put: OperationObject | undefined = pathItem.put;
+	const deletem: OperationObject | undefined = pathItem.delete;
+	const options: OperationObject | undefined = pathItem.options;
+	const trace: OperationObject | undefined = pathItem.trace;
+	const patch: OperationObject | undefined = pathItem.patch;
+
+	if (get && get.responses['404']) {
+		get.responses['404'] = notFoundRequestResponse;
+	}
+
+	if (head && head.responses['404']) {
+		head.responses['404'] = notFoundRequestResponse;
+	}
+
+	if (post && post.responses['404']) {
+		post.responses['404'] = notFoundRequestResponse;
+	}
+
+	if (put && put.responses['404']) {
+		put.responses['404'] = notFoundRequestResponse;
+	}
+
+	if (deletem && deletem.responses['404']) {
+		deletem.responses['404'] = notFoundRequestResponse;
+	}
+
+	if (options && options.responses['404']) {
+		options.responses['404'] = notFoundRequestResponse;
+	}
+
+	if (trace && trace.responses['404']) {
+		trace.responses['404'] = notFoundRequestResponse;
+	}
+
+	if (patch && patch.responses['404']) {
+		patch.responses['404'] = notFoundRequestResponse;
 	}
 
 	return {

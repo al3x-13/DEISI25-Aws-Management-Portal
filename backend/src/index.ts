@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import { logger, activateDebugModeLogging } from './logging/logging';
 import db from './db/db';
 import { dbUrlExists, jwtSecretExists } from './utils/env-utils';
-import { protectedContract, unprotectedContract, apiDocsContract } from '@deisi25/types/index';
+import { protectedContract, unprotectedContract, apiDocsContract, ResourceType } from '@deisi25/types/index';
 import authController from './routes/auth/controller';
 import { validateRequestHeaders } from './utils/endpoint-utils';
 import userController from './routes/user/controller';
@@ -16,6 +16,8 @@ import * as swaggerui from "swagger-ui-express";
 import { generateOpenApi } from "@ts-rest/open-api";
 import { buildDocsFromTSRestOAS } from '../docs/docs';
 import { OpenAPIObject } from 'openapi3-ts/oas31';
+import { addResourceTags, createResourceMetadata, deleteResourceMetadata, removeResourceTags, updateResourceName } from './lib/resources/metadata';
+import { getEC2Instances } from './lib/resources/ec2/ec2-manager';
 
 
 dotenv.config();
@@ -65,10 +67,15 @@ const unprotectedRoutesRouter = server.router(unprotectedContract, {
 			}
 		},
 		test: async () => {
+			// const success = await deleteResourceMetadata(['f0392jf3290fj', 'f0392jf37fdsfj']);
+			const success = true;
+
+			getEC2Instances(30);
+
 			return {
 				status: 200,
 				body: {
-					test: 'testing',
+					test: `Success: ${success}`,
 				},
 			}
 		},

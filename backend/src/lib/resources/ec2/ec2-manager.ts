@@ -1,15 +1,23 @@
-import { EC2Client, Instance, RunInstancesCommand, RunInstancesCommandInput } from "@aws-sdk/client-ec2";
+import { DescribeInstancesCommand, DescribeInstancesCommandInput, DescribeInstancesCommandOutput, EC2Client, Instance, Reservation, RunInstancesCommand, RunInstancesCommandInput } from "@aws-sdk/client-ec2";
 import { fromEnv } from "@aws-sdk/credential-providers";
 import { CreateInstanceInput } from "./ec2-types";
 import { elasticBlockStoresToBlockDeviceMappings } from "../ebs/ebs-types";
 import { logger } from "../../../logging/logging";
+import db from "../../../db/db";
+import { Ec2Instance } from "@deisi25/types";
+import { mapAwsEc2InstancesToLocal } from "./ec2-utils";
 
 const client: EC2Client = new EC2Client({
 	credentials: fromEnv(),
 	region: 'eu-west-2',
 });
 
-async function createEC2Instance(input: CreateInstanceInput): Promise<Instance | null> {
+/**
+* Create instance of an EC2 resource.
+* @param input Create instance data
+* @returns Created instace details
+*/
+export async function createEC2Instance(input: CreateInstanceInput): Promise<Instance | null> {
 	const runInstanceInput: RunInstancesCommandInput = {
 		ImageId: input.AMI,
 		InstanceType: input.InstanceType,
@@ -43,4 +51,43 @@ async function createEC2Instance(input: CreateInstanceInput): Promise<Instance |
 	}
 }
 
-export { createEC2Instance };
+
+/**
+ * Get existing EC2 instances.
+ * @param maxResults Max number of instances to return
+ * @returns List of EC2 instances
+ */
+export async function getEC2Instances(maxResults: number | undefined): Promise<Ec2Instance[] | null> {
+	// get instances AWS IDs from the database
+	const query = await db.query(
+		'SELECT aws_resource_id FROM resources LIMIT $1',
+		[ maxResults ]
+	);
+
+	const awsInstanceIds = query.rows.map((row) => row.aws_resource_id);
+	const instancesOutput: Instance[] = [];
+
+	// get instances data from AWS
+	const describeInstancesInput: DescribeInstancesCommandInput = {
+		InstanceIds: awsInstanceIds
+	};
+	const describeInstancesCommand = new DescribeInstancesCommand(describeInstancesInput);
+	const res: DescribeInstancesCommandOutput = await client.send(describeInstancesCommand);
+	const reservations: Reservation[] = res.Reservations || [];
+
+	try {
+		for (let i = 0; i < reservations.length; i++) {
+			const reservationInstances = reservations[i].Instances || [];
+
+			for (let j = 0; j < reservationInstances.length; j++) {
+				instancesOutput.push(reservationInstances[i]);
+			}
+		}
+	} catch (err) {
+		logger.error(`Failed to get EC2 instances: ${err}`);
+		return null;
+	}
+
+	// parse instances data
+	return mapAwsEc2InstancesToLocal(instancesOutput);
+}
