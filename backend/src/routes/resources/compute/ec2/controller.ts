@@ -137,12 +137,8 @@ const ec2Controller = server.router(ec2Contract, {
 
 		const terminateCommand = new TerminateInstancesCommand(terminateInput);
 		try {
-			const data = await client.send(terminateCommand);
-			
-			// delete metadata
-			deleteResourceMetadata(instanceIds);
-			// TODO: updates this to access LRI instead of ARI
-
+			await client.send(terminateCommand);
+			deleteResourceMetadata(instanceIds);  // delete metadata
 			logger.info(`Terminate EC2 instances (${instanceIds})`);
 
 			return {
