@@ -3,7 +3,7 @@
 --
 
 -- Dumped from database version 16.1
--- Dumped by pg_dump version 16.1 (Ubuntu 16.1-1.pgdg22.04+1)
+-- Dumped by pg_dump version 16.2 (Ubuntu 16.2-1.pgdg22.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -19,6 +19,43 @@ SET row_security = off;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: resource_actions; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.resource_actions (
+    id integer NOT NULL,
+    local_resource_id integer NOT NULL,
+    action text NOT NULL,
+    user_id integer NOT NULL,
+    "timestamp" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.resource_actions OWNER TO admin;
+
+--
+-- Name: resource_actions_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.resource_actions_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.resource_actions_id_seq OWNER TO admin;
+
+--
+-- Name: resource_actions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.resource_actions_id_seq OWNED BY public.resource_actions.id;
+
 
 --
 -- Name: resource_types; Type: TABLE; Schema: public; Owner: admin
@@ -168,6 +205,13 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: resource_actions id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.resource_actions ALTER COLUMN id SET DEFAULT nextval('public.resource_actions_id_seq'::regclass);
+
+
+--
 -- Name: resource_types id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -193,6 +237,14 @@ ALTER TABLE ONLY public.roles ALTER COLUMN id SET DEFAULT nextval('public.roles_
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Data for Name: resource_actions; Type: TABLE DATA; Schema: public; Owner: admin
+--
+
+COPY public.resource_actions (id, local_resource_id, action, user_id, "timestamp") FROM stdin;
+\.
 
 
 --
@@ -240,6 +292,13 @@ COPY public.users (id, username, password_hash, email, role, created_at) FROM st
 
 
 --
+-- Name: resource_actions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
+--
+
+SELECT pg_catalog.setval('public.resource_actions_id_seq', 1, false);
+
+
+--
 -- Name: resource_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
@@ -265,6 +324,14 @@ SELECT pg_catalog.setval('public.roles_id_seq', 3, true);
 --
 
 SELECT pg_catalog.setval('public.users_id_seq', 3, true);
+
+
+--
+-- Name: resource_actions resource_actions_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.resource_actions
+    ADD CONSTRAINT resource_actions_pkey PRIMARY KEY (id);
 
 
 --
@@ -329,6 +396,22 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_username_key UNIQUE (username);
+
+
+--
+-- Name: resource_actions resource_actions_local_resource_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.resource_actions
+    ADD CONSTRAINT resource_actions_local_resource_id_fkey FOREIGN KEY (local_resource_id) REFERENCES public.resources(id);
+
+
+--
+-- Name: resource_actions resource_actions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.resource_actions
+    ADD CONSTRAINT resource_actions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
