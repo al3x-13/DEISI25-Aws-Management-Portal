@@ -64,6 +64,8 @@ export async function getEC2Instances(maxResults: number | undefined): Promise<E
 		[ maxResults ]
 	);
 
+	if (query.rows.length === 0) return [];
+
 	const awsInstanceIds = query.rows.map((row) => row.aws_resource_id);
 	const instancesOutput: Instance[] = [];
 
@@ -72,10 +74,10 @@ export async function getEC2Instances(maxResults: number | undefined): Promise<E
 		InstanceIds: awsInstanceIds
 	};
 	const describeInstancesCommand = new DescribeInstancesCommand(describeInstancesInput);
-	const res: DescribeInstancesCommandOutput = await client.send(describeInstancesCommand);
-	const reservations: Reservation[] = res.Reservations || [];
 
 	try {
+		const res: DescribeInstancesCommandOutput = await client.send(describeInstancesCommand);
+		const reservations: Reservation[] = res.Reservations || [];
 		for (let i = 0; i < reservations.length; i++) {
 			const reservationInstances = reservations[i].Instances || [];
 
