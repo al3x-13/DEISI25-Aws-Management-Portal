@@ -1,6 +1,7 @@
 import { ResourceType } from "@deisi25/types";
 import db from "../../db/db";
 import { QueryResult } from "pg";
+import { logger } from "backend/src/logging/logging";
 
 /**
 * Create metadata for an application resource (AWS resource) and stores it
@@ -32,6 +33,9 @@ export async function createResourceMetadata(
 		[ type, name, awsResourceId, tags, userId.toString() ]
 	);
 
+	// logging
+	logger.error(`Failed to create metadata for resource with ARI '${awsResourceId}'`);
+
 	return data.rowCount === 1;
 }
 
@@ -62,6 +66,9 @@ export async function deleteResourceMetadata(resourceIds: number[] | string[]): 
 			resourceIds
 		);
 	}
+
+	// logging
+	logger.error(`Failed to delete metadata for the following resources: ${resourceIds}`);
 
 	return query.rowCount === resourceIds.length;
 }
