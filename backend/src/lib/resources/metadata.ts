@@ -46,7 +46,7 @@ export async function createResourceMetadata(
 export async function deleteResourceMetadata(resourceIds: number[] | string[]): Promise<boolean> {
 	if (resourceIds.length === 0) return false;
 
-	const usingLocalResourceId = typeof resourceIds === 'number';
+	const usingLocalResourceId = typeof resourceIds[0] === 'number';
 	const idPlaceholders = resourceIds.map((_, idx) => `$${idx + 1}`).join(', ');
 
 	let query: QueryResult<any>;
