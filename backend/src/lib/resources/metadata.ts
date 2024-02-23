@@ -1,7 +1,8 @@
 import { ResourceType } from "@deisi25/types";
 import db from "../../db/db";
 import { QueryResult } from "pg";
-import { logger } from "backend/src/logging/logging";
+import { logger } from "../../logging/logging";
+
 
 /**
 * Create metadata for an application resource (AWS resource) and stores it
