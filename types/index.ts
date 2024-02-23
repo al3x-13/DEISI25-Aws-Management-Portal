@@ -38,6 +38,10 @@ export const apiDocsContract = c.router(
 export * from './lib/resources/types';
 
 
+/* ##### ACTIONS ##### */
+export * from './lib/actions/resource-actions';
+
+
 /* ##### MISC ##### */
 // API error types
 export * from './lib/api/types/error';

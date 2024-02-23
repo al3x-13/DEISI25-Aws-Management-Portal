@@ -1,6 +1,19 @@
-import { ActionData } from "./common";
+/**
+ * Represents a Resource Action.
+ */
+export interface ResourceActionData {
+	actionId: number;
+	actionType: ResourceActionTypes;
+	localResourceId: number;
+	userId: number;
+	actionTimestamp: Date;
+};
 
-enum ResourceActionTypes {
+
+/**
+ * Resource Actions.
+ */
+export enum ResourceActionTypes {
 	Ec2CreateInstance = "EC2_CREATE_INSTANCE",
 	Ec2TerminateInstance = "EC2_TERMINATE_INSTANCE",
 	Ec2StartInstance = "EC2_START_INSTANCE",
@@ -12,7 +25,13 @@ enum ResourceActionTypes {
 /**
  * Application Action Types.
  */
-const RESOURCE_ACTIONS: Map<string, ActionData> = new Map();
+const RESOURCE_ACTIONS: Map<
+	string, 
+	{
+		type: ResourceActionTypes;
+		description: string;
+	}
+> = new Map();
 
 /* ----- EC2 Resource Actions ----- */
 RESOURCE_ACTIONS.set(
@@ -52,4 +71,4 @@ RESOURCE_ACTIONS.set(
 );
 
 
-export { RESOURCE_ACTIONS, ResourceActionTypes };
+export { RESOURCE_ACTIONS };
