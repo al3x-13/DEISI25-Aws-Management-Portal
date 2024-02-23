@@ -123,10 +123,9 @@ export async function awsResourceIdsToLocalResourceIds(awsResourceIds: string[])
  */
 export async function localResourceIdsToAwsResourceIds(localResourceIds: number[]): Promise<string[]> {
 	const queryPlaceholders = localResourceIds.map((_, idx) => `$${idx + 1}`).join(', ');
-
 	const query = await db.query(
 		`SELECT aws_resource_id FROM resources WHERE id IN (${queryPlaceholders})`,
-		[ localResourceIds ]
+		localResourceIds
 	);
 
 	return query.rows.map((row) => row.aws_resource_id as string);
