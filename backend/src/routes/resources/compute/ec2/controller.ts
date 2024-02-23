@@ -124,7 +124,7 @@ const ec2Controller = server.router(ec2Contract, {
 		// get aws resource id
 		const awsResourceIds = await localResourceIdsToAwsResourceIds(instanceIds);
 		if (!awsResourceIds) {
-			const error = new ApiError('Failed to start EC2 instance', "The proviced 'instance_id' does not exist");
+			const error = new ApiError('Failed to terminate EC2 instances', "The provided 'instanceIds' do not exist");
 			return {
 				status: 404,
 				body: error.toJSON()
