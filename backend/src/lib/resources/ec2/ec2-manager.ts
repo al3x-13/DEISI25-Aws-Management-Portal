@@ -60,7 +60,7 @@ export async function createEC2Instance(input: CreateInstanceInput): Promise<Ins
 export async function getEC2Instances(maxResults: number | undefined): Promise<Ec2Instance[] | null> {
 	// get instances AWS IDs from the database
 	const query = await db.query(
-		'SELECT aws_resource_id FROM resources LIMIT $1',
+		'SELECT aws_resource_id FROM resources WHERE active = TRUE LIMIT $1',
 		[ maxResults ]
 	);
 
@@ -82,7 +82,7 @@ export async function getEC2Instances(maxResults: number | undefined): Promise<E
 			const reservationInstances = reservations[i].Instances || [];
 
 			for (let j = 0; j < reservationInstances.length; j++) {
-				instancesOutput.push(reservationInstances[i]);
+				instancesOutput.push(reservationInstances[j]);
 			}
 		}
 	} catch (err) {
