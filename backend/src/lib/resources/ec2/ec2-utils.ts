@@ -8,6 +8,8 @@ import { BlockStorageDevice, BlockStorageDeviceSchema, Ec2Instance, Ec2InstanceS
  * @returns Local EC2 instances
  */
 export async function mapAwsEc2InstancesToLocal(instances: Instance[]): Promise<Ec2Instance[]> {
+	if (instances.length === 0) return [];
+
 	const queryPlaceholders = instances.map((_, idx) => `$${idx + 1}`).join(', ');
 	const awsInstanceIds: string[] = instances.map((inst) => inst.InstanceId ? inst.InstanceId : '');
 
