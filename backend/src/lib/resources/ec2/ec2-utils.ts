@@ -16,7 +16,6 @@ export async function mapAwsEc2InstancesToLocal(instances: Instance[]): Promise<
 		`SELECT aws_resource_id, id, name, tags FROM resources WHERE aws_resource_id IN (${queryPlaceholders})`,
 		awsInstanceIds
 	);
-	console.log(`Instance IDS: ${JSON.stringify(query.rows)}`)
 
 	// dict for easy of search
 	const localInstancesData: Map<string, { id: number, name: string, tags: string[] }> = new Map();
