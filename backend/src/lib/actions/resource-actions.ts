@@ -9,10 +9,35 @@ import db from "../../db/db";
  * @param userId Author ID
  * @returns Whether the resource action was created successfully.
  */
-export async function createResourceAction(actionType: ResourceActionTypes, localResourceId: number, userId: number): Promise<boolean> {
+export async function createResourceActionFromLRI(
+	actionType: ResourceActionTypes, 
+	localResourceId: number, 
+	userId: number
+): Promise<boolean> {
 	const query = await db.query(
 		'INSERT INTO resource_actions (action, local_resource_id, user_id) VALUES ($1, $2, $3)',
 		[ actionType, localResourceId, userId ]
+	);
+	return query.rowCount === 1;
+}
+
+
+/**
+ * Create a new resource action.
+ * @param actionType Resource Action Type
+ * @param awsResourceId AWS Resource ID (ARI)
+ * @param userId Author ID
+ * @returns Whether the resource action was created successfully.
+ */
+export async function createResourceActionFromARI(
+	actionType: ResourceActionTypes, 
+	awsResourceId: string, 
+	userId: number
+): Promise<boolean> {
+	const query = await db.query(
+		'INSERT INTO resource_actions (action, local_resource_id, user_id) VALUES ' + 
+			'($1, (SELECT id FROM resources WHERE aws_resource_id = $2), $3)',
+		[ actionType, awsResourceId, userId ]
 	);
 	return query.rowCount === 1;
 }
