@@ -6,11 +6,12 @@ import dotenv from "dotenv";
 import { createEC2Instance, getEC2Instances } from "../../../../lib/resources/ec2/ec2-manager";
 import { CreateInstanceInput } from "../../../../lib/resources/ec2/ec2-types";
 import { initServer } from "@ts-rest/express";
-import { Ec2State, ResourceType, ec2Contract } from "@deisi25/types/index";
+import { Ec2State, ResourceActionTypes, ResourceType, ec2Contract } from "@deisi25/types/index";
 import { EbsVolumeType } from "../../../../lib/resources/ebs/ebs-types";
-import { createResourceMetadata, deleteResourceMetadata } from "../../../../lib/resources/metadata";
+import { createResourceMetadata, deactivateResource } from "../../../../lib/resources/metadata";
 import { getUserIdFromRequestCookies } from "../../../../auth/auth-utils";
 import { awsEc2InstanceStateToLocalState, localResourceIdsToAwsResourceIds, mapAwsEc2InstancesToLocal } from "../../../../lib/resources/ec2/ec2-utils";
+import { createResourceActionFromARI, createResourceActionFromLRI } from "../../../../lib/actions/resource-actions";
 
 
 dotenv.config();
@@ -88,7 +89,7 @@ const ec2Controller = server.router(ec2Contract, {
 		const createdInstance = await createEC2Instance(instanceInput);
 		const createdInstanceId = createdInstance?.InstanceId;
 
-		if (!createdInstance) {
+		if (!createdInstance || !createdInstanceId) {
 			const error = new ApiError('EC2 Instance Creation Failed', 'Could not create instance');
 			return {
 				status: 500,
@@ -99,14 +100,16 @@ const ec2Controller = server.router(ec2Contract, {
 		const userId = getUserIdFromRequestCookies(req);
 
 		// application metadata
-		createResourceMetadata(ResourceType.EC2, name, createdInstanceId || '', undefined, userId);
-		const localInstace = (await mapAwsEc2InstancesToLocal([ createdInstance ]))[0];
+		await createResourceMetadata(ResourceType.EC2, name, createdInstanceId || '', undefined, userId);
+		createResourceActionFromARI(ResourceActionTypes.Ec2CreateInstance, createdInstanceId, userId);
+
+		const localInstance = (await mapAwsEc2InstancesToLocal([ createdInstance ]))[0];
 
 		logger.info(`New EC2 instance created (${createdInstance.InstanceId})`);
 		return {
 			status: 201,
 			body: {
-				instance: localInstace
+				instance: localInstance
 			}
 		}
 	},
@@ -135,10 +138,14 @@ const ec2Controller = server.router(ec2Contract, {
 			InstanceIds: awsResourceIds,
 		};
 
+		const userId = getUserIdFromRequestCookies(req);
 		const terminateCommand = new TerminateInstancesCommand(terminateInput);
 		try {
 			await client.send(terminateCommand);
-			deleteResourceMetadata(instanceIds);  // delete metadata
+			await deactivateResource(instanceIds);  // delete metadata
+			for (let i = 0; i < instanceIds.length; i++) {
+				createResourceActionFromLRI(ResourceActionTypes.Ec2TerminateInstance, instanceIds[i], userId);
+			}
 			logger.info(`Terminate EC2 instances (${instanceIds})`);
 
 			return {
@@ -185,6 +192,8 @@ const ec2Controller = server.router(ec2Contract, {
 		try {
 			const output = await client.send(startInstancesCommand);
 			updatedInstances = output.StartingInstances;
+			const userId = getUserIdFromRequestCookies(req);
+			createResourceActionFromLRI(ResourceActionTypes.Ec2StartInstance, instanceId, userId);
 		} catch (err) {
 			logger.error(`Failed to start EC2 instances: ${err}`);
 			const error = new ApiError('EC2 Instance Start Failed', 'Could not start instance');
@@ -278,6 +287,9 @@ const ec2Controller = server.router(ec2Contract, {
 			}
 		}
 
+		const userId = getUserIdFromRequestCookies(req);
+		createResourceActionFromLRI(ResourceActionTypes.Ec2StopInstance, instanceId, userId);
+
 		logger.info(`EC2 instance state changed to 'stopped'`);
 		return {
 			status: 201,
@@ -323,6 +335,9 @@ const ec2Controller = server.router(ec2Contract, {
 				body: error.toJSON()
 			}
 		}
+
+		const userId = getUserIdFromRequestCookies(req);
+		createResourceActionFromLRI(ResourceActionTypes.Ec2RebootInstance, instanceId, userId);
 
 		logger.info(`EC2 instance state changed to 'pending'`);
 
