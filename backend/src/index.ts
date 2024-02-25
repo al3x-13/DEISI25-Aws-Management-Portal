@@ -16,7 +16,6 @@ import * as swaggerui from "swagger-ui-express";
 import { generateOpenApi } from "@ts-rest/open-api";
 import { buildDocsFromTSRestOAS } from '../docs/docs';
 import { OpenAPIObject } from 'openapi3-ts/oas31';
-import { addResourceTags, createResourceMetadata, deleteResourceMetadata, removeResourceTags, updateResourceName } from './lib/resources/metadata';
 import { getEC2Instances } from './lib/resources/ec2/ec2-manager';
 
 

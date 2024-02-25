@@ -34,7 +34,7 @@ export const actions = {
 			}
 		});
 
-		if (status === 200) {
+		if (status === 201) {
 			return { success: true };
 		}
 		return { success: false };

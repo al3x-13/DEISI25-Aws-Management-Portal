@@ -8,6 +8,8 @@ import { BlockStorageDevice, BlockStorageDeviceSchema, Ec2Instance, Ec2InstanceS
  * @returns Local EC2 instances
  */
 export async function mapAwsEc2InstancesToLocal(instances: Instance[]): Promise<Ec2Instance[]> {
+	if (instances.length === 0) return [];
+
 	const queryPlaceholders = instances.map((_, idx) => `$${idx + 1}`).join(', ');
 	const awsInstanceIds: string[] = instances.map((inst) => inst.InstanceId ? inst.InstanceId : '');
 
@@ -16,7 +18,6 @@ export async function mapAwsEc2InstancesToLocal(instances: Instance[]): Promise<
 		`SELECT aws_resource_id, id, name, tags FROM resources WHERE aws_resource_id IN (${queryPlaceholders})`,
 		awsInstanceIds
 	);
-	console.log(`Instance IDS: ${JSON.stringify(query.rows)}`)
 
 	// dict for easy of search
 	const localInstancesData: Map<string, { id: number, name: string, tags: string[] }> = new Map();
@@ -123,10 +124,9 @@ export async function awsResourceIdsToLocalResourceIds(awsResourceIds: string[])
  */
 export async function localResourceIdsToAwsResourceIds(localResourceIds: number[]): Promise<string[]> {
 	const queryPlaceholders = localResourceIds.map((_, idx) => `$${idx + 1}`).join(', ');
-
 	const query = await db.query(
 		`SELECT aws_resource_id FROM resources WHERE id IN (${queryPlaceholders})`,
-		[ localResourceIds ]
+		localResourceIds
 	);
 
 	return query.rows.map((row) => row.aws_resource_id as string);

@@ -1,6 +1,8 @@
 import { ResourceType } from "@deisi25/types";
 import db from "../../db/db";
 import { QueryResult } from "pg";
+import { logger } from "../../logging/logging";
+
 
 /**
 * Create metadata for an application resource (AWS resource) and stores it
@@ -28,11 +30,19 @@ export async function createResourceMetadata(
 			$3 AS aws_resource_id,
 			$4 AS tags,
 			$5 AS created_by
+		RETURNING id
 		`,
 		[ type, name, awsResourceId, tags, userId.toString() ]
 	);
 
-	return data.rowCount === 1;
+	// logging
+	if (data.rowCount === 1) {
+		logger.info(`Metadata for resource with LRI '${data.rows[0].id}' created successfully`);
+		return true;
+	} else {
+		logger.error(`Failed to create metadata for resource with ARI '${awsResourceId}'`);
+		return false;
+	}
 }
 
 
@@ -43,27 +53,35 @@ export async function createResourceMetadata(
  * @param resourceIds Resource IDs
  * @returns Whether the metadata deletion was successful
  */
-export async function deleteResourceMetadata(resourceIds: number[] | string[]): Promise<boolean> {
+export async function deactivateResource(resourceIds: number[] | string[]): Promise<boolean> {
 	if (resourceIds.length === 0) return false;
 
-	const usingLocalResourceId = typeof resourceIds === 'number';
+	const usingLocalResourceId = typeof resourceIds[0] === 'number';
 	const idPlaceholders = resourceIds.map((_, idx) => `$${idx + 1}`).join(', ');
 
 	let query: QueryResult<any>;
 
 	if (usingLocalResourceId) {
 		query = await db.query(
-			`DELETE FROM resources WHERE id IN (${idPlaceholders})`,
+			`UPDATE resources SET active = FALSE WHERE id IN (${idPlaceholders})`,
 			resourceIds
 		);
 	} else {
 		query = await db.query(
-			`DELETE FROM resources WHERE aws_resource_id IN (${idPlaceholders})`,
+			`UPDATE resources SET active = FALSE WHERE aws_resource_id IN (${idPlaceholders})`,
 			resourceIds
 		);
 	}
 
-	return query.rowCount === resourceIds.length;
+	// logging
+	const idTypeString = usingLocalResourceId ? 'LRIs ->' : 'ARIs ->';
+	if (query.rowCount === resourceIds.length) {
+		logger.info(`Resources ${idTypeString} '${resourceIds}' deactivated successfully`);
+		return true;
+	} else {
+		logger.error(`Failed to deactivate resources ${idTypeString} '${resourceIds}'`);
+		return false;
+	}
 }
 
 
