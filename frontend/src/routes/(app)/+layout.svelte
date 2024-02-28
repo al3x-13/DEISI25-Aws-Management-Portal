@@ -16,6 +16,12 @@
 	{#if data.props.user.role === 'root'}
 		<Sidebar on:open={updateSidebarState}>
 			<SidebarItem ionIcon="grid-outline" label="Dashboard" href="/root" open={sidebarOpen} />
+			<SidebarItem 
+				ionIcon="people-outline" 
+				label="Users Management" 
+				href="/users" 
+				open={sidebarOpen} 
+			/>
 		</Sidebar>
 	{:else}
 		<Sidebar on:open={updateSidebarState}>
