@@ -3,7 +3,7 @@ import { JwtUserData, getUserId, getUserRole } from "../../lib/users";
 import { signJwt } from "../../auth/jwt";
 import { logger } from "../../logging/logging";
 import dotenv from "dotenv";
-import { validateAuthCredentials } from "../../utils/endpoint-utils";
+import { validateUserCredentials } from "../../auth/auth-utils";
 import { initServer } from "@ts-rest/express";
 import { authContract } from "@deisi25/types/lib/api/contracts/auth-contract";
 
@@ -16,7 +16,7 @@ const authController = server.router(authContract, {
 		const { username, password } = body;
 
 		// credentials validation
-		if (!(await validateAuthCredentials(username, password))) {
+		if (!(await validateUserCredentials(username, password))) {
 			const error = new ApiError('Authentication failed');
 			return {
 				status: 401,

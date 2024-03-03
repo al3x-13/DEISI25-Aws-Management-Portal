@@ -1,5 +1,3 @@
-import { getUserPasswordHash, usernameExists } from "../lib/users";
-import bcrypt from "bcryptjs";
 import { ApiError, ApiErrorData } from "./errors";
 import { TsRestRequest } from "@ts-rest/express";
 
@@ -30,21 +28,4 @@ export function validateRequestHeaders(req: TsRestRequest<any>): ApiErrorData | 
 		}
 	}
 	return null;
-}
-
-export async function validateAuthCredentials(username: string, password: string): Promise<boolean> {
-	const validUsername = await usernameExists(username);
-	if (!validUsername) {
-		return false;
-	}
-
-	let userPasswordHash = await getUserPasswordHash(username);
-	userPasswordHash = userPasswordHash ? userPasswordHash : '';
-
-	const validPassword = await bcrypt.compare(password, userPasswordHash);
-	if (!validPassword) {
-		return false;
-	}
-
-	return true;
 }

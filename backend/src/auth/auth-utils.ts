@@ -1,5 +1,7 @@
 import { Request } from "express";
 import { getJwtData } from "./jwt";
+import { getUserPasswordHash, usernameExists } from "../lib/users";
+import bcrypt from "bcryptjs";
 
 /**
 * Checks if the request's 'authorization' header is of scheme type 'Bearer'.
@@ -20,4 +22,27 @@ export function getUserIdFromRequestCookies(req: Request): number {
 	const { token } = req.cookies;
 	const jwtData = getJwtData(token);
 	return jwtData ? jwtData.id : -1;
+}
+
+/**
+ * Validates user credentials.
+ * @param username username
+ * @param password password
+ * @returns Whether the credential are valid
+ */
+export async function validateUserCredentials(username: string, password: string): Promise<boolean> {
+	const validUsername = await usernameExists(username);
+	if (!validUsername) {
+		return false;
+	}
+
+	let userPasswordHash = await getUserPasswordHash(username);
+	userPasswordHash = userPasswordHash ? userPasswordHash : '';
+
+	const validPassword = await bcrypt.compare(password, userPasswordHash);
+	if (!validPassword) {
+		return false;
+	}
+
+	return true;
 }
