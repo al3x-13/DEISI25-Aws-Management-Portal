@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { getJwtData } from "./jwt";
-import { getUserPasswordHash, usernameExists } from "../lib/users";
+import { getUserPasswordHash, usernameExists } from "../lib/users/user-manager";
 import bcrypt from "bcryptjs";
 
 /**
