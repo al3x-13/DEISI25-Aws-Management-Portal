@@ -1,4 +1,5 @@
-import db from "../db/db";
+import { string } from "zod";
+import db from "../../db/db";
 
 export type Role = {
 	id: number;
@@ -75,12 +76,35 @@ export async function getUserId(username: string): Promise<number | null> {
 	return id ? id : null;
 }
 
-export async function getUserRole(username: string): Promise<string> {
-	const result = await db.query(
-		'SELECT roles.role FROM roles INNER JOIN users ON roles.id = users.role WHERE users.username = $1',
-		[username]
-	);
-	return result.rows[0].role;
+/**
+ * Gets user role from the user id.
+ * @param id user id
+ * @returns User role
+ */
+export async function getUserRole(id: number): Promise<Role | null>;
+/**
+ * Gets user role from the user's username.
+ * @param username username
+ * @returns User role
+ */
+export async function getUserRole(username: string): Promise<Role | null>;
+export async function getUserRole(identifier: number | string): Promise<Role | null> {
+	let query;
+
+	if (typeof identifier === 'string') {
+		query = await db.query(
+			'SELECT roles.id, roles.role FROM roles INNER JOIN users ON roles.id = users.role WHERE users.username = $1',
+			[ identifier ]
+		);
+	} else {
+		query = await db.query(
+			'SELECT roles.id, roles.role FROM roles INNER JOIN users ON roles.id = users.role WHERE users.id = $1',
+			[ identifier ]
+		);
+	}
+
+	const data = query.rows[0];
+	return data ? { id: data.id, role: data.role } : null;
 }
 
 /**
