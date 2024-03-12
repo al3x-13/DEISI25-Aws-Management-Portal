@@ -1,4 +1,3 @@
-import { string } from "zod";
 import db from "../../db/db";
 
 export type Role = {
@@ -12,7 +11,7 @@ export type User = {
 	passwordHash: string;
 	email: string | undefined;
 	role: Role;
-	created_at: number;
+	createdAt: number;
 };
 
 export interface JwtUserData {
@@ -40,12 +39,25 @@ export async function usernameExists(username: string): Promise<boolean> {
  * @returns User or null
  */
 export async function getUserByID(userID: number): Promise<User | null> {
-	const result = await db.query(
-		'SELECT * FROM users WHERE id = $1',
+		const result = await db.query(
+		'SELECT id, username, email, password_hash, role as role_id, (SELECT role FROM roles r WHERE r.id = u.role) as role_name, created_at FROM users u WHERE id = $1',
 		[userID.toString()]
 	);
+
 	const user = result.rows[0];
-	return user ? user : null;
+	return user ?
+		{
+			id: user.id,
+			username: user.username,
+			passwordHash: user.password_hash,
+			email: user.email,
+			role: {
+				id: user.role_id,
+				role: user.role_name
+			},
+			createdAt: user.created_at
+		}
+		: null;
 }
 
 /**
@@ -55,11 +67,24 @@ export async function getUserByID(userID: number): Promise<User | null> {
  */
 export async function getUserByUsername(username: string): Promise<User | null> {
 	const result = await db.query(
-		'SELECT * FROM users WHERE username = $1',
+		'SELECT id, username, email, password_hash, role as role_id, (SELECT role FROM roles r WHERE r.id = u.role) as role_name, created_at FROM users u WHERE username = $1',
 		[username]
 	);
+
 	const user = result.rows[0];
-	return user ? user : null;
+	return user ?
+		{
+			id: user.id,
+			username: user.username,
+			passwordHash: user.password_hash,
+			email: user.email,
+			role: {
+				id: user.role_id,
+				role: user.role_name
+			},
+			createdAt: user.created_at
+		}
+		: null;
 }
 
 /**
