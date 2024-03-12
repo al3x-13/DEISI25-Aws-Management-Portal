@@ -39,13 +39,24 @@ jobs:
           version: 8
 
       - name: Node setup
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 18
           cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: DB setup
+        run: |
+          echo "POSTGRES_HOST=localhost" >> $GITHUB_ENV
+          echo "POSTGRES_PORT=5432" >> $GITHUB_ENV
+          echo "POSTGRES_DB=dev-db" >> $GITHUB_ENV
+          echo "POSTGRES_USER=admin" >> $GITHUB_ENV
+          echo "POSTGRES_PASSWORD=admin" >> $GITHUB_ENV
+          psql -h ${{ env.POSTGRES_HOST }} -d ${{ env.POSTGRES_DB }} -U ${{ env.POSTGRES_USER }} -f ./db/dev-db.sql
+        env:
+          PGPASSWORD: ${{ env.POSTGRES_PASSWORD }}
 
       - name: Run tests
         working-directory: ./backend
