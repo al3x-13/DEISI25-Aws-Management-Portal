@@ -47,14 +47,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: DB setup
+      - name: DB env
         run: |
           echo "POSTGRES_HOST=localhost" >> $GITHUB_ENV
           echo "POSTGRES_PORT=5432" >> $GITHUB_ENV
           echo "POSTGRES_DB=dev-db" >> $GITHUB_ENV
           echo "POSTGRES_USER=admin" >> $GITHUB_ENV
           echo "POSTGRES_PASSWORD=admin" >> $GITHUB_ENV
-          psql -h ${{ env.POSTGRES_HOST }} -d ${{ env.POSTGRES_DB }} -U ${{ env.POSTGRES_USER }} -f ./db/dev-db.sql
+
+      - name: DB setup
+        run: psql -h ${{ env.POSTGRES_HOST }} -d ${{ env.POSTGRES_DB }} -U ${{ env.POSTGRES_USER }} -f ./db/dev-db.sql
         env:
           PGPASSWORD: ${{ env.POSTGRES_PASSWORD }}
 
