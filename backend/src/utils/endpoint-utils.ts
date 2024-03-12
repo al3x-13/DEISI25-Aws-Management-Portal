@@ -1,6 +1,3 @@
-import { Request } from "express";
-import { getUserPasswordHash, usernameExists } from "../lib/users";
-import bcrypt from "bcryptjs";
 import { ApiError, ApiErrorData } from "./errors";
 import { TsRestRequest } from "@ts-rest/express";
 
@@ -9,7 +6,7 @@ export function isContentTypeValid(req: TsRestRequest<any>) {
 }
 
 export function validateRequestHeaders(req: TsRestRequest<any>): ApiErrorData | null {
-	if (!req.headers['content-type']) {
+	if (!req.headers || !req.headers['content-type']) {
 		const error = new ApiError(
 			"Bad Request", 
 			"Missing 'Content-Type' header", "Set the 'Content-Type' header to 'application/json'"
@@ -23,7 +20,7 @@ export function validateRequestHeaders(req: TsRestRequest<any>): ApiErrorData | 
 	if (!isContentTypeValid(req)) {
 		const error = new ApiError(
 			"Bad Request", 
-			"Invalid 'Content-Type' header", "The 'Contet-Type' header must be set to 'application/json'"
+			"Invalid 'Content-Type' header", "The 'Content-Type' header must be set to 'application/json'"
 		);
 		return {
 			status: 400,
@@ -31,29 +28,4 @@ export function validateRequestHeaders(req: TsRestRequest<any>): ApiErrorData | 
 		}
 	}
 	return null;
-}
-
-export function validateAuthenticationBody(req: Request): string {
-	const { username, password } = req.body;
-
-	if (!username) return 'username';
-	if (!password) return 'password';
-	return 'valid';
-}
-
-export async function validateAuthCredentials(username: string, password: string): Promise<boolean> {
-	const validUsername = await usernameExists(username);
-	if (!validUsername) {
-		return false;
-	}
-
-	let userPasswordHash = await getUserPasswordHash(username);
-	userPasswordHash = userPasswordHash ? userPasswordHash : '';
-
-	const validPassword = await bcrypt.compare(password, userPasswordHash);
-	if (!validPassword) {
-		return false;
-	}
-
-	return true;
 }

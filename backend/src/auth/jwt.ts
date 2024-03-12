@@ -1,6 +1,6 @@
 import { Request } from "express";
 import jwt from 'jsonwebtoken';
-import { JwtUserData } from "../lib/users";
+import { JwtUserData } from "../lib/users/user-manager";
 import dotenv from 'dotenv';
 import { logger } from "../logging/logging";
 

@@ -27,6 +27,13 @@ function initializeConnection(connectionString: string | undefined, callback: (s
 }
 
 /**
+ * Closes the active database pool.
+ */
+function closeConnection(): Promise<void> {
+	return pool.end();
+}
+
+/**
  * Performs a database query.
  * @param query Database query
  * @param values Query values
@@ -65,6 +72,7 @@ function getQueryTimestamp(): string {
 
 const db = {
 	initializeConnection,
+	closeConnection,
 	query,
 };
 

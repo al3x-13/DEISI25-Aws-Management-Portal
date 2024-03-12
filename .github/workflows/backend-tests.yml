@@ -1,0 +1,69 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - 'backend/*'
+  pull_request:
+    paths:
+      - 'backend/*'
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: backend tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: dev-db
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: admin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Repo checkout
+        uses: actions/checkout@v4
+
+      - name: Pnpm setup
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Node setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: DB env
+        run: |
+          echo "POSTGRES_HOST=localhost" >> $GITHUB_ENV
+          echo "POSTGRES_PORT=5432" >> $GITHUB_ENV
+          echo "POSTGRES_DB=dev-db" >> $GITHUB_ENV
+          echo "POSTGRES_USER=admin" >> $GITHUB_ENV
+          echo "POSTGRES_PASSWORD=admin" >> $GITHUB_ENV
+
+      - name: DB setup
+        run: psql -h ${{ env.POSTGRES_HOST }} -d ${{ env.POSTGRES_DB }} -U ${{ env.POSTGRES_USER }} -f ./db/dev-db.sql
+        env:
+          PGPASSWORD: ${{ env.POSTGRES_PASSWORD }}
+
+      - name: Run tests
+        working-directory: ./backend
+        env:
+          NODE_ENV: development
+          DB_URL: postgres://admin:admin@localhost:5432/dev-db
+          JWT_SECRET: b9a932dc325679760272b0913aa5e83300fd5ef29455a9db50b3f3c5d1077163d975bbf0c583d365cf939fcd6775f5b549df5f9a9ee2bc12905baca06637c14d
+        run: pnpm run test
