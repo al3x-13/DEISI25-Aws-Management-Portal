@@ -59,7 +59,7 @@ describe("getUserById", () => {
 					id: 3,
 					role: 'user'
 				}
-			})
+			});
 
 		expect(await getUserByID(4240))
 			.toMatchObject({
@@ -108,8 +108,7 @@ describe("getUserByUsername", () => {
 	});
 });
 
-describe("getUserRole", () => {
-	test("invalid users", async  () => {
+describe("getUserRole", () => { test("invalid users", async  () => {
 		expect(await getUserRole(3243)).toBeNull();
 		expect(await getUserRole(30928)).toBeNull();
 		expect(await getUserRole('fepwofjwffew')).toBeNull();
@@ -121,8 +120,8 @@ describe("getUserRole", () => {
 	});
 
 	test("valid usernames", async () => {
-		expect(await getUserRole('nick324')).toBe({ id: 3, role: 'user' });
-		expect(await getUserRole('ben324')).toBe({ id: 3, role: 'user' });
+		expect(await getUserRole('nick324')).toMatchObject({ id: 3, role: 'user' });
+		expect(await getUserRole('ben324')).toMatchObject({ id: 3, role: 'user' });
 	});
 });
 
