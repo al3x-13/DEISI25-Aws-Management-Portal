@@ -1,9 +1,12 @@
-name: Backend tests
+name: Backend CI
 
 on:
-  [push, pull_request]:
+  push:
     paths:
-      'backend/*'
+      - 'backend/*'
+  pull_request:
+    paths:
+      - 'backend/*'
   workflow_dispatch:
 
 jobs:
