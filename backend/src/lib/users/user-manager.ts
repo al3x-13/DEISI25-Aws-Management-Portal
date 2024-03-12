@@ -142,6 +142,6 @@ export async function getUserPasswordHash(username: string): Promise<string | nu
 		'SELECT password_hash FROM users WHERE username = $1',
 		[username]
 	);
-	const passwordHash = result.rows[0].password_hash;
-	return passwordHash ? passwordHash : null;
+	const passwordHash = result.rows[0];
+	return passwordHash ? passwordHash.password_hash : null;
 }
