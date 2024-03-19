@@ -18,6 +18,7 @@ import { buildDocsFromTSRestOAS } from '../docs/docs';
 import { OpenAPIObject } from 'openapi3-ts/oas31';
 import { addResourceTags, createResourceMetadata, deleteResourceMetadata, removeResourceTags, updateResourceName } from './lib/resources/metadata';
 import { getEC2Instances } from './lib/resources/ec2/ec2-manager';
+import usersController from './routes/users/controller';
 
 
 dotenv.config();
@@ -102,6 +103,7 @@ createExpressEndpoints(unprotectedContract, unprotectedRoutesRouter, app, {
 
 const protectedRoutesRouter = server.router(protectedContract, {
 	user: userController,
+	users: usersController,
 	resources: {
 		compute: {
 			ec2: ec2Controller,

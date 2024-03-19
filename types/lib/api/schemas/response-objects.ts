@@ -4,6 +4,7 @@ import { z } from "zod";
 export enum SchemaID {
 	ApiError = 'ApiError',
 	UserInfo = 'UserInfo',
+	UsersInfo = 'UsersInfo',
 }
 
 export interface ApiSchemasDict {
@@ -42,4 +43,24 @@ apiSchemas[SchemaID.UserInfo] = z.object(
 	}
 );
 
-
+apiSchemas[SchemaID.UsersInfo] = z.object({
+	users:z.array(z.object(
+	{
+		id: z.number().openapi({
+			example: 1337
+		}),
+		email: z.number().openapi({
+			example: 'example@gmail.com'
+		}),
+		username: z.string().openapi({
+			example: 'j0hn.w3ak'
+		}),
+		role: z.string().openapi({
+			example: 'user'
+		}),
+		createdAt: z.string().openapi({}),
+	}))}).openapi({
+		title: 'Users Info',
+		description: 'General information about all users.',
+	}
+);

@@ -4,6 +4,7 @@ import { authContract } from './lib/api/contracts/auth-contract';
 import { protectedContract } from './lib/api/contracts/protected-contract';
 import { ec2Contract } from './lib/api/contracts/resources/ec2-contract';
 import { userContract } from './lib/api/contracts/user-contract';
+import { usersContracts } from './lib/api/contracts/users-contracts';
 
 
 /* ##### UNPROTECTED ROUTES ##### */
@@ -21,6 +22,8 @@ export * from './lib/api/contracts/protected-contract';
 export * from './lib/api/contracts/user-contract';
 // EC2 contract
 export * from './lib/api/contracts/resources/ec2-contract';
+// Users contracts
+export * from './lib/api/contracts/users-contracts';
 
 /* ##### MAIN CONTRACT ##### */
 const c = initContract();
@@ -30,6 +33,7 @@ export const apiDocsContract = c.router(
 		auth: authContract,
 		ec2: ec2Contract,
 		user: userContract,
+		users: usersContracts,
 	},
 );
 

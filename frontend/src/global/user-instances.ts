@@ -1,20 +1,30 @@
-import { userContract } from "@deisi25/types";
+import type { User } from "$lib/domain/user";
+import { userContract, usersContracts } from "@deisi25/types";
 import { initClient } from "@ts-rest/core";
 
-const client = initClient(userContract, {
+const client = initClient(usersContracts, {
 	baseUrl: 'http://localhost:3000',
 	baseHeaders: {
 		'Content-Type': 'application/json'
-	}
+	},
+	credentials:"include"
 });
 
-export async function listUsers(): Promise<[] | []> {
-	const { status, body } = await client.info({
-		// query: { }
-	});
+type UserInfo = {
+	id: number,
+	username: string,
+	email: string,
+	role: string,
+	createdAt: string
+}
+
+export async function listUsers(): Promise<UserInfo[]> {
+
+	const { status, body } = await client.default({});
 
 	if (status !== 200) {
 		return [];
 	}
-	///return body.instances as Ec2Instance[];
+
+	return body.users;
 }
