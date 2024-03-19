@@ -1,5 +1,5 @@
 <script>
-	// import { getUserByID} from '../../../global/ec2-instances';
+	import { listUsers } from "../../../global/user-instances";
 
 	let users = [
 		{ id: 1, username: 'User1', email: 'user1@gmail.com', role: 'Admin', date: '2024-01-12' },
@@ -7,12 +7,14 @@
 		{ id: 3, username: 'User3', email: 'user3@gmail.com', role: 'User', date: '2024-02-02' }
 	];
 
-	function editUser(id) {}
+	// function editUser(id) {}
 
-	function deleteUser(id) {}
+	// function deleteUser(id) {}
 </script>
 
 <main>
+	<!-- <button on:click={async () => {console.log(await listUsers());
+	}}>tteeee</button> -->
 	<table>
 		<thead>
 			<tr class="text-color-primary-dark dark:bg-bg2-dark">
@@ -31,12 +33,12 @@
 					<td>{user.role}</td>
 					<td>{user.date}</td>
 					<td>
-						<button on:click={() => editUser(user.id)}>
+						<!-- <button on:click={() => editUser(user.id)}>
 							<ion-icon name="create-outline" />
 						</button>
 						<button on:click={() => deleteUser(user.id)}>
 							<ion-icon name="trash-outline" />
-						</button>
+						</button> -->
 					</td>
 				</tr>
 			{/each}
