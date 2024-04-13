@@ -5,9 +5,10 @@
     "rootDir": "../",                                  /* Specify the root folder within your source files. */
     "outDir": "./build",                                   /* Specify an output folder for all emitted files. */
 	"moduleResolution": "node",
+	"incremental": false,
 	"baseUrl": ".",
     "paths": {
-		"@deisi25/types": [ "../types/index" ]
+		"@deisi25/types": [ "../types/index", "./build/types" ]
 	},													 /* Specify a set of entries that re-map imports to additional lookup locations. */
     "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
     "strict": true,                                      /* Enable all strict type-checking options. */

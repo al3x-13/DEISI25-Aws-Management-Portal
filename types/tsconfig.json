@@ -6,7 +6,7 @@
     /* Projects */
 	"type": "module",
     "composite": true,                                /* Enable constraints that allow a TypeScript project to be used with project references. */
-
+	"incremental": false,
 
     /* Emit */
     "declaration": true,                              /* Generate .d.ts files from TypeScript and JavaScript files in your project. */

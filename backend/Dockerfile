@@ -1,4 +1,4 @@
-FROM node:18-alpine AS builder
+FROM node:18-alpine
 
 # pnpm setup
 RUN npm install -g pnpm
@@ -22,4 +22,4 @@ RUN pnpm run build
 
 EXPOSE 3000
 
-CMD [ "node", "-r", "tsconfig-paths/register", "build/index.js" ]
+CMD [ "node", "-r", "tsconfig-paths/register", "build/backend/src/index.js" ]
