@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 import { createEC2Instance, getEC2Instances } from "../../../../lib/resources/ec2/ec2-manager";
 import { CreateInstanceInput } from "../../../../lib/resources/ec2/ec2-types";
 import { initServer } from "@ts-rest/express";
-import { Ec2State, ResourceActionTypes, ResourceType, ec2Contract } from "@deisi25/types/index";
+import { Ec2State, ResourceActionTypes, ResourceType, ec2Contract } from "@deisi25/types";
 import { EbsVolumeType } from "../../../../lib/resources/ebs/ebs-types";
 import { createResourceMetadata, deactivateResource } from "../../../../lib/resources/metadata";
 import { getUserIdFromRequestCookies } from "../../../../auth/auth-utils";
