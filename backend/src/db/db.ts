@@ -30,9 +30,11 @@ function initializeConnection(connectionString: string | undefined, callback: (s
             .catch(_ => {
                 if (Date.now() - startTime > timeout) {
 					logger.error('Failed to initialize database connection: could not establish connection');
+					console.log('Failed to establish a database connection')
                     callback(false);
                 } else {
 					logger.info('Failed to establish a connection to the database. Trying again in 10 seconds')
+					console.log('Failed to connect to DB. Trying again in 10s')
                     setTimeout(attemptConnection, interval);
                 }
             });

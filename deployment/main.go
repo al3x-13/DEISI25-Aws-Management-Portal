@@ -79,8 +79,8 @@ func UpdateSqlFileWithUserCredentials(data []byte) []string {
 	var stdUserHash []byte
 	var rootUserHash []byte
 
-	stdUserHash, _ = bcrypt.GenerateFromPassword([]byte(stdUserPassword), bcrypt.DefaultCost)
-	rootUserHash, _ = bcrypt.GenerateFromPassword([]byte(rootUserPassword), bcrypt.DefaultCost)
+	stdUserHash, _ = bcrypt.GenerateFromPassword([]byte(stdUserPassword), 10)
+	rootUserHash, _ = bcrypt.GenerateFromPassword([]byte(rootUserPassword), 10)
 
 	content := strings.Split(string(data), "\n")
 	for i, line := range content {
