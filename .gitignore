@@ -7,4 +7,5 @@ node_modules
 .eslint*
 deployment/env-settings.txt
 deployment/db.sql
+deployment/dev-db.sql
 deployment/.*

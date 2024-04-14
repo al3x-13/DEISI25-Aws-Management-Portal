@@ -57,6 +57,24 @@ func GenerateBackendEnvFile(jwtSec string, awsReg string, awsAccKeyId string, aw
 	return nil
 }
 
+func GenerateDbEnvFile() error {
+	filename := ".env.db"
+
+	file, err := os.Create(filename)
+	if err != nil {
+		log.Fatal("Error creating db .env file")
+		return err
+	}
+	defer file.Close()
+
+	file.WriteString("POSTGRES_DB=dev-db\n")
+	file.WriteString("POSTGRES_USER=" + dbUsername + "\n")
+	file.WriteString("POSTGRES_PASSWORD=" + dbPassword + "\n")
+
+	fmt.Println("DB env file created successfully")
+	return nil
+}
+
 func UpdateSqlFileWithUserCredentials(data []byte) []string {
 	var stdUserHash []byte
 	var rootUserHash []byte
@@ -184,17 +202,24 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Generates backend .env file
+	// Generate backend .env file
 	err = GenerateBackendEnvFile(jwtSecret, awsRegion, awsAccessKey, awsSecretKey, dbUsername, dbPassword)
 	if err != nil {
 		log.Fatal("Failed to create backend env file")
 		return
 	}
 
+	// Generate db .env file
+	err = GenerateDbEnvFile()
+	if err != nil {
+		log.Fatal("Failed to create db env file")
+		return
+	}
+
 	// Build SQL file
 	updatedSql := UpdateSqlFileWithUserCredentials(data)
 	updatedSqlStr := strings.Join(updatedSql, "\n")
-	err = os.WriteFile("db.sql", []byte(updatedSqlStr), 0644)
+	err = os.WriteFile("dev-db.sql", []byte(updatedSqlStr), 0644)
 	if err != nil {
 		log.Fatal("Failed to generate SQL file")
 		return
