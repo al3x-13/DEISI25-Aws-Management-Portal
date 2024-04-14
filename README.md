@@ -17,7 +17,7 @@
 
 ### Steps
 #### 1. Getting the AWS Root Account Access Key
-Navigate to [https://aws.amazon.com](https://aws.amazon.com) and login with the ROOT accout.
+Navigate to [https://aws.amazon.com](https://aws.amazon.com) and login with the ROOT account.
 ![Aws 1](assets/aws-1.png)
 
 In the top-right corner click in the account username and select __Security Credentials__.
