@@ -47,7 +47,6 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 // Database connection
 db.initializeConnection(process.env.DB_URL, (success: boolean) => {
 	if (!success) {
-		logger.error('Failed to initialize database connection: verify the connection string');
 		process.exit(1);
 	}
 	logger.info('Database connection initialized successfully');

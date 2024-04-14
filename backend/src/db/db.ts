@@ -10,20 +10,34 @@ let pool: Pool;
 * @returns Whether connection was successful
 */
 function initializeConnection(connectionString: string | undefined, callback: (success: boolean) => void): void {
-	if (!connectionString) callback(false);
+	if (!connectionString) {
+		logger.error('Failed to initialize database connection: verify the connection string');
+		callback(false);
+	}
 
 	pool = new Pool({
 		connectionString: connectionString,
 	});
 	
-	// veryfying if the connection was created successfully
-	pool.query('SELECT 1', async (err, _res) => {
-		if (err) {
-			callback(false);
-		} else {
-			callback(true);
-		}
-	});
+	const timeout = 60000; // 1 min
+    const interval = 10000; // 10 sec
+    const startTime = Date.now();
+
+	// checking if the database is up
+    const attemptConnection = () => {
+        pool.query('SELECT 1')
+            .then(_ => callback(true))
+            .catch(_ => {
+                if (Date.now() - startTime > timeout) {
+					logger.error('Failed to initialize database connection: could not establish connection');
+                    callback(false);
+                } else {
+					logger.info('Failed to establish a connection to the database. Trying again in 10 seconds')
+                    setTimeout(attemptConnection, interval);
+                }
+            });
+    };
+	attemptConnection();
 }
 
 /**
