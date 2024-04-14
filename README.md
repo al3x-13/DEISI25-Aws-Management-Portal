@@ -12,7 +12,7 @@
 Navigate to [https://aws.amazon.com](https://aws.amazon.com) and login with the ROOT accout.
 ![Aws 1](assets/aws-1.png)
 
-In the top-right corner click in the account username and select Security Credentials.
+In the top-right corner click in the account username and select __Security Credentials__.
 ![Aws 2](assets/aws-2.png)
 
 Under __Access Keys__ select __Create access key__.
@@ -71,7 +71,7 @@ To run the application we just need to run the following command on the terminal
 ![Compose 1](assets/compose-1.png)
 ![Compose 2](assets/compose-2.png)
 
-If no error were thrown, the application should be running.
+If no error was thrown, the application should be running.
 
 #### 7. Ready to Go
 To make sure the application is running, access the following url in the browser:
@@ -79,4 +79,4 @@ To make sure the application is running, access the following url in the browser
 
 ![Running 1](assets/running-1.png)
 
-Now, you're able to login using the accounts created in the previous steps and test the application.
+Now, you're able to login using the accounts setup in the setup script and test the application.
