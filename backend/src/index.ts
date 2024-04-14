@@ -50,6 +50,7 @@ db.initializeConnection(process.env.DB_URL, (success: boolean) => {
 		process.exit(1);
 	}
 	logger.info('Database connection initialized successfully');
+	console.log('Database connection initialized successfully');
 });
 
 
