@@ -6,6 +6,14 @@
 - AWS Account with ROOT access (create one [here](https://aws.amazon.com/))
 - Github Account
 - Docker (download [here](https://docs.docker.com/get-docker/))
+- Operating system: Linux or Windows (with WSL 2)
+    - Guide on how to run Docker with WSL 2:
+      [https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers](https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers)
+    
+### Operating System Compatibility
+- Ubuntu 22.04
+- Other linux based systems should work with no problem
+- Windows with WSL should work as well
 
 ### Steps
 #### 1. Getting the AWS Root Account Access Key
