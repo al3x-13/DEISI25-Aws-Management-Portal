@@ -31,7 +31,7 @@ if (!jwtSecretExists() || !dbUrlExists()) {
 
 // config
 app.use(cors({
-	origin: true,
+	origin: '127.0.0.1',
 	credentials: true,
 }));
 app.use(cookieParser());
@@ -69,7 +69,7 @@ const unprotectedRoutesRouter = server.router(unprotectedContract, {
 			// const success = await deleteResourceMetadata(['f0392jf3290fj', 'f0392jf37fdsfj']);
 			const success = true;
 
-			getEC2Instances(30);
+			//getEC2Instances(30);
 
 			return {
 				status: 200,
