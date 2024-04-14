@@ -1,5 +1,6 @@
 <script lang="ts">
 	import NavbarLogo from '$lib/assets/NavbarLogo.svelte';
+	import { ChevronDown, ChevronUp, Menu } from 'lucide-svelte';
 
 	export let username: string | undefined;
 	export let role: string | undefined;
@@ -33,15 +34,9 @@
 			on:click={() => (userOptionsDropdownActive = !userOptionsDropdownActive)}
 		>
 			{#if userOptionsDropdownActive}
-				<ion-icon
-					name="chevron-up"
-					class="text-[28px] text-color-primary-light dark:text-color-primary-dark"
-				/>
+				<ChevronUp size={35} class="text-color-primary-light dark:text-color-primary-dark z-30" />
 			{:else}
-				<ion-icon
-					name="chevron-down"
-					class="text-[28px] text-color-primary-light dark:text-color-primary-dark"
-				/>
+				<ChevronDown size={35} class="text-color-primary-light dark:text-color-primary-dark z-30" />
 			{/if}
 		</button>
 
