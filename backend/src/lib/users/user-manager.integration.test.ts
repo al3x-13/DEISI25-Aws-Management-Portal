@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "@jest/globals";
-import db from "backend/src/db/db";
+import db from "../../db/db";
 import { getUserByID, getUserByUsername, getUserPasswordHash, getUserRole, usernameExists } from "./user-manager";
 
 beforeAll(async () => {

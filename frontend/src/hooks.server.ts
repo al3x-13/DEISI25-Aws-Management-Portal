@@ -19,7 +19,7 @@ const authorizeRouteAccess: Handle = async ({ event, resolve }) => {
 	// invalidate cookies and user info if token is not valid 
 	// when trying to access a protected route
 	if (!validToken && protectedRoute) {
-		event.cookies.delete('token');
+		event.cookies.delete('token', { path: '/' });
 		event.locals.user = undefined;
 	}
 

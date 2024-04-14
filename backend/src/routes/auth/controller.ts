@@ -5,7 +5,8 @@ import { logger } from "../../logging/logging";
 import dotenv from "dotenv";
 import { validateUserCredentials } from "../../auth/auth-utils";
 import { initServer } from "@ts-rest/express";
-import { authContract } from "@deisi25/types/lib/api/contracts/auth-contract";
+import { authContract } from "@deisi25/types";
+
 
 dotenv.config();
 

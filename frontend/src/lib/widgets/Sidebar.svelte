@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { darkModeActive, setDarkMode, setLightMode } from '$lib/darkMode';
+	import { Menu, Moon, Sun, X } from 'lucide-svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	let drawerOpen = false;
@@ -40,15 +41,9 @@
 			class="flex items-center justify-center rounded-custom hover:bg-hover-light dark:hover:bg-hover-dark"
 		>
 			{#if drawerOpen}
-				<ion-icon
-					name="close"
-					class="text-[40px] text-color-primary-light dark:text-color-primary-dark"
-				/>
+				<X size={40} class="text-color-primary-light dark:text-color-primary-dark z-30" />
 			{:else}
-				<ion-icon
-					name="menu"
-					class="text-[40px] text-color-primary-light dark:text-color-primary-dark"
-				/>
+				<Menu size={40} class="text-color-primary-light dark:text-color-primary-dark z-30" />
 			{/if}
 		</button>
 	</div>
@@ -71,15 +66,9 @@
 		class="w-full flex items-center justify-start border-r-[1.5px] border-border-light dark:border-border-dark pl-2.5 py-4 group"
 	>
 		{#if darkModeOn}
-			<ion-icon
-				name="sunny-outline"
-				class="text-[35px] text-color-primary-light dark:text-color-primary-dark group-hover:text-color-hover-light dark:group-hover:text-color-hover-dark"
-			/>
+			<Sun size={35} class="text-color-primary-light dark:text-color-primary-dark group-hover:text-color-hover-light dark:group-hover:text-color-hover-dark z-30" />
 		{:else}
-			<ion-icon
-				name="moon-outline"
-				class="text-[35px] text-color-primary-light dark:text-color-primary-dark group-hover:text-color-hover-light dark:group-hover:text-color-hover-dark"
-			/>
+			<Moon size={35} class="text-color-primary-light dark:text-color-primary-dark group-hover:text-color-hover-light dark:group-hover:text-color-hover-dark z-30" />
 		{/if}
 
 		{#if drawerOpen}
