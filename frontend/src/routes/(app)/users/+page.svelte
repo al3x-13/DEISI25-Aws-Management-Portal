@@ -23,9 +23,9 @@
 		}));
     });
 
-    // function editUser(id: number) {}
+    function editUser(id: number) {}
 
-    // function deleteUser(id: number) {}
+    function deleteUser(id: number) {}
 </script>
 
 <main>
@@ -47,12 +47,12 @@
                     <td>{user.role}</td>
                     <td>{user.date}</td>
                     <td>
-                        <!-- <button on:click={() => editUser(user.id)}>
+                        <button on:click={() => editUser(user.id)}>
                             <ion-icon name="create-outline" />
                         </button>
                         <button on:click={() => deleteUser(user.id)}>
                             <ion-icon name="trash-outline" />
-                        </button> -->
+                        </button>
                     </td>
                 </tr>
             {/each}
@@ -75,5 +75,15 @@
     th, td {
         padding: 10px;
         text-align: left;
+    }
+
+	button {
+        margin: 0 5px;
+        padding: 8px 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
     }
 </style>
