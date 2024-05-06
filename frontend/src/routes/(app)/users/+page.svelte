@@ -14,12 +14,14 @@
 
     onMount(async () => {
 		const userInfoList = await listUsers();
+		console.log(userInfoList);
+		
 		users = userInfoList.map(userInfo => ({
 			id: userInfo.id,
 			username: userInfo.username,
 			email: userInfo.email,
 			role: userInfo.role,
-			date: '' 
+			date: userInfo.createdAt.slice(0, 10)
 		}));
     });
 
