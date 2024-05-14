@@ -17,27 +17,23 @@
 	{#if data.props.user.role === 'root'}
 		<Sidebar on:open={updateSidebarState}>
 			<SidebarItem label="Dashboard" href="/root" open={sidebarOpen}>
-				<LayoutDashboard size={32} class='text-color-primary-light dark:text-color-primary-dark' />
+				<LayoutDashboard size={32} class="text-color-primary-light dark:text-color-primary-dark" />
 			</SidebarItem>
 		</Sidebar>
 	{:else}
 		<Sidebar on:open={updateSidebarState}>
 			<SidebarItem label="Dashboard" href="/dashboard" open={sidebarOpen}>
-				<LayoutDashboard size={32} class='text-color-primary-light dark:text-color-primary-dark' />
+				<LayoutDashboard size={32} class="text-color-primary-light dark:text-color-primary-dark" />
 			</SidebarItem>
-			<SidebarItem
-				label="EC2"
-				href="/resources/compute/ec2"
-				open={sidebarOpen}
-			>
-				<Cpu size={32} class='text-color-primary-light dark:text-color-primary-dark' />
+			<SidebarItem label="EC2" href="/resources/compute/ec2" open={sidebarOpen}>
+				<Cpu size={32} class="text-color-primary-light dark:text-color-primary-dark" />
 			</SidebarItem>
 		</Sidebar>
 	{/if}
 
 	<div class="w-full">
 		<Header username={data.props.user.username} role={data.props.user.role} />
-		<div class="w-full px-24 mt-12 flex items-start justify-center">
+		<div class="w-full px-24 mt-24 flex items-start justify-center">
 			<slot />
 		</div>
 	</div>
