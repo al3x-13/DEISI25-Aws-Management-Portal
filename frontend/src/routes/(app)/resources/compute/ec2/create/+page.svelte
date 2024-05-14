@@ -6,6 +6,7 @@
 	import type { ActionData } from './$types';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
+	import OsImagesRadio from '$lib/components/ec2/OSImagesRadio.svelte';
 
 	export let form: ActionData;
 
@@ -27,6 +28,9 @@
 	let instanceTypeValue = instanceTypes.at(0);
 	let volumeTypeValue = volumeTypes.at(0);
 	let submitDisabled = true;
+
+	// TODO: temp
+	let selectedOs: string;
 
 	$: {
 		if (nameValue.length === 0) {
@@ -82,14 +86,8 @@
 			</h1>
 
 			<h2 class="text-lg font text-text-light dark:text-text-dark mb-3">Base OS</h2>
-			<div
-				class="size-32 p-4 flex flex-col items-center justify-between rounded-custom border-[3px] border-color-primary-light dark:border-color-primary-dark bg-bg2-light dark:bg-bg2-dark cursor-pointer"
-			>
-				<p class="text-sm text-center font-bold text-text-light dark:text-text-dark select-none">
-					Amazon Linux
-				</p>
-				<img src="/os-images/amazon-linux.png" alt="amazon-linux-logo" />
-			</div>
+
+			<OsImagesRadio {selectedOs} />
 
 			<h2 class="text-lg font text-text-light dark:text-text-dark mb-3 mt-6">
 				Amazon Machine Image (AMI)
