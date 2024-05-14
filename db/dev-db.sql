@@ -104,7 +104,8 @@ CREATE TABLE public.resources (
     aws_resource_id character varying(300) NOT NULL,
     tags text[],
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    created_by integer NOT NULL
+    created_by integer NOT NULL,
+	active boolean NOT NULL DEFAULT FALSE
 );
 
 
