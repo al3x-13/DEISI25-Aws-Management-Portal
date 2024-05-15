@@ -1,5 +1,7 @@
 <script lang="ts">
-	export let selectedOs: string = '';
+	import { createEventDispatcher } from 'svelte';
+
+	let selectedOs: string = '';
 
 	let options = [
 		{ id: 'amazon', name: 'Amazon Linux', img: 'amazon-linux.png' },
@@ -10,9 +12,13 @@
 		{ id: 'suse', name: 'SUSE Linux', img: 'suse.png' },
 		{ id: 'debian', name: 'Debian Linux', img: 'debian.png' }
 	];
+
+	const dispatch = createEventDispatcher();
+
+	$: dispatch('change', selectedOs);
 </script>
 
-<div class="max-w-xl overflow-x-auto overflow-y-hidden flex space-x-2 custom-scrollbar pb-1">
+<div class="max-w-md overflow-x-auto overflow-y-hidden flex space-x-2 custom-scrollbar pb-1">
 	{#each options as os}
 		<input
 			type="radio"
@@ -48,7 +54,7 @@
 	}
 
 	.custom-scrollbar::-webkit-scrollbar-track {
-		background: #1e242f;
+		background: rgba(0, 0, 0, 30%);
 		border-radius: 12px;
 	}
 

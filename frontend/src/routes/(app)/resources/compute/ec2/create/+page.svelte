@@ -7,6 +7,7 @@
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 	import OsImagesRadio from '$lib/components/ec2/OSImagesRadio.svelte';
+	import Input from '$lib/components/ui/input/input.svelte';
 
 	export let form: ActionData;
 
@@ -24,13 +25,9 @@
 	];
 
 	let nameValue = '';
-	let amiValue = amis.at(0);
-	let instanceTypeValue = instanceTypes.at(0);
 	let volumeTypeValue = volumeTypes.at(0);
 	let submitDisabled = true;
-
-	// TODO: temp
-	let selectedOs: string;
+	let selectedOs: string | null = null;
 
 	$: {
 		if (nameValue.length === 0) {
@@ -41,143 +38,141 @@
 	}
 </script>
 
-<div class="w-full flex flex-col items-start justify-center space-y-12">
-	<PageTitle title="New EC2 Instance" />
+<div class="w-full flex flex-col items-center">
+	<div class="w-fit flex flex-col items-center justify-center">
+		<PageTitle title="New EC2 Instance" />
 
-	<form
-		method="POST"
-		action="?/createInstance"
-		use:enhance={() => {
-			return async ({ result, update }) => {
-				await applyAction(result);
+		<form
+			method="POST"
+			action="?/createInstance"
+			use:enhance={() => {
+				return async ({ result, update }) => {
+					await applyAction(result);
 
-				if (form) {
-					if (form.success) {
-						console.log('this working');
-						toast.success('EC2 instance created successfully');
-						goto('/resources/compute/ec2');
-						return;
-					} else {
-						toast.error('Failed to create EC2 instance');
+					if (form) {
+						if (form.success) {
+							console.log('this working');
+							toast.success('EC2 instance created successfully');
+							goto('/resources/compute/ec2');
+							return;
+						} else {
+							toast.error('Failed to create EC2 instance');
+						}
 					}
-				}
 
-				await update();
-			};
-		}}
-		class="flex flex-col space-y-12"
-	>
-		<div>
-			<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">
-				Instance Name
-			</h1>
-			<input
-				type="text"
-				bind:value={nameValue}
-				name="name"
-				placeholder="Web Server"
-				class="w-[350px] text-base text-text-light dark:text-text-dark bg-transparent border-2 rounded-custom border-border-light dark:border-border-dark focus:border-color-primary-light dark:focus:border-color-primary-dark outline-none placeholder:text-details-light dark:placeholder:text-details-dark px-2 py-1"
-			/>
-		</div>
+					await update();
+				};
+			}}
+			class="flex flex-col items-center justify-center space-y-12 mt-12"
+		>
+			<div class="flex flex-row space-x-20">
+				<div class="flex flex-col basis-1/2 space-y-12">
+					<div>
+						<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">
+							Instance Name
+						</h1>
+						<Input type="text" placeholder="Web Server" bind:value={nameValue} class="w-[350px]" />
+					</div>
 
-		<div>
-			<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">
-				OS Image (Amazon Machine Images)
-			</h1>
+					<div>
+						<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">
+							OS Image (Amazon Machine Images)
+						</h1>
 
-			<h2 class="text-lg font text-text-light dark:text-text-dark mb-3">Base OS</h2>
+						<h2 class="text-lg font text-text-light dark:text-text-dark mb-3">Base OS</h2>
 
-			<OsImagesRadio {selectedOs} />
+						<OsImagesRadio on:change={(e) => (selectedOs = e.detail)} />
 
-			<h2 class="text-lg font text-text-light dark:text-text-dark mb-3 mt-6">
-				Amazon Machine Image (AMI)
-			</h2>
+						<h2 class="text-lg font text-text-light dark:text-text-dark mb-3 mt-6">
+							Amazon Machine Image (AMI)
+						</h2>
 
-			<Select.Root portal={null} name="ami" bind:selected={amiValue}>
-				<Select.Trigger
-					class="w-[450px] text-base text-text-light dark:text-text-dark border-2 rounded-custom border-border-light dark:border-border-dark focus:border-color-primary-light dark:focus:border-color-primary-dark"
-				>
-					<Select.Value placeholder="Select AMI" />
-				</Select.Trigger>
-				<Select.Content>
-					<Select.Group>
-						{#each amis as ami}
-							<Select.Item value={ami.value} label={ami.label} class="">{ami.label}</Select.Item>
-						{/each}
-					</Select.Group>
-				</Select.Content>
-				<Select.Input name="ami" />
-			</Select.Root>
-		</div>
-
-		<div>
-			<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">
-				Instance Type
-			</h1>
-			<Select.Root portal={null} name="instanceType" bind:selected={instanceTypeValue}>
-				<Select.Trigger
-					class="w-[250px] text-base text-text-light dark:text-text-dark border-2 rounded-custom border-border-light dark:border-border-dark focus:border-color-primary-light dark:focus:border-color-primary-dark"
-				>
-					<Select.Value placeholder="Select an instance type" />
-				</Select.Trigger>
-				<Select.Content>
-					<Select.Group>
-						{#each instanceTypes as instance}
-							<Select.Item value={instance.value} label={instance.label} class=""
-								>{instance.label}</Select.Item
-							>
-						{/each}
-					</Select.Group>
-				</Select.Content>
-				<Select.Input name="instanceType" />
-			</Select.Root>
-		</div>
-
-		<div>
-			<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">
-				Storage
-			</h1>
-
-			<div class="flex items-center justify-center space-x-10">
-				<div class="flex items-center justiyf-center">
-					<Select.Root portal={null} name="storageType" bind:selected={volumeTypeValue}>
-						<Select.Trigger
-							id="storage"
-							class="w-[300px] text-base text-text-light dark:text-text-dark border-2 rounded-custom border-border-light dark:border-border-dark focus:border-color-primary-light dark:focus:border-color-primary-dark"
-						>
-							<Select.Value placeholder="Select volume" />
-						</Select.Trigger>
-						<Select.Content>
-							<Select.Group>
-								{#each volumeTypes as volume}
-									<Select.Item value={volume.value} label={volume.label} class=""
-										>{volume.label}</Select.Item
-									>
-								{/each}
-							</Select.Group>
-						</Select.Content>
-						<Select.Input name="storageType" />
-					</Select.Root>
-					<label for="storage" class="ml-3 text-text-light dark:text-text-dark">
-						Root Volume Type
-					</label>
+						<Select.Root portal={null} name="ami" disabled={selectedOs === null}>
+							<Select.Trigger class="w-[450px]">
+								<Select.Value placeholder="Select AMI" />
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Group>
+									{#each amis as ami}
+										<Select.Item value={ami.value} label={ami.label} class=""
+											>{ami.label}</Select.Item
+										>
+									{/each}
+								</Select.Group>
+							</Select.Content>
+							<Select.Input name="ami" />
+						</Select.Root>
+						{#if selectedOs === null}
+							<p class="text-text2-light dark:text-text2-dark mt-1">Select Base OS first</p>
+						{/if}
+					</div>
 				</div>
 
-				<div class="flex items-center justiyf-center">
-					<input
-						id="storage"
-						name="storageSize"
-						type="number"
-						min="1"
-						max="10000"
-						value="8"
-						class="bg-transparent text-text-light dark:text-text-dark border-2 rounded-custom border-border-light dark:border-border-dark focus:border-color-primary-light dark:focus:border-color-primary-dark py-1 px-2"
-					/>
-					<label for="storage" class="ml-3 text-text-light dark:text-text-dark">GiB</label>
+				<div class="flex flex-col basis-1/2 space-y-12">
+					<div>
+						<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">
+							Instance Type
+						</h1>
+						<Select.Root portal={null} name="instanceType">
+							<Select.Trigger class="w-[250px]">
+								<Select.Value placeholder="Select an instance type" />
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Group>
+									{#each instanceTypes as instance}
+										<Select.Item value={instance.value} label={instance.label}
+											>{instance.label}</Select.Item
+										>
+									{/each}
+								</Select.Group>
+							</Select.Content>
+							<Select.Input name="instanceType" />
+						</Select.Root>
+					</div>
+
+					<div class="flex flex-col">
+						<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">
+							Storage
+						</h1>
+
+						<div class="flex space-x-2">
+							<div class="flex flex-col">
+								<label for="storage" class="mb-2 text-text-light dark:text-text-dark">
+									Root Volume Type
+								</label>
+								<Select.Root portal={null} name="storageType" bind:selected={volumeTypeValue}>
+									<Select.Trigger id="storage" class="w-[270px]">
+										<Select.Value placeholder="Select volume" />
+									</Select.Trigger>
+									<Select.Content>
+										<Select.Group>
+											{#each volumeTypes as volume}
+												<Select.Item value={volume.value} label={volume.label} class=""
+													>{volume.label}</Select.Item
+												>
+											{/each}
+										</Select.Group>
+									</Select.Content>
+									<Select.Input name="storageType" />
+								</Select.Root>
+							</div>
+
+							<div class="flex flex-col">
+								<label for="storage" class="mb-2 text-text-light dark:text-text-dark">GiB</label>
+								<Input
+									id="storage"
+									name="storageSize"
+									type="number"
+									min="1"
+									max="10000"
+									value="8"
+								/>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
-		</div>
-
-		<Button type="submit" disabled={submitDisabled} class="self-start">Create</Button>
-	</form>
+			<Button type="submit" disabled={submitDisabled} class="self-start">Create</Button>
+		</form>
+	</div>
 </div>

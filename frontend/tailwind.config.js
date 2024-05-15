@@ -34,6 +34,8 @@ const config = {
 				'hover-light': '#C4C4C4',
 				'text-dark': '#596B89',
 				'text-light': '#7F7F7F',
+				'text2-dark': '#8790c5',
+				'text2-light': '#8790c5',
 				'details-dark': '#323D4F',
 				'details-light': '#A8A8A8',
 
