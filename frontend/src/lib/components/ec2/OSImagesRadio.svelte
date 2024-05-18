@@ -1,16 +1,17 @@
 <script lang="ts">
+	import { Ec2ImageBaseOs } from '@deisi25/types';
 	import { createEventDispatcher } from 'svelte';
 
-	let selectedOs: string = '';
+	let selectedOs: Ec2ImageBaseOs;
 
 	let options = [
-		{ id: 'amazon', name: 'Amazon Linux', img: 'amazon-linux.png' },
-		{ id: 'macos', name: 'macOS', img: 'macos.png' },
-		{ id: 'ubuntu', name: 'Ubuntu', img: 'ubuntu.png' },
-		{ id: 'windows', name: 'Windows', img: 'windows.png' },
-		{ id: 'redhat', name: 'Red Hat', img: 'redhat.png' },
-		{ id: 'suse', name: 'SUSE Linux', img: 'suse.png' },
-		{ id: 'debian', name: 'Debian Linux', img: 'debian.png' }
+		{ id: Ec2ImageBaseOs.AmazonLinux, name: 'Amazon Linux', img: 'amazon-linux.png' },
+		{ id: Ec2ImageBaseOs.MacOS, name: 'macOS', img: 'macos.png' },
+		{ id: Ec2ImageBaseOs.Ubuntu, name: 'Ubuntu', img: 'ubuntu.png' },
+		{ id: Ec2ImageBaseOs.Windows, name: 'Windows', img: 'windows.png' },
+		{ id: Ec2ImageBaseOs.RedHat, name: 'Red Hat', img: 'redhat.png' },
+		{ id: Ec2ImageBaseOs.SuseLinux, name: 'SUSE Linux', img: 'suse.png' },
+		{ id: Ec2ImageBaseOs.Debian, name: 'Debian Linux', img: 'debian.png' }
 	];
 
 	const dispatch = createEventDispatcher();
@@ -25,18 +26,18 @@
 			id={os.id}
 			name={os.name}
 			bind:group={selectedOs}
-			value={os.name}
+			value={os.id}
 			class="hidden"
 		/>
 		<label for={os.id}>
 			<div
 				class="size-32 p-4 flex flex-col items-center justify-between rounded-custom border-[2px] bg-bg2-light dark:bg-bg2-dark cursor-pointer {selectedOs ===
-				os.name
+				os.id
 					? 'border-color-primary-light dark:border-color-primary-dark'
 					: 'border-border-light dark:border-border-dark'}"
 			>
 				<p
-					class="text-sm text-center font-bold select-none {selectedOs !== os.name
+					class="text-sm text-center font-bold select-none {selectedOs !== os.id
 						? 'text-text-light dark:text-text-dark'
 						: 'text-color-primary-light dark:text-color-primary-dark'}"
 				>
