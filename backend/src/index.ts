@@ -30,8 +30,15 @@ if (!jwtSecretExists() || !dbUrlExists()) {
 }
 
 // config
+const allowedCorsOrigins = ['127.0.0.1', 'http://localhost:5173'];
 app.use(cors({
-	origin: '127.0.0.1',
+	origin: function (origin, callback) {
+		if (!origin) return callback(null, true);
+		if (allowedCorsOrigins.includes(origin)) {
+			return callback(null, true);
+		}
+		return callback(new Error('Not allowed by CORS'));
+	},
 	credentials: true,
 }));
 app.use(cookieParser());
