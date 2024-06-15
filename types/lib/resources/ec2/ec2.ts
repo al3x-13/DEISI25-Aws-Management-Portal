@@ -51,3 +51,41 @@ export const Ec2InstanceSchema = z.object({
 });
 
 export type Ec2Instance = z.infer<typeof Ec2InstanceSchema>;
+
+export enum Ec2ImageBaseOs {
+	AmazonLinux = "amazon-linux",
+	MacOS = "macos",
+	Ubuntu = "ubuntu",
+	Windows = "windows",
+	RedHat = "redhat",
+	SuseLinux = "suse-linux",
+	Debian = "debian"
+};
+const Ec2ImageBaseOsEnum = z.nativeEnum(Ec2ImageBaseOs);
+export type Ec2ImageBaseOsEnum = z.infer<typeof Ec2ImageBaseOsEnum>;
+
+export const Ec2ImageSchema = z.object({
+	ImageId: z.string().openapi({
+		example: 'ami-5731123e'
+	}),
+	Architecture: z.string().openapi({
+		example: 'x86_64'
+	}),
+	ImageType: z.string().openapi({
+		example: 'machine'
+	}),
+	KernelId: z.string().openapi({
+		example: 'aki-88aa75e1'
+	}),
+	Name: z.string().openapi({
+		example: 'Amazon Linux Image'
+	}),
+	OwnerId: z.string().openapi({
+		example: '123456789012'
+	}),
+	State: z.string().openapi({
+		example: 'available'
+	}),
+});
+
+export type Ec2Image = z.infer<typeof Ec2ImageSchema>;
