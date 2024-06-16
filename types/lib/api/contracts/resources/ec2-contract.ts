@@ -1,7 +1,7 @@
 import { initContract } from "@ts-rest/core";
 import { ApiErrorSchema } from "../../types/error";
 import { z } from "zod";
-import { Ec2InstanceSchema, Ec2State } from "../../../resources/types";
+import { Ec2ImageBaseOs, Ec2ImageSchema, Ec2InstanceSchema, Ec2State } from "../../../resources/types";
 import { extendZodWithOpenApi } from "@anatine/zod-openapi";
 
 extendZodWithOpenApi(z);
@@ -117,7 +117,7 @@ const ec2Contract = c.router(
 			}),
 			responses: {
 				200: z.object({
-					instances: z.array(z.object({}))
+					instances: z.array(Ec2InstanceSchema)
 				}),
 				400: ApiErrorSchema,
 				500: ApiErrorSchema
@@ -125,6 +125,46 @@ const ec2Contract = c.router(
 			summary: 'List EC2 instances',
 			description: 'Lists existing EC2 instances.'
 		},
+		listImages: {
+			method: 'GET',
+			path: '/listImages',
+			query: z.object({
+				baseOs: z.string().openapi({
+					example: Ec2ImageBaseOs.Ubuntu
+				}),
+				nextPaginationToken: z.string().optional().openapi({
+					example: 'todo'
+				}),
+			}),
+			responses: {
+				200: z.object({
+					images: z.array(Ec2ImageSchema),
+					nextPaginationToken: z.string().optional(),
+				}),
+				400: ApiErrorSchema,
+				500: ApiErrorSchema
+			},
+			summary: 'List EC2 images',
+			description: 'Lists available EC2 instance images.'
+		},
+		listQuickstartImages: {
+			method: 'GET',
+			path: '/listQuickstartImages',
+			query: z.object({
+				baseOs: z.string().openapi({
+					example: Ec2ImageBaseOs.Ubuntu
+				}),
+			}),
+			responses: {
+				200: z.object({
+					amis: z.array(Ec2ImageSchema)
+				}),
+				400: ApiErrorSchema,
+				500: ApiErrorSchema
+			},
+			summary: 'List EC2 quickstart images',
+			description: 'Lists EC2 instance images that are displayed in AWS quickstart.'
+		}
 	},
 	{
 		pathPrefix: '/resources/compute/ec2'
