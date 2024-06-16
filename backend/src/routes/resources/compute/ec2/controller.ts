@@ -1,4 +1,4 @@
-import { EC2Client, InstanceStateChange, RebootInstancesCommand, RebootInstancesCommandInput, StartInstancesCommand, StartInstancesCommandInput, StopInstancesCommand, StopInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from "@aws-sdk/client-ec2";
+import { DescribeImagesCommand, DescribeImagesCommandInput, DescribeImagesCommandOutput, EC2Client, Image, InstanceStateChange, RebootInstancesCommand, RebootInstancesCommandInput, StartInstancesCommand, StartInstancesCommandInput, StopInstancesCommand, StopInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from "@aws-sdk/client-ec2";
 import { ApiError } from "../../../../utils/errors";
 import { fromEnv } from "@aws-sdk/credential-providers";
 import { logger } from "../../../../logging/logging";
@@ -6,11 +6,11 @@ import dotenv from "dotenv";
 import { createEC2Instance, getEC2Instances } from "../../../../lib/resources/ec2/ec2-manager";
 import { CreateInstanceInput } from "../../../../lib/resources/ec2/ec2-types";
 import { initServer } from "@ts-rest/express";
-import { Ec2State, ResourceActionTypes, ResourceType, ec2Contract } from "@deisi25/types";
+import { Ec2Image, Ec2ImageBaseOs, Ec2State, ResourceActionTypes, ResourceType, ec2Contract } from "@deisi25/types";
 import { EbsVolumeType } from "../../../../lib/resources/ebs/ebs-types";
 import { createResourceMetadata, deactivateResource } from "../../../../lib/resources/metadata";
 import { getUserIdFromRequestCookies } from "../../../../auth/auth-utils";
-import { awsEc2InstanceStateToLocalState, localResourceIdsToAwsResourceIds, mapAwsEc2InstancesToLocal } from "../../../../lib/resources/ec2/ec2-utils";
+import { awsEc2InstanceStateToLocalState, fetchAwsQuickstartImages, localResourceIdsToAwsResourceIds, mapAwsEc2InstancesToLocal } from "../../../../lib/resources/ec2/ec2-utils";
 import { createResourceActionFromARI, createResourceActionFromLRI } from "../../../../lib/actions/resource-actions";
 
 
@@ -382,6 +382,117 @@ const ec2Controller = server.router(ec2Contract, {
 			status: 200,
 			body: {
 				instances: instancesData
+			}
+		}
+	},
+	listImages: async ({ req }) => {
+		const baseOs = req.query.baseOs;
+
+		if (!Object.values(Ec2ImageBaseOs).includes(baseOs as Ec2ImageBaseOs)) {
+			const error = new ApiError(
+				'Failed to get EC2 images',
+				"Invalid 'baseOs' query parameter"
+			);
+			return {
+				status: 400,
+				body: error.toJSON()
+			}
+		}
+
+
+		const suseLinuxInputValues = [ "*suse*", "*SLES*" ];
+
+		let nextPaginationToken: string | undefined;
+		const describeImagesInput: DescribeImagesCommandInput = {
+			Filters: [
+				{
+					Name: 'name',
+					Values: baseOs === Ec2ImageBaseOs.SuseLinux 
+						? suseLinuxInputValues 
+						: [ `*${baseOs}*` ]
+				},
+				{
+					Name: 'state',
+					Values: [
+						'available'
+					]
+				},
+			],
+			IncludeDeprecated: false,
+			MaxResults: 1000,
+			NextToken: nextPaginationToken,
+		};
+
+		const describeImagesCommand = new DescribeImagesCommand(describeImagesInput);
+		let outputImages: Image[] = [];
+
+		try {
+			while (outputImages.length < 30) {
+				const response: DescribeImagesCommandOutput = await client.send(describeImagesCommand);
+
+				if (response.NextToken === null) break;
+
+				if (response.Images) {
+					for (let i = 0; i < response.Images.length; i++) {
+						if (outputImages.length >= 30) break;
+						outputImages.push(response.Images[i]);
+					}
+				}
+				nextPaginationToken = response.NextToken;
+			}
+		} catch (err) {
+			logger.error(`Failed to get EC2 images: ${err}`);
+			const error = new ApiError('EC2 Images fetch failed', 'Could not fetch images');
+			return {
+				status: 500,
+				body: error.toJSON()
+			}
+		}
+
+		const images: Ec2Image[] = [];
+		outputImages.forEach((img) => {
+			images.push({
+				State: img.State!,
+				Name: img.Name!,
+				Description: img.Description!,
+				ImageId: img.ImageId!,
+				Architecture: img.Architecture!,
+				ImageType: img.ImageType!,
+				KernelId: img.KernelId!,
+				VirtualizationType: img.VirtualizationType!,
+				OwnerId: img.OwnerId!,
+			});
+		});
+
+		return {
+			status: 200,
+			body: {
+				images: images,
+				nextPaginationToken: nextPaginationToken,
+			}
+		}
+	},
+	listQuickstartImages: async ({ req }) => {
+		const baseOs = req.query.baseOs;
+
+		if (!Object.values(Ec2ImageBaseOs).includes(baseOs as Ec2ImageBaseOs)) {
+			const error = new ApiError(
+				'Failed to get EC2 images',
+				"Invalid 'baseOs' query parameter"
+			);
+			return {
+				status: 400,
+				body: error.toJSON()
+			}
+		}
+
+
+		const amis: Ec2Image[] =  await fetchAwsQuickstartImages(baseOs as Ec2ImageBaseOs);
+		
+		return {
+			status: 200,
+			body: {
+				amis: amis
 			}
 		}
 	}
