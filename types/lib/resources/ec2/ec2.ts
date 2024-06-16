@@ -77,8 +77,17 @@ export const Ec2ImageSchema = z.object({
 	KernelId: z.string().openapi({
 		example: 'aki-88aa75e1'
 	}),
+	VirtualizationType: z.string().openapi({
+		example: 'hvm'
+	}),
 	Name: z.string().openapi({
 		example: 'Amazon Linux Image'
+	}),
+	Description: z.string().openapi({
+		example: 'Debian 12 (HVM), EBS General Purpose (SSD) Volume Type. Community developed free GNU/Linux distribution.'
+	}),
+	FreeTier: z.boolean().optional().openapi({
+		example: false
 	}),
 	OwnerId: z.string().openapi({
 		example: '123456789012'
