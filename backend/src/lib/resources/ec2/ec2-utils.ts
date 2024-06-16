@@ -1,6 +1,6 @@
 import { Instance, InstanceBlockDeviceMapping, InstanceState, InstanceStateName } from "@aws-sdk/client-ec2";
 import db from "../../../db/db";
-import { BlockStorageDevice, BlockStorageDeviceSchema, Ec2Instance, Ec2InstanceSchema, Ec2State } from "@deisi25/types";
+import { BlockStorageDevice, BlockStorageDeviceSchema, Ec2Image, Ec2ImageBaseOs, Ec2Instance, Ec2InstanceSchema, Ec2State } from "@deisi25/types";
 
 /**
  * Map AWS EC2 instances data to local EC2 instances data.
@@ -130,4 +130,81 @@ export async function localResourceIdsToAwsResourceIds(localResourceIds: number[
 	);
 
 	return query.rows.map((row) => row.aws_resource_id as string);
+}
+
+export async function fetchAwsQuickstartImages(baseOs: Ec2ImageBaseOs): Promise<Ec2Image[]> {
+	const quickstartAmisResource = 'https://prod.eu-west-1.qs.console.ec2.aws.dev/get_quickstart_list_en.json';
+
+	const data = (await fetch(quickstartAmisResource).then((res) => res.json())).amiList;
+
+	let platform = 'amazon';
+	switch (baseOs) {
+		case Ec2ImageBaseOs.Ubuntu:
+			platform = 'ubuntu';
+			break;
+		case Ec2ImageBaseOs.Debian:
+			platform = 'debian';
+			break;
+		case Ec2ImageBaseOs.Windows:
+			platform = 'windows';
+			break;
+		case Ec2ImageBaseOs.RedHat:
+			platform = 'rhel';
+			break;
+		case Ec2ImageBaseOs.SuseLinux:
+			platform = 'suse';
+			break;
+		case Ec2ImageBaseOs.MacOS:
+			platform = 'mac';
+			break;
+		default:
+			platform = 'amazon'
+	}
+
+	const amis: Ec2Image[] = [];
+
+	function handleAmiWithMultipleArchitectures(ami: any) {
+		if (ami.architectures.length > 0) {
+			for (var arch of ami.architectures) {
+				amis.push({
+					Name: ami.title,
+					Description: ami.description,
+					ImageId: arch.imageId,
+					Architecture: arch.architectureType,
+					ImageType: 'N/A',
+					KernelId: 'N/A',
+					VirtualizationType: ami.virtualizationType,
+					FreeTier: ami.freeTier,
+					OwnerId: 'N/A',
+					State: 'N/A',
+				});
+			}
+		}
+	}
+
+	for (let i = 0; i < data.length; i++) {
+		const ami = data[i];
+		if (ami.platform.includes(platform)) {
+			console.log(ami);
+
+			if (ami.architectures.length > 0) {
+				handleAmiWithMultipleArchitectures(ami);
+				console.log('MULTIPLE HANDLE');
+			} else {
+				amis.push({
+					Name: ami.title,
+					Description: ami.description,
+					ImageId: ami.imageId64,
+					Architecture: ami.architectures ? ami.architectures[0] : 'N/A',
+					ImageType: 'N/A',
+					KernelId: 'N/A',
+					VirtualizationType: ami.virtualizationType,
+					FreeTier: ami.freeTier,
+					OwnerId: 'N/A',
+					State: 'N/A',
+				});
+			}
+		}
+	}
+	return amis;
 }
