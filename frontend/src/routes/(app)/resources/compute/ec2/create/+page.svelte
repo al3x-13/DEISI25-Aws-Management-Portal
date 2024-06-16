@@ -8,13 +8,12 @@
 	import { goto } from '$app/navigation';
 	import OsImagesRadio from '$lib/components/ec2/OSImagesRadio.svelte';
 	import Input from '$lib/components/ui/input/input.svelte';
+	import { Ec2ImageBaseOs, type Ec2Image } from '@deisi25/types';
+	import { getEc2QuickstartImagesClientside } from '../../../../../../global/ec2-instances';
+	import AmiModal from '$lib/components/ec2/AmiModal.svelte';
 
 	export let form: ActionData;
 
-	const amis = [
-		{ value: 'ami-0500f74cc2b89fb6b', label: 'Amazon Linux 2023 AMI (ami-0500f74cc2b89fb6b)' },
-		{ value: 'ami-017f2d474b502e78a', label: 'Amazon Linux 2 AMI (HVM) (ami-017f2d474b502e78a)' }
-	];
 	const instanceTypes = [{ value: 't2.micro', label: 't2.micro' }];
 	const volumeTypes = [
 		{ value: 'gp3', label: 'General Purpose SSD (gp3)' },
@@ -27,7 +26,9 @@
 	let nameValue = '';
 	let volumeTypeValue = volumeTypes.at(0);
 	let submitDisabled = true;
-	let selectedOs: string | null = null;
+	let selectedOs: Ec2ImageBaseOs | null = null;
+	let selectedAmi: Ec2Image | null = null;
+	let amis: Ec2Image[] = [];
 
 	$: {
 		if (nameValue.length === 0) {
@@ -36,6 +37,20 @@
 			submitDisabled = false;
 		}
 	}
+
+	async function fetchAmis() {
+		if (selectedOs != null) {
+			const images = await getEc2QuickstartImagesClientside(selectedOs);
+			if (images == null) {
+				toast.error('Failed to get EC2 images');
+				return;
+			}
+			amis = images;
+		}
+	}
+
+	// Modals state
+	let showAmiModal = false;
 </script>
 
 <div class="w-full flex flex-col items-center">
@@ -81,27 +96,39 @@
 
 						<h2 class="text-lg font text-text-light dark:text-text-dark mb-3">Base OS</h2>
 
-						<OsImagesRadio on:change={(e) => (selectedOs = e.detail)} />
+						<OsImagesRadio
+							on:change={(e) => {
+								selectedOs = e.detail;
+								amis = [];
+								fetchAmis();
+							}}
+						/>
 
 						<h2 class="text-lg font text-text-light dark:text-text-dark mb-3 mt-6">
 							Amazon Machine Image (AMI)
 						</h2>
 
-						<Select.Root portal={null} name="ami" disabled={selectedOs === null}>
-							<Select.Trigger class="w-[450px]">
-								<Select.Value placeholder="Select AMI" />
-							</Select.Trigger>
-							<Select.Content>
-								<Select.Group>
-									{#each amis as ami}
-										<Select.Item value={ami.value} label={ami.label} class=""
-											>{ami.label}</Select.Item
-										>
-									{/each}
-								</Select.Group>
-							</Select.Content>
-							<Select.Input name="ami" />
-						</Select.Root>
+						<AmiModal bind:isOpen={showAmiModal} {amis} bind:selected={selectedAmi} />
+						<div
+							class="flex items-center justify-between text-text-light dark:text-text-dark border-2 rounded-custom border-border-light dark:border-border-dark p-1 pl-3"
+						>
+							{#if selectedAmi === null}
+								<p>AMI not selected</p>
+							{:else}
+								<p>{selectedAmi.ImageId}</p>
+							{/if}
+
+							<Button
+								on:click={async () => {
+									showAmiModal = true;
+									fetchAmis();
+								}}
+								disabled={selectedOs === null}
+							>
+								Select AMI
+							</Button>
+						</div>
+
 						{#if selectedOs === null}
 							<p class="text-text2-light dark:text-text2-dark mt-1">Select Base OS first</p>
 						{/if}
