@@ -163,14 +163,17 @@ export async function fetchAwsQuickstartImages(baseOs: Ec2ImageBaseOs): Promise<
 
 	const amis: Ec2Image[] = [];
 
-	function handleAmiWithMultipleArchitectures(ami: any) {
-		if (ami.architectures.length > 0) {
-			for (var arch of ami.architectures) {
+	for (let i = 0; i < data.length; i++) {
+		const ami = data[i];
+		if (ami.platform.includes(platform)) {
+			console.log(ami);
+
+			if (ami.imageId64 !== undefined) {
 				amis.push({
 					Name: ami.title,
 					Description: ami.description,
-					ImageId: arch.imageId,
-					Architecture: arch.architectureType,
+					ImageId: ami.imageId64,
+					Architecture: 'x86_64',
 					ImageType: 'N/A',
 					KernelId: 'N/A',
 					VirtualizationType: ami.virtualizationType,
@@ -179,23 +182,13 @@ export async function fetchAwsQuickstartImages(baseOs: Ec2ImageBaseOs): Promise<
 					State: 'N/A',
 				});
 			}
-		}
-	}
 
-	for (let i = 0; i < data.length; i++) {
-		const ami = data[i];
-		if (ami.platform.includes(platform)) {
-			console.log(ami);
-
-			if (ami.architectures.length > 0) {
-				handleAmiWithMultipleArchitectures(ami);
-				console.log('MULTIPLE HANDLE');
-			} else {
+			if (ami.imageIdArm64 !== undefined) {
 				amis.push({
 					Name: ami.title,
 					Description: ami.description,
-					ImageId: ami.imageId64,
-					Architecture: ami.architectures ? ami.architectures[0] : 'N/A',
+					ImageId: ami.imageIdArm64,
+					Architecture: 'arm64',
 					ImageType: 'N/A',
 					KernelId: 'N/A',
 					VirtualizationType: ami.virtualizationType,
@@ -203,6 +196,23 @@ export async function fetchAwsQuickstartImages(baseOs: Ec2ImageBaseOs): Promise<
 					OwnerId: 'N/A',
 					State: 'N/A',
 				});
+			}
+
+			if (ami.architectures.length > 0) {
+				for (var arch of ami.architectures) {
+					amis.push({
+						Name: ami.title,
+						Description: ami.description,
+						ImageId: arch.imageId,
+						Architecture: arch.architectureType,
+						ImageType: 'N/A',
+						KernelId: 'N/A',
+						VirtualizationType: ami.virtualizationType,
+						FreeTier: ami.freeTier,
+						OwnerId: 'N/A',
+						State: 'N/A',
+					});
+				}
 			}
 		}
 	}
