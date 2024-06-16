@@ -1,4 +1,4 @@
-import { ec2Contract, Ec2State, type Ec2Instance } from "@deisi25/types";
+import { ec2Contract, Ec2ImageBaseOs, Ec2State, type Ec2Image, type Ec2Instance } from "@deisi25/types";
 import { initClient } from "@ts-rest/core";
 
 const client = initClient(ec2Contract, {
@@ -6,7 +6,7 @@ const client = initClient(ec2Contract, {
 	baseHeaders: {
 		'Content-Type': 'application/json'
 	},
-	credentials: 'include'
+	credentials: 'include',
 });
 
 
@@ -71,4 +71,32 @@ export async function terminateInstance(instanceId: number): Promise<boolean> {
 	});
 
 	return status === 201;
+}
+
+export async function listEc2ImagesClientSide(baseOs: Ec2ImageBaseOs): Promise<Ec2Image[] | null> {
+	const { status, body } = await client.listImages({
+		query: {
+			baseOs: baseOs.toString()
+		}
+	});
+
+	if (status !== 200) {
+		return null;
+	}
+
+	return body.images;
+}
+
+export async function getEc2QuickstartImagesClientside(baseOs: Ec2ImageBaseOs): Promise<Ec2Image[]> {
+	const { status, body } = await client.listQuickstartImages({
+		query: {
+			baseOs: baseOs.toString()
+		}
+	});
+
+	if (status !== 200) {
+		return [];
+	}
+
+	return body.amis;
 }
