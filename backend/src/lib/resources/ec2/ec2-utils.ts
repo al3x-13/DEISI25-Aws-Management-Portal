@@ -1,4 +1,4 @@
-import { Instance, InstanceBlockDeviceMapping, InstanceState, InstanceStateName } from "@aws-sdk/client-ec2";
+import { Instance, InstanceBlockDeviceMapping, InstanceState, InstanceStateName, InstanceTypeInfo } from "@aws-sdk/client-ec2";
 import db from "../../../db/db";
 import { BlockStorageDevice, BlockStorageDeviceSchema, Ec2Image, Ec2ImageBaseOs, Ec2Instance, Ec2InstanceSchema, Ec2State } from "@deisi25/types";
 
@@ -217,4 +217,27 @@ export async function fetchAwsQuickstartImages(baseOs: Ec2ImageBaseOs): Promise<
 		}
 	}
 	return amis;
+}
+
+export function parseDisksInfoFromEc2InstanceType(instanceType: InstanceTypeInfo): {
+	Count: number,
+	SizeInGB: number,
+	DiskType: string
+}[] {
+	const disks = instanceType.InstanceStorageInfo?.Disks;
+	const disksInfo: { Count: number, SizeInGB: number, DiskType: string }[] = [];
+
+	if (disks === undefined) return [];
+
+	for (let i = 0; i < disks?.length; i++) {
+		const disk = disksInfo[i];
+
+		disksInfo.push({
+			Count: disk?.Count ?? -1,
+			SizeInGB: disk?.SizeInGB ?? -1,
+			DiskType: disk?.DiskType ?? 'N/A'
+		});
+	}
+
+	return disksInfo;
 }

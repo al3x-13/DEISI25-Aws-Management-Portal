@@ -1,7 +1,7 @@
 import { initContract } from "@ts-rest/core";
 import { ApiErrorSchema } from "../../types/error";
 import { z } from "zod";
-import { Ec2ImageBaseOs, Ec2ImageSchema, Ec2InstanceSchema, Ec2State } from "../../../resources/types";
+import { Ec2ImageBaseOs, Ec2ImageSchema, Ec2InstanceSchema, Ec2InstanceTypeSchema, Ec2State } from "../../../resources/types";
 import { extendZodWithOpenApi } from "@anatine/zod-openapi";
 
 extendZodWithOpenApi(z);
@@ -164,6 +164,19 @@ const ec2Contract = c.router(
 			},
 			summary: 'List EC2 quickstart images',
 			description: 'Lists EC2 instance images that are displayed in AWS quickstart.'
+		},
+		listInstanceTypes: {
+			method: 'GET',
+			path: '/listInstanceTypes',
+			responses: {
+				200: z.object({
+					instanceTypes: z.array(Ec2InstanceTypeSchema)
+				}),
+				400: ApiErrorSchema,
+				500: ApiErrorSchema
+			},
+			summary: 'List EC2 instance types',
+			description: 'Lists available EC2 instace types.'
 		}
 	},
 	{

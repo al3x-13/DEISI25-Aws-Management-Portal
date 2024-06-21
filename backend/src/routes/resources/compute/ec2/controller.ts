@@ -1,4 +1,4 @@
-import { DescribeImagesCommand, DescribeImagesCommandInput, DescribeImagesCommandOutput, EC2Client, Image, InstanceStateChange, RebootInstancesCommand, RebootInstancesCommandInput, StartInstancesCommand, StartInstancesCommandInput, StopInstancesCommand, StopInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from "@aws-sdk/client-ec2";
+import { DescribeImagesCommand, DescribeImagesCommandInput, DescribeImagesCommandOutput, DescribeInstanceTypesCommand, DescribeInstanceTypesCommandOutput, EC2Client, Image, InstanceStateChange, RebootInstancesCommand, RebootInstancesCommandInput, StartInstancesCommand, StartInstancesCommandInput, StopInstancesCommand, StopInstancesCommandInput, TerminateInstancesCommand, TerminateInstancesCommandInput } from "@aws-sdk/client-ec2";
 import { ApiError } from "../../../../utils/errors";
 import { fromEnv } from "@aws-sdk/credential-providers";
 import { logger } from "../../../../logging/logging";
@@ -6,11 +6,11 @@ import dotenv from "dotenv";
 import { createEC2Instance, getEC2Instances } from "../../../../lib/resources/ec2/ec2-manager";
 import { CreateInstanceInput } from "../../../../lib/resources/ec2/ec2-types";
 import { initServer } from "@ts-rest/express";
-import { Ec2Image, Ec2ImageBaseOs, Ec2State, ResourceActionTypes, ResourceType, ec2Contract } from "@deisi25/types";
+import { Ec2Image, Ec2ImageBaseOs, Ec2InstanceType, Ec2State, ResourceActionTypes, ResourceType, ec2Contract } from "@deisi25/types";
 import { EbsVolumeType } from "../../../../lib/resources/ebs/ebs-types";
 import { createResourceMetadata, deactivateResource } from "../../../../lib/resources/metadata";
 import { getUserIdFromRequestCookies } from "../../../../auth/auth-utils";
-import { awsEc2InstanceStateToLocalState, fetchAwsQuickstartImages, localResourceIdsToAwsResourceIds, mapAwsEc2InstancesToLocal } from "../../../../lib/resources/ec2/ec2-utils";
+import { awsEc2InstanceStateToLocalState, fetchAwsQuickstartImages, localResourceIdsToAwsResourceIds, mapAwsEc2InstancesToLocal, parseDisksInfoFromEc2InstanceType } from "../../../../lib/resources/ec2/ec2-utils";
 import { createResourceActionFromARI, createResourceActionFromLRI } from "../../../../lib/actions/resource-actions";
 
 
@@ -493,6 +493,73 @@ const ec2Controller = server.router(ec2Contract, {
 			status: 200,
 			body: {
 				amis: amis
+			}
+		}
+	},
+	listInstanceTypes: async ({ req }) => {
+		const command: DescribeInstanceTypesCommand = new DescribeInstanceTypesCommand({});
+		let response: DescribeInstanceTypesCommandOutput;
+
+		try {
+			response = await client.send(command);
+		} catch (err) {
+			logger.error(`Failed to get EC2 instance types: ${err}`);
+			const error = new ApiError('EC2 instance types fetch failed', 'Could not fetch instance types');
+			return {
+				status: 500,
+				body: error.toJSON()
+			}
+		}
+
+		const instanceTypes: Ec2InstanceType[] = [];
+
+		if (response.InstanceTypes === undefined) {
+			return {
+				status: 200,
+				body: {
+					instanceTypes: []
+				}
+			}
+		}
+
+		for (let i = 0; i < response.InstanceTypes?.length; i++) {
+			const iType = response.InstanceTypes[i];
+			const disksInfo = parseDisksInfoFromEc2InstanceType(iType);
+
+			instanceTypes.push({
+				BareMetal: iType.BareMetal ?? false,
+				CurrentGeneration: iType.CurrentGeneration ?? false,
+				DedicatedHostsSupported: iType.DedicatedHostsSupported ?? false,
+				FreeTier: iType.FreeTierEligible ?? false,
+				HibernationSupported: iType.HibernationSupported ?? false,
+				InstanceStorageSupported: iType.InstanceStorageSupported ?? false,
+				InstanceStorageInfo: {
+					Disks: disksInfo,
+					EncryptionSupport: iType.InstanceStorageInfo?.EncryptionSupport ?? 'N/A',
+					NvmeSupport: iType.InstanceStorageInfo?.NvmeSupport ?? 'N/A',
+					TotalSizeInGB: iType.InstanceStorageInfo?.TotalSizeInGB ?? -1
+				},
+				InstanceType: iType.InstanceType ?? 'N/A',
+				MemorySizeInMiB: iType.MemoryInfo?.SizeInMiB ?? -1,
+				ProcessorInfo: {
+					SupportedArchitectures: iType.ProcessorInfo?.SupportedArchitectures ?? [],
+					SustainedClockSpeedInGhz: iType.ProcessorInfo?.SustainedClockSpeedInGhz ?? -1
+				},
+				SupportedBootModes: iType.SupportedBootModes ?? [],
+				SupportedRootDeviceTypes: iType.SupportedRootDeviceTypes ?? [],
+				SupportedVirtualizationTypes: iType.SupportedVirtualizationTypes ?? [],
+				VCpuInfo: {
+					DefaultCores: iType.VCpuInfo?.DefaultCores ?? -1,
+					DefaultThreadsPerCore: iType.VCpuInfo?.DefaultThreadsPerCore ?? -1,
+					DefaultVCpus: iType.VCpuInfo?.DefaultVCpus ?? -1
+				}
+			});
+		}
+
+		return {
+			status: 200,
+			body: {
+				instanceTypes: instanceTypes
 			}
 		}
 	}

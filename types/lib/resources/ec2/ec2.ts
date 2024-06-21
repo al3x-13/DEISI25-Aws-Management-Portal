@@ -96,5 +96,50 @@ export const Ec2ImageSchema = z.object({
 		example: 'available'
 	}),
 });
-
 export type Ec2Image = z.infer<typeof Ec2ImageSchema>;
+
+export const Ec2InstanceTypeSchema = z.object({
+	BareMetal: z.boolean().openapi({
+		example: false
+	}),
+	CurrentGeneration: z.boolean().openapi({
+		example: true
+	}),
+	DedicatedHostsSupported: z.boolean().openapi({
+		example: true
+	}),
+	FreeTier: z.boolean().openapi({
+		example: true
+	}),
+	HibernationSupported: z.boolean().openapi({
+		example: true
+	}),
+	InstanceStorageSupported: z.boolean().openapi({
+		example: true
+	}),
+	InstanceStorageInfo: z.object({
+		Disks: z.array(z.object({
+			Count: z.number(),
+			SizeInGB: z.number(),
+			DiskType: z.string()
+		})),
+		EncryptionSupport: z.string(),
+		NvmeSupport: z.string(),
+		TotalSizeInGB: z.number()
+	}),
+	InstanceType: z.string(),
+	MemorySizeInMiB: z.number(),
+	ProcessorInfo: z.object({
+		SupportedArchitectures: z.array(z.string()),
+		SustainedClockSpeedInGhz: z.number()
+	}),
+	SupportedBootModes: z.array(z.string()),
+	SupportedRootDeviceTypes: z.array(z.string()),
+	SupportedVirtualizationTypes: z.array(z.string()),
+	VCpuInfo: z.object({
+		DefaultCores: z.number(),
+		DefaultThreadsPerCore: z.number(),
+		DefaultVCpus: z.number()
+	})
+});
+export type Ec2InstanceType = z.infer<typeof Ec2InstanceTypeSchema>;
