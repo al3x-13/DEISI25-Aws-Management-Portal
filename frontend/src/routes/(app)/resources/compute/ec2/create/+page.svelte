@@ -16,6 +16,7 @@
 	import AmiModal from '$lib/components/ec2/AmiModal.svelte';
 	import InstanceTypeModal from '$lib/components/ec2/InstanceTypeModal.svelte';
 	import { onMount } from 'svelte';
+	import { Check, CheckCircle, CircleCheckIcon, CircleX, X } from 'lucide-svelte';
 
 	export let form: ActionData;
 
@@ -40,11 +41,13 @@
 	let instanceTypes: Ec2InstanceType[] | null = null;
 
 	$: {
-		if (nameValue.length === 0) {
-			submitDisabled = true;
-		} else {
-			submitDisabled = false;
-		}
+		submitDisabled =
+			nameValue.length === 0 || selectedAmi === null || selectedInstanceType === null;
+	}
+
+	function handleNameInput() {
+		nameValue = nameValue.replace(' ', '-');
+		nameValue = nameValue.replace(/[^a-zA-Z0-9-.]/g, '');
 	}
 
 	async function fetchAmis() {
@@ -105,7 +108,13 @@
 						<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">
 							Instance Name
 						</h1>
-						<Input type="text" placeholder="Web Server" bind:value={nameValue} class="w-[350px]" />
+						<Input
+							type="text"
+							placeholder="Web Server"
+							bind:value={nameValue}
+							on:input={handleNameInput}
+							class="w-[350px]"
+						/>
 					</div>
 
 					<div>
@@ -243,7 +252,47 @@
 					</div>
 				</div>
 			</div>
-			<Button type="submit" disabled={submitDisabled} class="self-start">Create</Button>
+
+			<div class="w-full">
+				<div class="mb-4">
+					{#if nameValue.length === 0}
+						<div class="flex items-center space-x-1">
+							<CircleX size="16" class="text-text2-light dark:text-text2-dark" />
+							<p class="text-text2-light dark:text-text2-dark">Set a valid instance name</p>
+						</div>
+					{:else}
+						<div class="flex items-center space-x-1">
+							<CircleCheckIcon size="16" class="text-green-600 dark:text-green-600" />
+							<p class="text-green-600 dark:text-green-600">Set a valid instance name</p>
+						</div>
+					{/if}
+
+					{#if selectedAmi === null}
+						<div class="flex items-center space-x-1">
+							<CircleX size="16" class="text-text2-light dark:text-text2-dark" />
+							<p class="text-text2-light dark:text-text2-dark">Select an AMI</p>
+						</div>
+					{:else}
+						<div class="flex items-center space-x-1">
+							<CircleCheckIcon size="16" class="text-green-600 dark:text-green-600" />
+							<p class="text-green-600 dark:text-green-600">Select an AMI</p>
+						</div>
+					{/if}
+
+					{#if selectedInstanceType === null}
+						<div class="flex items-center space-x-1">
+							<CircleX size="16" class="text-text2-light dark:text-text2-dark" />
+							<p class="text-text2-light dark:text-text2-dark">Select an instance type</p>
+						</div>
+					{:else}
+						<div class="flex items-center space-x-1">
+							<CircleCheckIcon size="16" class="text-green-600 dark:text-green-600" />
+							<p class="text-green-600 dark:text-green-600">Select an instance type</p>
+						</div>
+					{/if}
+				</div>
+				<Button type="submit" disabled={submitDisabled} class="self-start">Create</Button>
+			</div>
 		</form>
 	</div>
 </div>
