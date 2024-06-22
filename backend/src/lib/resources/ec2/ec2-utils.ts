@@ -1,6 +1,6 @@
-import { Instance, InstanceBlockDeviceMapping, InstanceState, InstanceStateName, InstanceTypeInfo } from "@aws-sdk/client-ec2";
+import { DescribeInstanceTypesCommandOutput, Instance, InstanceBlockDeviceMapping, InstanceState, InstanceStateName, InstanceTypeInfo } from "@aws-sdk/client-ec2";
 import db from "../../../db/db";
-import { BlockStorageDevice, BlockStorageDeviceSchema, Ec2Image, Ec2ImageBaseOs, Ec2Instance, Ec2InstanceSchema, Ec2State } from "@deisi25/types";
+import { BlockStorageDevice, BlockStorageDeviceSchema, Ec2Image, Ec2ImageBaseOs, Ec2Instance, Ec2InstanceSchema, Ec2InstanceType, Ec2State } from "@deisi25/types";
 
 /**
  * Map AWS EC2 instances data to local EC2 instances data.
@@ -240,4 +240,48 @@ export function parseDisksInfoFromEc2InstanceType(instanceType: InstanceTypeInfo
 	}
 
 	return disksInfo;
+}
+
+export function parseEc2InstanceTypes(data: DescribeInstanceTypesCommandOutput): Ec2InstanceType[] {
+	if (data.InstanceTypes === undefined) {
+		return [];
+	}
+
+	const instanceTypes: Ec2InstanceType[] = [];
+
+	for (let i = 0; i < data.InstanceTypes?.length; i++) {
+		const iType = data.InstanceTypes[i];
+		const disksInfo = parseDisksInfoFromEc2InstanceType(iType);
+
+		instanceTypes.push({
+			BareMetal: iType.BareMetal ?? false,
+			CurrentGeneration: iType.CurrentGeneration ?? false,
+			DedicatedHostsSupported: iType.DedicatedHostsSupported ?? false,
+			FreeTier: iType.FreeTierEligible ?? false,
+			HibernationSupported: iType.HibernationSupported ?? false,
+			InstanceStorageSupported: iType.InstanceStorageSupported ?? false,
+			InstanceStorageInfo: {
+				Disks: disksInfo,
+				EncryptionSupport: iType.InstanceStorageInfo?.EncryptionSupport ?? 'N/A',
+				NvmeSupport: iType.InstanceStorageInfo?.NvmeSupport ?? 'N/A',
+				TotalSizeInGB: iType.InstanceStorageInfo?.TotalSizeInGB ?? -1
+			},
+			InstanceType: iType.InstanceType ?? 'N/A',
+			MemorySizeInMiB: iType.MemoryInfo?.SizeInMiB ?? -1,
+			ProcessorInfo: {
+				SupportedArchitectures: iType.ProcessorInfo?.SupportedArchitectures ?? [],
+				SustainedClockSpeedInGhz: iType.ProcessorInfo?.SustainedClockSpeedInGhz ?? -1
+			},
+			SupportedBootModes: iType.SupportedBootModes ?? [],
+			SupportedRootDeviceTypes: iType.SupportedRootDeviceTypes ?? [],
+			SupportedVirtualizationTypes: iType.SupportedVirtualizationTypes ?? [],
+			VCpuInfo: {
+				DefaultCores: iType.VCpuInfo?.DefaultCores ?? -1,
+				DefaultThreadsPerCore: iType.VCpuInfo?.DefaultThreadsPerCore ?? -1,
+				DefaultVCpus: iType.VCpuInfo?.DefaultVCpus ?? -1
+			}
+		});
+	}
+
+	return instanceTypes;
 }

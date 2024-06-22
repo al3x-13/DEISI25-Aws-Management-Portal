@@ -10,7 +10,7 @@ import { Ec2Image, Ec2ImageBaseOs, Ec2InstanceType, Ec2State, ResourceActionType
 import { EbsVolumeType } from "../../../../lib/resources/ebs/ebs-types";
 import { createResourceMetadata, deactivateResource } from "../../../../lib/resources/metadata";
 import { getUserIdFromRequestCookies } from "../../../../auth/auth-utils";
-import { awsEc2InstanceStateToLocalState, fetchAwsQuickstartImages, localResourceIdsToAwsResourceIds, mapAwsEc2InstancesToLocal, parseDisksInfoFromEc2InstanceType } from "../../../../lib/resources/ec2/ec2-utils";
+import { awsEc2InstanceStateToLocalState, fetchAwsQuickstartImages, localResourceIdsToAwsResourceIds, mapAwsEc2InstancesToLocal, parseDisksInfoFromEc2InstanceType, parseEc2InstanceTypes } from "../../../../lib/resources/ec2/ec2-utils";
 import { createResourceActionFromARI, createResourceActionFromLRI } from "../../../../lib/actions/resource-actions";
 
 
@@ -497,11 +497,19 @@ const ec2Controller = server.router(ec2Contract, {
 		}
 	},
 	listInstanceTypes: async ({ req }) => {
-		const command: DescribeInstanceTypesCommand = new DescribeInstanceTypesCommand({});
 		let response: DescribeInstanceTypesCommandOutput;
+		let nextPagToken: string | undefined;
+		let instanceTypes: Ec2InstanceType[] = [];
 
 		try {
-			response = await client.send(command);
+			while (true) {
+				const command: DescribeInstanceTypesCommand = new DescribeInstanceTypesCommand({ MaxResults: 100, NextToken: nextPagToken });
+				response = await client.send(command);
+				instanceTypes = [...instanceTypes, ...parseEc2InstanceTypes(response)];
+
+				if (response.NextToken == null) break;
+				nextPagToken = response.NextToken;
+			}
 		} catch (err) {
 			logger.error(`Failed to get EC2 instance types: ${err}`);
 			const error = new ApiError('EC2 instance types fetch failed', 'Could not fetch instance types');
@@ -511,50 +519,8 @@ const ec2Controller = server.router(ec2Contract, {
 			}
 		}
 
-		const instanceTypes: Ec2InstanceType[] = [];
-
-		if (response.InstanceTypes === undefined) {
-			return {
-				status: 200,
-				body: {
-					instanceTypes: []
-				}
-			}
-		}
-
-		for (let i = 0; i < response.InstanceTypes?.length; i++) {
-			const iType = response.InstanceTypes[i];
-			const disksInfo = parseDisksInfoFromEc2InstanceType(iType);
-
-			instanceTypes.push({
-				BareMetal: iType.BareMetal ?? false,
-				CurrentGeneration: iType.CurrentGeneration ?? false,
-				DedicatedHostsSupported: iType.DedicatedHostsSupported ?? false,
-				FreeTier: iType.FreeTierEligible ?? false,
-				HibernationSupported: iType.HibernationSupported ?? false,
-				InstanceStorageSupported: iType.InstanceStorageSupported ?? false,
-				InstanceStorageInfo: {
-					Disks: disksInfo,
-					EncryptionSupport: iType.InstanceStorageInfo?.EncryptionSupport ?? 'N/A',
-					NvmeSupport: iType.InstanceStorageInfo?.NvmeSupport ?? 'N/A',
-					TotalSizeInGB: iType.InstanceStorageInfo?.TotalSizeInGB ?? -1
-				},
-				InstanceType: iType.InstanceType ?? 'N/A',
-				MemorySizeInMiB: iType.MemoryInfo?.SizeInMiB ?? -1,
-				ProcessorInfo: {
-					SupportedArchitectures: iType.ProcessorInfo?.SupportedArchitectures ?? [],
-					SustainedClockSpeedInGhz: iType.ProcessorInfo?.SustainedClockSpeedInGhz ?? -1
-				},
-				SupportedBootModes: iType.SupportedBootModes ?? [],
-				SupportedRootDeviceTypes: iType.SupportedRootDeviceTypes ?? [],
-				SupportedVirtualizationTypes: iType.SupportedVirtualizationTypes ?? [],
-				VCpuInfo: {
-					DefaultCores: iType.VCpuInfo?.DefaultCores ?? -1,
-					DefaultThreadsPerCore: iType.VCpuInfo?.DefaultThreadsPerCore ?? -1,
-					DefaultVCpus: iType.VCpuInfo?.DefaultVCpus ?? -1
-				}
-			});
-		}
+		// sort by 'Free tier' first
+		instanceTypes.sort((a, b) => Number(b.FreeTier) - Number(a.FreeTier));
 
 		return {
 			status: 200,
