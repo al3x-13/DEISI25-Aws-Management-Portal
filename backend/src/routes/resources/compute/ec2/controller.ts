@@ -348,6 +348,17 @@ const ec2Controller = server.router(ec2Contract, {
 			}
 		}
 	},
+	validateInstanceName: async ({ req }) => {
+		const instanceName = req.body.instanceName;
+		// TODO
+
+		return {
+			status: 200,
+			body: {
+				valid: false
+			}
+		}
+	},
 	listInstaces: async ({ req }) => {
 		const maxResultsParam = Number(req.query.maxResults);
 		const validMaxResults = Number.isInteger(maxResultsParam) && maxResultsParam >= 1 && maxResultsParam < 100;

@@ -211,3 +211,18 @@ export async function updateResourceName(resourceId: number | string, name: stri
 
 	return operationSucceded;
 }
+
+/**
+ * Check whether there is an existing EC2 instance with the given name.
+ * @param instanceName Instance Name
+ * @returns Whether an instance with the name exists
+ */
+export async function ec2InstanceNameExists(instanceName: string): Promise<boolean> {
+	const query = await db.query(
+		'SELECT name FROM resources WHERE type = 1 AND name = $1',
+		[ instanceName ]
+	)
+
+	console.log('OHH YEAHHHH: ' + query.rowCount);
+	return query.rowCount! > 0;
+}

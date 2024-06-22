@@ -109,6 +109,27 @@ const ec2Contract = c.router(
 			summary: 'Reboot EC2 instance',
 			description: 'Reboots an existing EC2 instance by providing its Local Resource ID (LRI).'
 		},
+		validateInstanceName: {
+			method: 'POST',
+			path: '/validateInstanceName',
+			body: z.object({
+				instanceName: z.string().openapi({
+					example: 'very-c00l-name'
+				})
+			}),
+			responses: {
+				200: z.object({
+					valid: z.boolean().openapi({
+						example: true
+					})
+				}),
+				400: ApiErrorSchema,
+				404: ApiErrorSchema,
+				500: ApiErrorSchema
+			},
+			summary: 'Validate EC2 instance name',
+			description: 'Checks if the given instance name is valid, i.e. if the name has a valid format and whether it is unique.'
+		},
 		listInstaces: {
 			method: 'GET',
 			path: '/listInstances',
