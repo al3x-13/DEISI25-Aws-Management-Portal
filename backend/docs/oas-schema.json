@@ -201,6 +201,7 @@
     },
     "/resources/compute/ec2/create": {
       "post": {
+        "description": "Creates a new AWS EC2 instance by providing some specifications.Returns the new instance details if the request succeds.",
         "summary": "Create EC2 instance",
         "tags": [
           "ec2"
@@ -251,7 +252,92 @@
                   "properties": {
                     "instance": {
                       "type": "object",
-                      "properties": {}
+                      "properties": {
+                        "LocalInstanceId": {
+                          "type": "number",
+                          "example": 4123
+                        },
+                        "AwsInstanceId": {
+                          "type": "string",
+                          "example": "i-00e671f3a983c4131"
+                        },
+                        "InstanceName": {
+                          "type": "string",
+                          "example": "Web Server"
+                        },
+                        "AMI": {
+                          "type": "string",
+                          "example": "ami-0c55b159cbfafe1f0"
+                        },
+                        "State": {
+                          "type": "string",
+                          "enum": [
+                            "pending",
+                            "running",
+                            "stopping",
+                            "stopped",
+                            "shutting-down",
+                            "terminated",
+                            "unknown"
+                          ],
+                          "example": "running"
+                        },
+                        "BlockStorageDevices": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "Name": {
+                                "type": "string"
+                              },
+                              "EbsVolumeId": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "Name",
+                              "EbsVolumeId"
+                            ]
+                          },
+                          "example": [
+                            {
+                              "Name": "Storage1",
+                              "EbsVolumeId": "vol-1234567890abcdef0"
+                            },
+                            {
+                              "Name": "Storage1",
+                              "EbsVolumeId": "vol-u4398201748fnaeou0"
+                            }
+                          ]
+                        },
+                        "LaunchTime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2024-06-22T21:52:32.519Z"
+                        },
+                        "Tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "example": [
+                            "webapp",
+                            "important"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "LocalInstanceId",
+                        "AwsInstanceId",
+                        "InstanceName",
+                        "AMI",
+                        "State",
+                        "BlockStorageDevices",
+                        "LaunchTime",
+                        "Tags"
+                      ],
+                      "title": "EC2 Instance",
+                      "description": "Represents a local EC2 instance."
                     }
                   },
                   "required": [
@@ -301,7 +387,8 @@
     },
     "/resources/compute/ec2/terminate": {
       "post": {
-        "summary": "Terminate EC2 instance",
+        "description": "Terminates AWS EC2 instances by providing their Local Resource IDs (LRI).",
+        "summary": "Terminate EC2 instances",
         "tags": [
           "ec2"
         ],
@@ -317,7 +404,7 @@
                   "instanceIds": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "type": "number"
                     }
                   }
                 },
@@ -359,6 +446,16 @@
               }
             }
           },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Server error",
             "content": {
@@ -379,6 +476,7 @@
     },
     "/resources/compute/ec2/start": {
       "post": {
+        "description": "Starts an existing EC2 instance by providing its Local Resource ID (LRI).",
         "summary": "Start EC2 instance",
         "tags": [
           "ec2"
@@ -393,7 +491,8 @@
                 "type": "object",
                 "properties": {
                   "instanceId": {
-                    "type": "string"
+                    "type": "number",
+                    "example": 4123
                   }
                 },
                 "required": [
@@ -412,7 +511,17 @@
                   "type": "object",
                   "properties": {
                     "instanceState": {
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "running",
+                        "stopping",
+                        "stopped",
+                        "shutting-down",
+                        "terminated",
+                        "unknown"
+                      ],
+                      "example": "pending"
                     }
                   },
                   "required": [
@@ -434,6 +543,16 @@
           },
           "401": {
             "description": "Authentication error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -462,6 +581,7 @@
     },
     "/resources/compute/ec2/stop": {
       "post": {
+        "description": "Stops an existing EC2 instance by providing its Local Resource ID (LRI).",
         "summary": "Stop EC2 instance",
         "tags": [
           "ec2"
@@ -476,7 +596,8 @@
                 "type": "object",
                 "properties": {
                   "instanceId": {
-                    "type": "string"
+                    "type": "number",
+                    "example": 4123
                   }
                 },
                 "required": [
@@ -495,7 +616,17 @@
                   "type": "object",
                   "properties": {
                     "instanceState": {
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "running",
+                        "stopping",
+                        "stopped",
+                        "shutting-down",
+                        "terminated",
+                        "unknown"
+                      ],
+                      "example": "stopping"
                     }
                   },
                   "required": [
@@ -517,6 +648,16 @@
           },
           "401": {
             "description": "Authentication error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -545,6 +686,7 @@
     },
     "/resources/compute/ec2/reboot": {
       "post": {
+        "description": "Reboots an existing EC2 instance by providing its Local Resource ID (LRI).",
         "summary": "Reboot EC2 instance",
         "tags": [
           "ec2"
@@ -559,7 +701,8 @@
                 "type": "object",
                 "properties": {
                   "instanceId": {
-                    "type": "string"
+                    "type": "number",
+                    "example": 4123
                   }
                 },
                 "required": [
@@ -578,7 +721,17 @@
                   "type": "object",
                   "properties": {
                     "instanceState": {
-                      "type": "string"
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "running",
+                        "stopping",
+                        "stopped",
+                        "shutting-down",
+                        "terminated",
+                        "unknown"
+                      ],
+                      "example": "pending"
                     }
                   },
                   "required": [
@@ -608,6 +761,112 @@
               }
             }
           },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/resources/compute/ec2/validateInstanceName": {
+      "post": {
+        "description": "Checks if the given instance name is valid, i.e. if the name has a valid format and whether it is unique.",
+        "summary": "Validate EC2 instance name",
+        "tags": [
+          "ec2"
+        ],
+        "parameters": [],
+        "operationId": "validateInstanceName",
+        "requestBody": {
+          "description": "Body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "instanceName": {
+                    "type": "string",
+                    "example": "very-c00l-name"
+                  }
+                },
+                "required": [
+                  "instanceName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  },
+                  "required": [
+                    "valid"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Server error",
             "content": {
@@ -628,6 +887,7 @@
     },
     "/resources/compute/ec2/listInstances": {
       "get": {
+        "description": "Lists existing EC2 instances.",
         "summary": "List EC2 instances",
         "tags": [
           "ec2"
@@ -658,12 +918,598 @@
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "properties": {}
+                        "properties": {
+                          "LocalInstanceId": {
+                            "type": "number",
+                            "example": 4123
+                          },
+                          "AwsInstanceId": {
+                            "type": "string",
+                            "example": "i-00e671f3a983c4131"
+                          },
+                          "InstanceName": {
+                            "type": "string",
+                            "example": "Web Server"
+                          },
+                          "AMI": {
+                            "type": "string",
+                            "example": "ami-0c55b159cbfafe1f0"
+                          },
+                          "State": {
+                            "type": "string",
+                            "enum": [
+                              "pending",
+                              "running",
+                              "stopping",
+                              "stopped",
+                              "shutting-down",
+                              "terminated",
+                              "unknown"
+                            ],
+                            "example": "running"
+                          },
+                          "BlockStorageDevices": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "Name": {
+                                  "type": "string"
+                                },
+                                "EbsVolumeId": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "Name",
+                                "EbsVolumeId"
+                              ]
+                            },
+                            "example": [
+                              {
+                                "Name": "Storage1",
+                                "EbsVolumeId": "vol-1234567890abcdef0"
+                              },
+                              {
+                                "Name": "Storage1",
+                                "EbsVolumeId": "vol-u4398201748fnaeou0"
+                              }
+                            ]
+                          },
+                          "LaunchTime": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2024-06-22T21:52:32.519Z"
+                          },
+                          "Tags": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "example": [
+                              "webapp",
+                              "important"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "LocalInstanceId",
+                          "AwsInstanceId",
+                          "InstanceName",
+                          "AMI",
+                          "State",
+                          "BlockStorageDevices",
+                          "LaunchTime",
+                          "Tags"
+                        ],
+                        "title": "EC2 Instance",
+                        "description": "Represents a local EC2 instance."
                       }
                     }
                   },
                   "required": [
                     "instances"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/resources/compute/ec2/listImages": {
+      "get": {
+        "description": "Lists available EC2 instance images.",
+        "summary": "List EC2 images",
+        "tags": [
+          "ec2"
+        ],
+        "parameters": [
+          {
+            "name": "baseOs",
+            "in": "query",
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "ubuntu"
+                }
+              }
+            }
+          },
+          {
+            "name": "nextPaginationToken",
+            "in": "query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "todo"
+                }
+              }
+            }
+          }
+        ],
+        "operationId": "listImages",
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "images": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "ImageId": {
+                            "type": "string",
+                            "example": "ami-5731123e"
+                          },
+                          "Architecture": {
+                            "type": "string",
+                            "example": "x86_64"
+                          },
+                          "ImageType": {
+                            "type": "string",
+                            "example": "machine"
+                          },
+                          "KernelId": {
+                            "type": "string",
+                            "example": "aki-88aa75e1"
+                          },
+                          "VirtualizationType": {
+                            "type": "string",
+                            "example": "hvm"
+                          },
+                          "Name": {
+                            "type": "string",
+                            "example": "Amazon Linux Image"
+                          },
+                          "Description": {
+                            "type": "string",
+                            "example": "Debian 12 (HVM), EBS General Purpose (SSD) Volume Type. Community developed free GNU/Linux distribution."
+                          },
+                          "FreeTier": {
+                            "type": "boolean",
+                            "example": false
+                          },
+                          "OwnerId": {
+                            "type": "string",
+                            "example": "123456789012"
+                          },
+                          "State": {
+                            "type": "string",
+                            "example": "available"
+                          }
+                        },
+                        "required": [
+                          "ImageId",
+                          "Architecture",
+                          "ImageType",
+                          "KernelId",
+                          "VirtualizationType",
+                          "Name",
+                          "Description",
+                          "OwnerId",
+                          "State"
+                        ]
+                      }
+                    },
+                    "nextPaginationToken": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "images"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/resources/compute/ec2/listQuickstartImages": {
+      "get": {
+        "description": "Lists EC2 instance images that are displayed in AWS quickstart.",
+        "summary": "List EC2 quickstart images",
+        "tags": [
+          "ec2"
+        ],
+        "parameters": [
+          {
+            "name": "baseOs",
+            "in": "query",
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "ubuntu"
+                }
+              }
+            }
+          }
+        ],
+        "operationId": "listQuickstartImages",
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "amis": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "ImageId": {
+                            "type": "string",
+                            "example": "ami-5731123e"
+                          },
+                          "Architecture": {
+                            "type": "string",
+                            "example": "x86_64"
+                          },
+                          "ImageType": {
+                            "type": "string",
+                            "example": "machine"
+                          },
+                          "KernelId": {
+                            "type": "string",
+                            "example": "aki-88aa75e1"
+                          },
+                          "VirtualizationType": {
+                            "type": "string",
+                            "example": "hvm"
+                          },
+                          "Name": {
+                            "type": "string",
+                            "example": "Amazon Linux Image"
+                          },
+                          "Description": {
+                            "type": "string",
+                            "example": "Debian 12 (HVM), EBS General Purpose (SSD) Volume Type. Community developed free GNU/Linux distribution."
+                          },
+                          "FreeTier": {
+                            "type": "boolean",
+                            "example": false
+                          },
+                          "OwnerId": {
+                            "type": "string",
+                            "example": "123456789012"
+                          },
+                          "State": {
+                            "type": "string",
+                            "example": "available"
+                          }
+                        },
+                        "required": [
+                          "ImageId",
+                          "Architecture",
+                          "ImageType",
+                          "KernelId",
+                          "VirtualizationType",
+                          "Name",
+                          "Description",
+                          "OwnerId",
+                          "State"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "amis"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    },
+    "/resources/compute/ec2/listInstanceTypes": {
+      "get": {
+        "description": "Lists available EC2 instace types.",
+        "summary": "List EC2 instance types",
+        "tags": [
+          "ec2"
+        ],
+        "parameters": [],
+        "operationId": "listInstanceTypes",
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "instanceTypes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "BareMetal": {
+                            "type": "boolean",
+                            "example": false
+                          },
+                          "CurrentGeneration": {
+                            "type": "boolean",
+                            "example": true
+                          },
+                          "DedicatedHostsSupported": {
+                            "type": "boolean",
+                            "example": true
+                          },
+                          "FreeTier": {
+                            "type": "boolean",
+                            "example": true
+                          },
+                          "HibernationSupported": {
+                            "type": "boolean",
+                            "example": true
+                          },
+                          "InstanceStorageSupported": {
+                            "type": "boolean",
+                            "example": true
+                          },
+                          "InstanceStorageInfo": {
+                            "type": "object",
+                            "properties": {
+                              "Disks": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "Count": {
+                                      "type": "number"
+                                    },
+                                    "SizeInGB": {
+                                      "type": "number"
+                                    },
+                                    "DiskType": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "Count",
+                                    "SizeInGB",
+                                    "DiskType"
+                                  ]
+                                }
+                              },
+                              "EncryptionSupport": {
+                                "type": "string"
+                              },
+                              "NvmeSupport": {
+                                "type": "string"
+                              },
+                              "TotalSizeInGB": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "Disks",
+                              "EncryptionSupport",
+                              "NvmeSupport",
+                              "TotalSizeInGB"
+                            ]
+                          },
+                          "InstanceType": {
+                            "type": "string"
+                          },
+                          "MemorySizeInMiB": {
+                            "type": "number"
+                          },
+                          "ProcessorInfo": {
+                            "type": "object",
+                            "properties": {
+                              "SupportedArchitectures": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "SustainedClockSpeedInGhz": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "SupportedArchitectures",
+                              "SustainedClockSpeedInGhz"
+                            ]
+                          },
+                          "SupportedBootModes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "SupportedRootDeviceTypes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "SupportedVirtualizationTypes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "VCpuInfo": {
+                            "type": "object",
+                            "properties": {
+                              "DefaultCores": {
+                                "type": "number"
+                              },
+                              "DefaultThreadsPerCore": {
+                                "type": "number"
+                              },
+                              "DefaultVCpus": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "DefaultCores",
+                              "DefaultThreadsPerCore",
+                              "DefaultVCpus"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "BareMetal",
+                          "CurrentGeneration",
+                          "DedicatedHostsSupported",
+                          "FreeTier",
+                          "HibernationSupported",
+                          "InstanceStorageSupported",
+                          "InstanceStorageInfo",
+                          "InstanceType",
+                          "MemorySizeInMiB",
+                          "ProcessorInfo",
+                          "SupportedBootModes",
+                          "SupportedRootDeviceTypes",
+                          "SupportedVirtualizationTypes",
+                          "VCpuInfo"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "instanceTypes"
                   ]
                 }
               }
