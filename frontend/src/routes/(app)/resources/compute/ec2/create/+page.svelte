@@ -11,12 +11,13 @@
 	import { Ec2ImageBaseOs, type Ec2Image, type Ec2InstanceType } from '@deisi25/types';
 	import {
 		getEc2QuickstartImagesClientside,
-		getEc2InstanceTypesClientside
+		getEc2InstanceTypesClientside,
+		validateEc2InstanceNameClientside
 	} from '../../../../../../global/ec2-instances';
 	import AmiModal from '$lib/components/ec2/AmiModal.svelte';
 	import InstanceTypeModal from '$lib/components/ec2/InstanceTypeModal.svelte';
-	import { onMount } from 'svelte';
-	import { Check, CheckCircle, CircleCheckIcon, CircleX, X } from 'lucide-svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import { CircleCheckIcon, CircleX } from 'lucide-svelte';
 
 	export let form: ActionData;
 
@@ -30,6 +31,9 @@
 
 	// instance values
 	let nameValue = '';
+	let validInstanceName = false;
+	// eslint-disable-next-line no-undef
+	let nameTimeout: string | number | NodeJS.Timeout | undefined;
 	let volumeTypeValue = volumeTypes.at(0);
 	let submitDisabled = true;
 	let selectedOs: Ec2ImageBaseOs | null = null;
@@ -41,13 +45,21 @@
 	let instanceTypes: Ec2InstanceType[] | null = null;
 
 	$: {
-		submitDisabled =
-			nameValue.length === 0 || selectedAmi === null || selectedInstanceType === null;
+		submitDisabled = !validInstanceName || selectedAmi === null || selectedInstanceType === null;
 	}
 
 	function handleNameInput() {
 		nameValue = nameValue.replace(' ', '-');
 		nameValue = nameValue.replace(/[^a-zA-Z0-9-.]/g, '');
+	}
+
+	function validateInstanceName() {
+		validInstanceName = false;
+
+		clearTimeout(nameTimeout);
+		nameTimeout = setTimeout(() => {
+			validInstanceName = validateEc2InstanceNameClientside(nameValue);
+		}, 300);
 	}
 
 	async function fetchAmis() {
@@ -68,11 +80,17 @@
 		}
 	}
 
-	onMount(async () => fetchInstanceTypes());
-
 	// Modals state
 	let showAmiModal = false;
 	let showInstanceTypeModal = false;
+
+	onMount(async () => fetchInstanceTypes());
+
+	onDestroy(() => {
+		if (nameTimeout) {
+			clearTimeout(nameTimeout);
+		}
+	});
 </script>
 
 <div class="w-full flex flex-col items-center">
@@ -112,9 +130,21 @@
 							type="text"
 							placeholder="Web Server"
 							bind:value={nameValue}
-							on:input={handleNameInput}
+							on:input={() => {
+								handleNameInput();
+								validateInstanceName();
+							}}
 							class="w-[350px]"
 						/>
+						<div class="flex items-center text-sm space-x-1 mt-1">
+							{#if validInstanceName}
+								<CircleCheckIcon size="12" class="text-green-600 dark:text-green-600" />
+								<p class="text-green-600 dark:text-green-600">Set a valid instance name</p>
+							{:else}
+								<CircleX size="12" class="text-text2-light dark:text-text2-dark" />
+								<p class="text-text2-light dark:text-text2-dark">Invalid instance name</p>
+							{/if}
+						</div>
 					</div>
 
 					<div>
@@ -192,23 +222,6 @@
 							</Button>
 						</div>
 					</div>
-					<!-- <div> -->
-					<!-- 	<Select.Root portal={null} name="instanceType"> -->
-					<!-- 		<Select.Trigger class="w-[250px]"> -->
-					<!-- 			<Select.Value placeholder="Select an instance type" /> -->
-					<!-- 		</Select.Trigger> -->
-					<!-- 		<Select.Content> -->
-					<!-- 			<Select.Group> -->
-					<!-- 				{#each instanceTypes as instance} -->
-					<!-- 					<Select.Item value={instance.value} label={instance.label} -->
-					<!-- 						>{instance.label}</Select.Item -->
-					<!-- 					> -->
-					<!-- 				{/each} -->
-					<!-- 			</Select.Group> -->
-					<!-- 		</Select.Content> -->
-					<!-- 		<Select.Input name="instanceType" /> -->
-					<!-- 	</Select.Root> -->
-					<!-- </div> -->
 
 					<div class="flex flex-col">
 						<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">

@@ -110,3 +110,14 @@ export async function getEc2InstanceTypesClientside(): Promise<Ec2InstanceType[]
 
 	return body.instanceTypes;
 }
+
+export async function validateEc2InstanceNameClientside(instanceName: string): Promise<boolean> {
+	const { status, body } = await client.validateInstanceName({
+		body: {
+			instanceName: instanceName
+		}
+	});
+
+	if (status !== 200) return false;
+	return body.valid;
+}

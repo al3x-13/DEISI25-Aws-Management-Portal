@@ -38,6 +38,7 @@
 				<div class="w-full flex justify-between space-x-4">
 					<div>
 						<p class="text-lg font-semibold">{iType.InstanceType}</p>
+						<p>{iType.FreeTier}</p>
 						{#if iType.FreeTier}
 							<p class="text-nowrap text-color-primary-light dark:text-color-primary-dark">
 								Free tier
