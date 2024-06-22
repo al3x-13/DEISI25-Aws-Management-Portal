@@ -8,13 +8,17 @@
 	import { goto } from '$app/navigation';
 	import OsImagesRadio from '$lib/components/ec2/OSImagesRadio.svelte';
 	import Input from '$lib/components/ui/input/input.svelte';
-	import { Ec2ImageBaseOs, type Ec2Image } from '@deisi25/types';
-	import { getEc2QuickstartImagesClientside } from '../../../../../../global/ec2-instances';
+	import { Ec2ImageBaseOs, type Ec2Image, type Ec2InstanceType } from '@deisi25/types';
+	import {
+		getEc2QuickstartImagesClientside,
+		getEc2InstanceTypesClientside
+	} from '../../../../../../global/ec2-instances';
 	import AmiModal from '$lib/components/ec2/AmiModal.svelte';
+	import InstanceTypeModal from '$lib/components/ec2/InstanceTypeModal.svelte';
+	import { onMount } from 'svelte';
 
 	export let form: ActionData;
 
-	const instanceTypes = [{ value: 't2.micro', label: 't2.micro' }];
 	const volumeTypes = [
 		{ value: 'gp3', label: 'General Purpose SSD (gp3)' },
 		{ value: 'gp2', label: 'General Purpose SSD (gp2)' },
@@ -23,12 +27,17 @@
 		{ value: 'standard', label: 'Magnetic (standard)' }
 	];
 
+	// instance values
 	let nameValue = '';
 	let volumeTypeValue = volumeTypes.at(0);
 	let submitDisabled = true;
 	let selectedOs: Ec2ImageBaseOs | null = null;
 	let selectedAmi: Ec2Image | null = null;
+	let selectedInstanceType: Ec2InstanceType | null = null;
+
+	// selection data
 	let amis: Ec2Image[] = [];
+	let instanceTypes: Ec2InstanceType[] | null = null;
 
 	$: {
 		if (nameValue.length === 0) {
@@ -49,8 +58,18 @@
 		}
 	}
 
+	async function fetchInstanceTypes() {
+		instanceTypes = await getEc2InstanceTypesClientside();
+		if (selectedInstanceType === null) {
+			selectedInstanceType = instanceTypes[0];
+		}
+	}
+
+	onMount(async () => fetchInstanceTypes());
+
 	// Modals state
 	let showAmiModal = false;
+	let showInstanceTypeModal = false;
 </script>
 
 <div class="w-full flex flex-col items-center">
@@ -140,22 +159,47 @@
 						<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">
 							Instance Type
 						</h1>
-						<Select.Root portal={null} name="instanceType">
-							<Select.Trigger class="w-[250px]">
-								<Select.Value placeholder="Select an instance type" />
-							</Select.Trigger>
-							<Select.Content>
-								<Select.Group>
-									{#each instanceTypes as instance}
-										<Select.Item value={instance.value} label={instance.label}
-											>{instance.label}</Select.Item
-										>
-									{/each}
-								</Select.Group>
-							</Select.Content>
-							<Select.Input name="instanceType" />
-						</Select.Root>
+
+						<InstanceTypeModal
+							bind:isOpen={showInstanceTypeModal}
+							{instanceTypes}
+							bind:selected={selectedInstanceType}
+						/>
+						<div
+							class="flex items-center justify-between text-text-light dark:text-text-dark border-2 rounded-custom border-border-light dark:border-border-dark p-1 pl-3"
+						>
+							{#if selectedInstanceType === null}
+								<p>Instance not selected</p>
+							{:else}
+								<p>{selectedInstanceType.InstanceType}</p>
+							{/if}
+
+							<Button
+								on:click={async () => {
+									showInstanceTypeModal = true;
+								}}
+							>
+								Select Instance
+							</Button>
+						</div>
 					</div>
+					<!-- <div> -->
+					<!-- 	<Select.Root portal={null} name="instanceType"> -->
+					<!-- 		<Select.Trigger class="w-[250px]"> -->
+					<!-- 			<Select.Value placeholder="Select an instance type" /> -->
+					<!-- 		</Select.Trigger> -->
+					<!-- 		<Select.Content> -->
+					<!-- 			<Select.Group> -->
+					<!-- 				{#each instanceTypes as instance} -->
+					<!-- 					<Select.Item value={instance.value} label={instance.label} -->
+					<!-- 						>{instance.label}</Select.Item -->
+					<!-- 					> -->
+					<!-- 				{/each} -->
+					<!-- 			</Select.Group> -->
+					<!-- 		</Select.Content> -->
+					<!-- 		<Select.Input name="instanceType" /> -->
+					<!-- 	</Select.Root> -->
+					<!-- </div> -->
 
 					<div class="flex flex-col">
 						<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">

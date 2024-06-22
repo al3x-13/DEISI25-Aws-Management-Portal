@@ -1,4 +1,4 @@
-import { ec2Contract, Ec2ImageBaseOs, Ec2State, type Ec2Image, type Ec2Instance } from "@deisi25/types";
+import { ec2Contract, Ec2ImageBaseOs, Ec2State, type Ec2Image, type Ec2Instance, type Ec2InstanceType } from "@deisi25/types";
 import { initClient } from "@ts-rest/core";
 
 const client = initClient(ec2Contract, {
@@ -99,4 +99,14 @@ export async function getEc2QuickstartImagesClientside(baseOs: Ec2ImageBaseOs): 
 	}
 
 	return body.amis;
+}
+
+export async function getEc2InstanceTypesClientside(): Promise<Ec2InstanceType[]> {
+	const { status, body } = await client.listInstanceTypes();
+
+	if (status !== 200) {
+		return [];
+	}
+
+	return body.instanceTypes;
 }
