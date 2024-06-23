@@ -8,7 +8,7 @@ import { CreateInstanceInput } from "../../../../lib/resources/ec2/ec2-types";
 import { initServer } from "@ts-rest/express";
 import { Ec2Image, Ec2ImageBaseOs, Ec2InstanceType, Ec2State, ResourceActionTypes, ResourceType, ec2Contract } from "@deisi25/types";
 import { EbsVolumeType } from "../../../../lib/resources/ebs/ebs-types";
-import { createResourceMetadata, deactivateResource } from "../../../../lib/resources/metadata";
+import { createResourceMetadata, deactivateResource, ec2InstanceNameExists } from "../../../../lib/resources/metadata";
 import { getUserIdFromRequestCookies } from "../../../../auth/auth-utils";
 import { awsEc2InstanceStateToLocalState, fetchAwsQuickstartImages, localResourceIdsToAwsResourceIds, mapAwsEc2InstancesToLocal, parseDisksInfoFromEc2InstanceType, parseEc2InstanceTypes } from "../../../../lib/resources/ec2/ec2-utils";
 import { createResourceActionFromARI, createResourceActionFromLRI } from "../../../../lib/actions/resource-actions";
@@ -350,12 +350,21 @@ const ec2Controller = server.router(ec2Contract, {
 	},
 	validateInstanceName: async ({ req }) => {
 		const instanceName = req.body.instanceName;
-		// TODO
+		let validName = true;
+
+		if (await ec2InstanceNameExists(instanceName)) {
+			validName = false;
+		}
+
+		const validFmt = /[^a-zA-Z0-9-]/;
+		if (validFmt.test(instanceName)) {
+			validName = false;
+		}
 
 		return {
 			status: 200,
 			body: {
-				valid: false
+				valid: validName
 			}
 		}
 	},

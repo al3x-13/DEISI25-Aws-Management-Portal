@@ -58,7 +58,10 @@
 
 		clearTimeout(nameTimeout);
 		nameTimeout = setTimeout(() => {
-			validInstanceName = validateEc2InstanceNameClientside(nameValue);
+			validateEc2InstanceNameClientside(nameValue).then((valid) => {
+				console.log('OKK: ' + valid);
+				validInstanceName = valid;
+			});
 		}, 300);
 	}
 
