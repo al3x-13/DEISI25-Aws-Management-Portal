@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { logger, activateDebugModeLogging } from './logging/logging';
 import db from './db/db';
-import { dbUrlExists, jwtSecretExists } from './utils/env-utils';
+import { validateEnvironmentVariablesOnStartup } from './utils/env-utils';
 import { protectedContract, unprotectedContract, apiDocsContract, ResourceType } from '@deisi25/types';
 import authController from './routes/auth/controller';
 import { validateRequestHeaders } from './utils/endpoint-utils';
@@ -16,7 +16,6 @@ import * as swaggerui from "swagger-ui-express";
 import { generateOpenApi } from "@ts-rest/open-api";
 import { buildDocsFromTSRestOAS } from '../docs/docs';
 import { OpenAPIObject } from 'openapi3-ts/oas31';
-import { getEC2Instances } from './lib/resources/ec2/ec2-manager';
 
 
 dotenv.config();
@@ -25,7 +24,7 @@ const app = express();
 const port = 3000;
 
 // Checks for env variables
-if (!jwtSecretExists() || !dbUrlExists()) {
+if (!validateEnvironmentVariablesOnStartup()) {
 	process.exit(1);
 }
 
