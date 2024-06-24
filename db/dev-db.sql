@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.1
--- Dumped by pg_dump version 16.2 (Ubuntu 16.2-1.pgdg22.04+1)
+-- Dumped from database version 16.2
+-- Dumped by pg_dump version 16.3 (Ubuntu 16.3-1.pgdg22.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -105,7 +105,7 @@ CREATE TABLE public.resources (
     tags text[],
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     created_by integer NOT NULL,
-	active boolean NOT NULL DEFAULT FALSE
+    active boolean DEFAULT false NOT NULL
 );
 
 
@@ -165,6 +165,46 @@ ALTER SEQUENCE public.roles_id_seq OWNER TO admin;
 --
 
 ALTER SEQUENCE public.roles_id_seq OWNED BY public.roles.id;
+
+
+--
+-- Name: ssh_keys; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.ssh_keys (
+    id integer NOT NULL,
+    name character varying(300) NOT NULL,
+    key_pair_type character varying(20) NOT NULL,
+    private_key_file_format character varying(20) NOT NULL,
+    key_access_type character varying(20) NOT NULL,
+    private_key_value text NOT NULL,
+    created_by integer NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.ssh_keys OWNER TO admin;
+
+--
+-- Name: ssh_keys_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.ssh_keys_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.ssh_keys_id_seq OWNER TO admin;
+
+--
+-- Name: ssh_keys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.ssh_keys_id_seq OWNED BY public.ssh_keys.id;
 
 
 --
@@ -234,6 +274,13 @@ ALTER TABLE ONLY public.roles ALTER COLUMN id SET DEFAULT nextval('public.roles_
 
 
 --
+-- Name: ssh_keys id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.ssh_keys ALTER COLUMN id SET DEFAULT nextval('public.ssh_keys_id_seq'::regclass);
+
+
+--
 -- Name: users id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -266,7 +313,7 @@ COPY public.resource_types (id, name, description, category) FROM stdin;
 -- Data for Name: resources; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
-COPY public.resources (id, type, name, aws_resource_id, tags, created_at, created_by) FROM stdin;
+COPY public.resources (id, type, name, aws_resource_id, tags, created_at, created_by, active) FROM stdin;
 \.
 
 
@@ -278,6 +325,14 @@ COPY public.roles (id, role) FROM stdin;
 1	root
 2	admin
 3	user
+\.
+
+
+--
+-- Data for Name: ssh_keys; Type: TABLE DATA; Schema: public; Owner: admin
+--
+
+COPY public.ssh_keys (id, name, key_pair_type, private_key_file_format, key_access_type, private_key_value, created_by, created_at) FROM stdin;
 \.
 
 
@@ -318,6 +373,13 @@ SELECT pg_catalog.setval('public.resources_id_seq', 1, false);
 --
 
 SELECT pg_catalog.setval('public.roles_id_seq', 3, true);
+
+
+--
+-- Name: ssh_keys_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
+--
+
+SELECT pg_catalog.setval('public.ssh_keys_id_seq', 1, false);
 
 
 --
@@ -376,6 +438,22 @@ ALTER TABLE ONLY public.roles
 
 
 --
+-- Name: ssh_keys ssh_keys_name_key; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.ssh_keys
+    ADD CONSTRAINT ssh_keys_name_key UNIQUE (name);
+
+
+--
+-- Name: ssh_keys ssh_keys_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.ssh_keys
+    ADD CONSTRAINT ssh_keys_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -397,6 +475,14 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_username_key UNIQUE (username);
+
+
+--
+-- Name: ssh_keys fk_user; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.ssh_keys
+    ADD CONSTRAINT fk_user FOREIGN KEY (created_by) REFERENCES public.users(id);
 
 
 --
