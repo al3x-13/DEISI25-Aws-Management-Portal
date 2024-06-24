@@ -56,6 +56,17 @@ function awsEnvironmentSettingsExist(): boolean {
 }
 
 /**
+ * Checks if SSH secret environemnt variable is present.
+ * @returns Whether SSH secret is present
+ */
+function sshEcryptionSecret(): boolean {
+	if (!process.env.SSH_SECRET) {
+		return false;
+	}
+	return true;
+}
+
+/**
 * Checks if all the required environment variables are present at startup (before running the server).
 * @returns Whether 
 */
@@ -69,6 +80,10 @@ function validateEnvironmentVariablesOnStartup(): boolean {
 	}
 
 	if (!awsEnvironmentSettingsExist()) {
+		return false;
+	}
+
+	if (!sshEcryptionSecret()) {
 		return false;
 	}
 
