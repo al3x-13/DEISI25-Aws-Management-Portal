@@ -2,7 +2,7 @@
 	import Header from '$lib/widgets/Header.svelte';
 	import Sidebar from '$lib/widgets/Sidebar.svelte';
 	import SidebarItem from '$lib/widgets/SidebarItem.svelte';
-	import { Cpu, LayoutDashboard } from 'lucide-svelte';
+	import { Cpu, KeyRound, LayoutDashboard } from 'lucide-svelte';
 	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;
@@ -27,6 +27,9 @@
 			</SidebarItem>
 			<SidebarItem label="EC2" href="/resources/compute/ec2" open={sidebarOpen}>
 				<Cpu size={32} class="text-color-primary-light dark:text-color-primary-dark" />
+			</SidebarItem>
+			<SidebarItem label="SSH Keys" href="/resources/compute/ssh" open={sidebarOpen}>
+				<KeyRound size={32} class="text-color-primary-light dark:text-color-primary-dark" />
 			</SidebarItem>
 		</Sidebar>
 	{/if}
