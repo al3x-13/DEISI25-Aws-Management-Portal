@@ -95,6 +95,27 @@ const sshContract = c.router({
 		},
 		summary: 'List all the existing SSH keys.',
 		description: 'Lists all the existing AWS SSH keys available to the requesting user.'
+	},
+	checkNameAvailability: {
+		method: 'POST',
+		path: '/checkNameAvailability',
+		body: z.object({
+			keyName: z.string().openapi({
+				example: 'test-key'
+			})
+		}),
+		responses: {
+			200: z.object({
+				available: z.boolean().openapi({
+					example: true
+				})
+			}),
+			400: ApiErrorSchema,
+			404: ApiErrorSchema,
+			500: ApiErrorSchema,
+		},
+		summary: 'Check SSH Key name availability',
+		description: 'Checks if the given key name is available (i.e. not taken).'
 	}
 },{
 	pathPrefix: '/compute/ssh'

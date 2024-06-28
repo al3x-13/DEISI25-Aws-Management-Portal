@@ -6,7 +6,7 @@ import { initServer } from "@ts-rest/express";
 import dotenv from "dotenv";
 import { getUserIdFromRequestCookies } from "../../../../auth/auth-utils";
 import { createSSHKeyMetadata, updateSSHKeyAccessType } from "../../../../lib/resources/metadata";
-import { getUserAccessibleSSHKeys, isSSHKeyOwner } from "../../../../lib/resources/ssh/ssh-utils";
+import { checkKeyNameAvailability, getUserAccessibleSSHKeys, isSSHKeyOwner } from "../../../../lib/resources/ssh/ssh-utils";
 import { logger } from "../../../../logging/logging";
 import { ApiError } from "../../../../utils/errors";
 
@@ -215,6 +215,26 @@ const sshController = server.router(sshContract, {
 			status: 200,
 			body: {
 				sshKeys: sshKeys
+			}
+		}
+	},
+	checkNameAvailability: async ({ req }) => {
+		const { keyName } = req.body;
+
+		if (!keyName) {
+			const error = new ApiError('SSH Key Deletion Failed', "Missing 'keyName' field");
+			return {
+				status: 400,
+				body: error.toJSON()
+			}
+		}
+
+		const availability = await checkKeyNameAvailability(keyName);
+
+		return {
+			status: 200,
+			body: {
+				available: availability
 			}
 		}
 	}
