@@ -18,7 +18,7 @@ export function encryptSSHkey(sshKey: string): string {
 	const cipher = crypto.createCipheriv(sshEncryptionAlgorithm, Buffer.from(secret), iv);
     let encrypted = cipher.update(sshKey);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
-    return iv.toString('hex') + ':' + encrypted.toString('hex');
+    return iv.toString('hex') + ':' + encrypted.toString('base64');
 }
 
 
@@ -30,11 +30,11 @@ export function decryptSSHKey(sshKey: string): string {
 	const secret = process.env.SSH_SECRET!.substring(0, 32);
 	const textParts = sshKey.split(':');
     const iv = Buffer.from(textParts.shift()!, 'hex');
-    const encryptedText = Buffer.from(textParts.join(':'), 'hex');
-    const decipher = crypto.createDecipheriv(sshEncryptionAlgorithm, secret, iv);
-    let decrypted = decipher.update(encryptedText.toString(), 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    return decrypted;
+    const encryptedText = Buffer.from(textParts.join(':'), 'base64');
+    const decipher = crypto.createDecipheriv(sshEncryptionAlgorithm, Buffer.from(secret), iv);
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
 }
 
 
@@ -74,9 +74,28 @@ export async function getUserAccessibleSSHKeys(userId: number): Promise<SSHKey[]
 			KeyPairType: key.key_pair_type,
 			PrivateKeyFileFormat: key.private_key_file_format,
 			KeyAccessType: key.key_access_type,
-			PrivateKeyValue: key.private_key_value,
+			PrivateKeyValue: decryptSSHKey(key.private_key_value),
 		});
 	}
 
 	return keys;
+}
+
+
+/**
+ * Check if the given key name is available (i.e. not taken).
+ * @param keyName Key name
+ * @returns Whether the given name is available
+ */
+export async function checkKeyNameAvailability(keyName: string): Promise<boolean> {
+	const query = await db.query('SELECT name FROM ssh_keys');
+
+	for (let i = 0; i < query.rows.length; i++) {
+		const name: string = query.rows[i].name;
+		if (name.toLowerCase() === keyName.toLowerCase()) {
+			return false;
+		}
+	}
+
+	return true;
 }

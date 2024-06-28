@@ -5,7 +5,7 @@ import { SSHKey, SSHKeyPairType, SSHPrivateKeyFileFormat } from "@deisi25/types/
 import { initServer } from "@ts-rest/express";
 import dotenv from "dotenv";
 import { getUserIdFromRequestCookies } from "../../../../auth/auth-utils";
-import { createSSHKeyMetadata, updateSSHKeyAccessType } from "../../../../lib/resources/metadata";
+import { createSSHKeyMetadata, deleteSSHKeyMetadata, updateSSHKeyAccessType } from "../../../../lib/resources/metadata";
 import { checkKeyNameAvailability, getUserAccessibleSSHKeys, isSSHKeyOwner } from "../../../../lib/resources/ssh/ssh-utils";
 import { logger } from "../../../../logging/logging";
 import { ApiError } from "../../../../utils/errors";
@@ -134,6 +134,9 @@ const sshController = server.router(sshContract, {
 				
 			};
 		}
+
+		// delete metadata
+		await deleteSSHKeyMetadata(keyName);
 
 		return {
 			status: 200,

@@ -267,7 +267,7 @@ export async function deleteSSHKeyMetadata(keyName: string): Promise<boolean> {
 	);
 
 	if (query.rowCount === 1) {
-		logger.info(`SSH key '${query.rows[0].name}' deleted successfully`);
+		logger.info(`SSH key '${keyName}' deleted successfully`);
 		return true;
 	} else {
 		logger.error(`Failed to delete SSH key '${keyName}'`);
@@ -288,7 +288,7 @@ export async function updateSSHKeyAccessType(keyName: string, newAccessType: SSH
 	);
 
 	if (query.rowCount === 1) {
-		logger.info(`SSH key '${query.rows[0].name}' access type updated successfully`);
+		logger.info(`SSH key '${keyName}' access type updated successfully`);
 		return true;
 	} else {
 		logger.error(`Failed to update access type of SSH key '${keyName}'`);
