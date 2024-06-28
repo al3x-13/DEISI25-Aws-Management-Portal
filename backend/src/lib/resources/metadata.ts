@@ -242,7 +242,7 @@ export async function createSSHKeyMetadata(key: SSHKey, userId: number): Promise
 		INSERT INTO ssh_keys (name, key_pair_type, private_key_file_format, key_access_type, private_key_value,
 		created_by) VALUES ($1, $2, $3, $4, $5, $6)
 		`,
-		[ key.Name, key.KeyPairType, key.PrivateKeyFileFormat, key.KeyAccessType, key.PrivateKeyValue, userId ]
+		[ key.Name, key.KeyPairType, key.PrivateKeyFileFormat, key.KeyAccessType, encryptedPrivKey, userId ]
 	);
 
 	if (query.rowCount === 1) {
