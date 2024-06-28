@@ -1,3 +1,4 @@
+import { UserNoHash } from "@deisi25/types/lib/users/users";
 import db from "../../db/db";
 
 export type Role = {
@@ -144,4 +145,45 @@ export async function getUserPasswordHash(username: string): Promise<string | nu
 	);
 	const passwordHash = result.rows[0];
 	return passwordHash ? passwordHash.password_hash : null;
+}
+
+
+/**
+ * Return all applicaction users;
+ * @returns All users
+ */
+export async function getAllUsers(): Promise<UserNoHash[]> {
+	const query = await db.query(
+		'SELECT * FROM users'
+	);
+
+	const data: UserNoHash[] = [];
+
+	for (let i = 0; i < query.rows.length; i++) {
+		const user = query.rows[i];
+		data.push({
+			id: user.id,
+			username: user.username,
+			email: user.email,
+			role: user.role,
+			createdAt: user.created_at
+		});
+	}
+
+	return data;
+}
+
+
+/**
+ * Delete a user from the application.
+ * @param id User id
+ * @returns Whether the user was deleted successfully
+ */
+export async function deleteUser(id: number): Promise<boolean> {
+	const query = await db.query(
+		'DELETE FROM users WHERE id = $1',
+		[ id ]
+	);
+
+	return query.rowCount === 1;
 }
