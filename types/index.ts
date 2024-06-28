@@ -1,9 +1,9 @@
 import { initContract } from '@ts-rest/core';
 import { testContract } from './lib/api/contracts/test-contract';
 import { authContract } from './lib/api/contracts/auth-contract';
-import { protectedContract } from './lib/api/contracts/protected-contract';
 import { ec2Contract } from './lib/api/contracts/resources/ec2-contract';
 import { userContract } from './lib/api/contracts/user-contract';
+import { sshContract } from './lib/api/contracts/resources/ssh-contract';
 
 
 /* ##### UNPROTECTED ROUTES ##### */
@@ -21,6 +21,8 @@ export * from './lib/api/contracts/protected-contract';
 export * from './lib/api/contracts/user-contract';
 // EC2 contract
 export * from './lib/api/contracts/resources/ec2-contract';
+// SSH contract
+export * from './lib/api/contracts/resources/ssh-contract';
 
 /* ##### MAIN CONTRACT ##### */
 const c = initContract();
@@ -28,8 +30,9 @@ export const apiDocsContract = c.router(
 	{
 		test: testContract,
 		auth: authContract,
-		ec2: ec2Contract,
 		user: userContract,
+		ec2: ec2Contract,
+		ssh: sshContract,
 	},
 );
 

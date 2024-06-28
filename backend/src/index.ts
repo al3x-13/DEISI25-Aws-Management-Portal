@@ -16,6 +16,7 @@ import * as swaggerui from "swagger-ui-express";
 import { generateOpenApi } from "@ts-rest/open-api";
 import { buildDocsFromTSRestOAS } from '../docs/docs';
 import { OpenAPIObject } from 'openapi3-ts/oas31';
+import sshController from './routes/resources/compute/ssh/controller';
 
 
 dotenv.config();
@@ -110,6 +111,7 @@ const protectedRoutesRouter = server.router(protectedContract, {
 	resources: {
 		compute: {
 			ec2: ec2Controller,
+			ssh: sshController,
 		}
 	}
 });
