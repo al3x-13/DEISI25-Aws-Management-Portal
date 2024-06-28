@@ -37,7 +37,7 @@ copy all the content inside and save it locally to a file named `docker-compose.
 ![Setup 2](assets/setup-2.png)
 
 #### 3. Download Setup Script
-Go to [this page](https://github.com/al3x-13/DEISI25-Aws-Management-Portal/releases/tag/v0.1.0) and download the binary
+Go to [this page](https://github.com/al3x-13/DEISI25-Aws-Management-Portal/releases) and download the binary
 that matches your operating system. Save it in the same directory as the `docker-compose.yml` file.
 
 Make sure the binary has `execute` permissions.
