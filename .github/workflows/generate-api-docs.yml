@@ -35,7 +35,7 @@ jobs:
         run: pnpm install -g ts-node
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Generate API docs
         run: ts-node docs/generate-oas-json.ts
