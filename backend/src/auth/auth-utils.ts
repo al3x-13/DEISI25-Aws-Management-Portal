@@ -13,13 +13,19 @@ export function isBearerAuthScheme(req: Request) {
 	return authScheme?.toLowerCase() === 'bearer';
 }
 
+export function getUserIdFromRequestCookies(data: Request): number;
+export function getUserIdFromRequestCookies(data: string): number;
 /**
  * Extracts user id from request cookies.
  * @param req Request
  * @returns User ID
  */
-export function getUserIdFromRequestCookies(req: Request): number {
-	const { token } = req.cookies;
+export function getUserIdFromRequestCookies(data: Request | string): number {
+	if (typeof data === 'string') {
+		const jwtData = getJwtData(data);
+		return jwtData ? jwtData.id : -1;
+	}
+	const { token } = data.cookies;
 	const jwtData = getJwtData(token);
 	return jwtData ? jwtData.id : -1;
 }
