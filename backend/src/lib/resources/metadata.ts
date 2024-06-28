@@ -2,6 +2,8 @@ import { ResourceType } from "@deisi25/types";
 import db from "../../db/db";
 import { QueryResult } from "pg";
 import { logger } from "../../logging/logging";
+import { SSHKey, SSHKeyAccessType } from "@deisi25/types/lib/resources/ssh/ssh";
+import { encryptSSHkey } from "./ssh/ssh-utils";
 
 
 /**
@@ -212,6 +214,7 @@ export async function updateResourceName(resourceId: number | string, name: stri
 	return operationSucceded;
 }
 
+
 /**
  * Check whether there is an existing EC2 instance with the given name.
  * @param instanceName Instance Name
@@ -222,7 +225,73 @@ export async function ec2InstanceNameExists(instanceName: string): Promise<boole
 		'SELECT name FROM resources WHERE type = 1 AND name = $1',
 		[ instanceName ]
 	)
-
-	console.log('OHH YEAHHHH: ' + query.rowCount);
 	return query.rowCount! > 0;
+}
+
+
+/**
+ * Creates metadata for an AWS SSH key and stores it in the database.
+ * @param key SSH key
+ * @param userId userId
+ * @returns Whether the resource metadata was created successfully
+ */
+export async function createSSHKeyMetadata(key: SSHKey, userId: number): Promise<boolean> {
+	const encryptedPrivKey = encryptSSHkey(key.PrivateKeyValue);
+
+	const query = await db.query(`
+		INSERT INTO ssh_keys (name, key_pair_type, private_key_file_format, key_access_type, private_key_value,
+		created_by) VALUES ($1, $2, $3, $4, $5, $6)
+		`,
+		[ key.Name, key.KeyPairType, key.PrivateKeyFileFormat, key.KeyAccessType, encryptedPrivKey, userId ]
+	);
+
+	if (query.rowCount === 1) {
+		logger.info(`Metadata ssh key '${key.Name}' created successfully`);
+		return true;
+	} else {
+		logger.error(`Failed to create metadata for ssh key with name '${key.Name}'`);
+		return false;
+	}
+}
+
+
+/**
+ * Deletes existing metadata for an AWS SSH key.
+ * @param keyName Key name
+ * @returns Whether the metadata was successfully deleted
+ */
+export async function deleteSSHKeyMetadata(keyName: string): Promise<boolean> {
+	const query = await db.query(
+		'DELETE FROM ssh_keys WHERE name = $1',
+		[ keyName ]
+	);
+
+	if (query.rowCount === 1) {
+		logger.info(`SSH key '${keyName}' deleted successfully`);
+		return true;
+	} else {
+		logger.error(`Failed to delete SSH key '${keyName}'`);
+		return false;
+	}
+}
+
+
+/**
+ * Updates the access type of an existing SSH key.
+ * @param newAccessType New access type
+ * @returns Whether the access type was updated successfully
+ */
+export async function updateSSHKeyAccessType(keyName: string, newAccessType: SSHKeyAccessType): Promise<boolean> {
+	const query = await db.query(
+		'UPDATE ssh_keys SET key_access_type = $1 WHERE name = $2',
+		[ newAccessType, keyName ]
+	);
+
+	if (query.rowCount === 1) {
+		logger.info(`SSH key '${keyName}' access type updated successfully`);
+		return true;
+	} else {
+		logger.error(`Failed to update access type of SSH key '${keyName}'`);
+		return false;
+	}
 }

@@ -15,6 +15,7 @@ import (
 
 var (
 	jwtSecret        string
+	sshSecret        string
 	awsRegion        string
 	awsAccessKey     string
 	awsSecretKey     string
@@ -37,7 +38,7 @@ func GenerateRandomHexString(len int) (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-func GenerateBackendEnvFile(jwtSec string, awsReg string, awsAccKeyId string, awsSec string, dbUser string, dbPw string) error {
+func GenerateBackendEnvFile(jwtSec string, sshSec string, awsReg string, awsAccKeyId string, awsSec string, dbUser string, dbPw string) error {
 	filename := ".env.backend"
 
 	file, err := os.Create(filename)
@@ -50,6 +51,7 @@ func GenerateBackendEnvFile(jwtSec string, awsReg string, awsAccKeyId string, aw
 	file.WriteString("NODE_ENV=production\n")
 	file.WriteString("DB_URL=postgres://" + dbUser + ":" + dbPw + "@localhost:5432/dev-db\n")
 	file.WriteString("JWT_SECRET=" + jwtSec + "\n")
+	file.WriteString("SSH_SECRET=" + sshSec + "\n")
 	file.WriteString("AWS_ACCESS_KEY_ID=" + awsAccKeyId + "\n")
 	file.WriteString("AWS_SECRET_ACCESS_KEY=" + awsSec + "\n")
 	file.WriteString("AWS_DEFAULT_REGION=" + awsReg)
@@ -149,6 +151,12 @@ func main() {
 		return
 	}
 
+	sshSecret, err = GenerateRandomHexString(64)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
 	dbPassword, err = GenerateRandomHexString(15)
 	if err != nil {
 		log.Fatal(err)
@@ -203,7 +211,7 @@ func main() {
 	}
 
 	// Generate backend .env file
-	err = GenerateBackendEnvFile(jwtSecret, awsRegion, awsAccessKey, awsSecretKey, dbUsername, dbPassword)
+	err = GenerateBackendEnvFile(jwtSecret, sshSecret, awsRegion, awsAccessKey, awsSecretKey, dbUsername, dbPassword)
 	if err != nil {
 		log.Fatal("Failed to create backend env file")
 		return
