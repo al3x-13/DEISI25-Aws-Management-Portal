@@ -51,6 +51,9 @@ const inviteContractProtected = cProtected.router({
 		method: 'POST',
 		path: '/createInvite',
 		body: z.object({
+			role: z.string().openapi({
+				example: 'admin'
+			}),
 			expirationTimestamp: z.string().datetime()
 		}),
 		responses: {
