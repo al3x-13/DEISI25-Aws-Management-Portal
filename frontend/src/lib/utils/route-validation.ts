@@ -42,7 +42,7 @@ function routeIsProtected(route: string): boolean {
 }
 
 function isRootRoute(route: string): boolean {
-	return route.startsWith('/root');
+	return route.startsWith('/root') || route.startsWith('/users');
 }
 
 export { userCanAccessRoute, routeIsProtected };

@@ -57,8 +57,7 @@ const smartRedirects: Handle = async ({ event, resolve }) => {
 				throw redirect(303, '/root');
 			}
 			case 'admin': {
-				// TODO: implement this
-				break;
+				throw redirect(303, '/dashboard');
 			}
 			default: {
 				throw redirect(303, '/dashboard');
