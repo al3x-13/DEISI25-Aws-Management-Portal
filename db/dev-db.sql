@@ -208,6 +208,44 @@ ALTER SEQUENCE public.ssh_keys_id_seq OWNED BY public.ssh_keys.id;
 
 
 --
+-- Name: user_invites; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.user_invites (
+    id integer NOT NULL,
+    uuid text NOT NULL,
+    role integer NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    expires_at timestamp without time zone NOT NULL,
+    used boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE public.user_invites OWNER TO admin;
+
+--
+-- Name: user_invites_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.user_invites_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.user_invites_id_seq OWNER TO admin;
+
+--
+-- Name: user_invites_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.user_invites_id_seq OWNED BY public.user_invites.id;
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: admin
 --
 
@@ -281,6 +319,13 @@ ALTER TABLE ONLY public.ssh_keys ALTER COLUMN id SET DEFAULT nextval('public.ssh
 
 
 --
+-- Name: user_invites id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.user_invites ALTER COLUMN id SET DEFAULT nextval('public.user_invites_id_seq'::regclass);
+
+
+--
 -- Name: users id; Type: DEFAULT; Schema: public; Owner: admin
 --
 
@@ -337,6 +382,14 @@ COPY public.ssh_keys (id, name, key_pair_type, private_key_file_format, key_acce
 
 
 --
+-- Data for Name: user_invites; Type: TABLE DATA; Schema: public; Owner: admin
+--
+
+COPY public.user_invites (id, uuid, role, created_at, expires_at, used) FROM stdin;
+\.
+
+
+--
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
@@ -380,6 +433,13 @@ SELECT pg_catalog.setval('public.roles_id_seq', 3, true);
 --
 
 SELECT pg_catalog.setval('public.ssh_keys_id_seq', 1, false);
+
+
+--
+-- Name: user_invites_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
+--
+
+SELECT pg_catalog.setval('public.user_invites_id_seq', 1, false);
 
 
 --
@@ -454,6 +514,22 @@ ALTER TABLE ONLY public.ssh_keys
 
 
 --
+-- Name: user_invites user_invites_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.user_invites
+    ADD CONSTRAINT user_invites_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_invites user_invites_uuid_key; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.user_invites
+    ADD CONSTRAINT user_invites_uuid_key UNIQUE (uuid);
+
+
+--
 -- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -475,6 +551,14 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_username_key UNIQUE (username);
+
+
+--
+-- Name: user_invites fk_role; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.user_invites
+    ADD CONSTRAINT fk_role FOREIGN KEY (role) REFERENCES public.roles(id);
 
 
 --
