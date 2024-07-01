@@ -17,6 +17,7 @@ import { generateOpenApi } from "@ts-rest/open-api";
 import { buildDocsFromTSRestOAS } from '../docs/docs';
 import { OpenAPIObject } from 'openapi3-ts/oas31';
 import sshController from './routes/resources/compute/ssh/controller';
+import inviteUnprotectedController from './routes/invite/controllerUnprotected';
 
 
 dotenv.config();
@@ -87,6 +88,7 @@ const unprotectedRoutesRouter = server.router(unprotectedContract, {
 		},
 	},
 	auth: authController,
+	invite: inviteUnprotectedController,
 });
 
 createExpressEndpoints(unprotectedContract, unprotectedRoutesRouter, app, {

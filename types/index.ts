@@ -4,6 +4,7 @@ import { authContract } from './lib/api/contracts/auth-contract';
 import { ec2Contract } from './lib/api/contracts/resources/ec2-contract';
 import { userContract } from './lib/api/contracts/user-contract';
 import { sshContract } from './lib/api/contracts/resources/ssh-contract';
+import { inviteContractProtected, inviteContractUnprotected } from './lib/api/contracts/invites/invite-contract';
 
 
 /* ##### UNPROTECTED ROUTES ##### */
@@ -33,6 +34,8 @@ export const apiDocsContract = c.router(
 		user: userContract,
 		ec2: ec2Contract,
 		ssh: sshContract,
+		inviteUnprotected: inviteContractUnprotected,
+		inviteProtected: inviteContractProtected,
 	},
 );
 
