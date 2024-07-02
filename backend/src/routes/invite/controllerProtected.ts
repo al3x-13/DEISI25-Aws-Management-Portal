@@ -1,6 +1,7 @@
 import { inviteContractProtected } from "@deisi25/types/lib/api/contracts/invites/invite-contract";
 import { initServer } from "@ts-rest/express";
 import { ApiError } from "../../../src/utils/errors";
+import { createUserInvite, expireUserInvite } from "src/lib/invite/invite-utils";
 
 const server = initServer();
 
@@ -9,7 +10,53 @@ const inviteProtectedController = server.router(inviteContractProtected, {
 		const { role, expirationTimestamp } = req.body;
 
 		if (!role) {
-			const error = new ApiError('Validity Check Failed', "Missing 'uuid' field");
+			const error = new ApiError('Invite Creation Failed', "Missing 'uuid' field");
+			return {
+				status: 400,
+				body: error.toJSON()
+			}
+		}
+
+		if (!expirationTimestamp) {
+			const error = new ApiError('Invite Creation Failed', "Missing 'expirationTimestamp' field");
+			return {
+				status: 400,
+				body: error.toJSON()
+			}
+		}
+
+		const expDate = new Date(expirationTimestamp);
+		const nowDate = new Date();
+
+		if (nowDate >= expDate) {
+			const error = new ApiError('Invite Creation Failed', "Invalid 'expirationTimestamp' field");
+			return {
+				status: 400,
+				body: error.toJSON()
+			}
+		}
+
+		const inviteUUID = await createUserInvite(role, expDate);
+		if (inviteUUID === null) {
+			const error = new ApiError('Invite Creation Failed', "Could not create user invite");
+			return {
+				status: 500,
+				body: error.toJSON()
+			}
+		}
+
+		return {
+			status: 201,
+			body: {
+				inviteUUID: inviteUUID
+			}
+		}
+	},
+	deactivateInvite: async ({ req }) => {
+		const { uuid } = req.body;
+
+		if (!uuid) {
+			const error = new ApiError('Invite Deactivation Failed', "Missing 'uuid' field");
 			return {
 				status: 400,
 				body: error.toJSON()
@@ -19,7 +66,7 @@ const inviteProtectedController = server.router(inviteContractProtected, {
 		return {
 			status: 201,
 			body: {
-				inviteUUID: 'TODO'
+				success: await expireUserInvite(uuid)
 			}
 		}
 	}

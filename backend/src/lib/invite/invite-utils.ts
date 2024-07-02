@@ -1,4 +1,5 @@
 import db from "../../db/db";
+import { v4 as uuidv4 } from "uuid";
 
 
 /**
@@ -38,4 +39,39 @@ export async function getInviteRoleId(uuid: string): Promise<number | null> {
 	);
 
 	return query.rows.length === 1 ? query.rows[0].role : null;
+}
+
+
+/**
+ * Create a new user invite.
+ * @param role The user role
+ * @returns UUID of the user invite on success and null otherwise
+ */
+export async function createUserInvite(role: string, expirationTimestamp: Date): Promise<string | null> {
+	const roleId = await getInviteRoleId(role);
+
+	if (roleId === null) return null;
+	
+	const inviteId= uuidv4();
+
+	const query = await db.query(
+		'INSERT INTO user_invites (uuid, role, expires_at) VALUES ($1, $2, $3)',
+		[ inviteId, roleId, expirationTimestamp.toISOString() ]
+	);
+
+	return query.rowCount === 1 ? query.rows[0].uuid : null;
+}
+
+
+/**
+ * Expire an existing user invite by updating the expiration timestamp.
+ * @param User invite UUID
+ * @returns Whether the user invite was successfully expired
+ */
+export async function expireUserInvite(uuid: string): Promise<boolean> {
+	const query = await db.query(
+		'UPDATE user_invites SET expirest_at = $1 WHERE uuid = $2',
+		[ new Date(Date.now()), uuid ]
+	);
+	return query.rowCount === 1;
 }
