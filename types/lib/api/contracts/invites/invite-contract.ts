@@ -2,6 +2,7 @@ import { z } from "zod";
 import { extendZodWithOpenApi } from "@anatine/zod-openapi";
 import { initContract } from "@ts-rest/core";
 import { ApiErrorSchema } from "../../types/error";
+import { UserInviteSchema } from "../../../invites/invites";
 
 const cUnprotected = initContract();
 
@@ -81,6 +82,20 @@ const inviteContractProtected = cProtected.router({
 		},
 		summary: 'Deactivate an user invite',
 		description: 'Deactivates an user invitation.'
+	},
+	getAllInvites: {
+		method: 'GET',
+		path: '/getAllInvites',
+		query: z.object({
+			maxResults: z.number().optional()
+		}),
+		responses: {
+			200: z.object({
+				invites: z.array(UserInviteSchema)
+			}),
+			400: ApiErrorSchema,
+			500: ApiErrorSchema
+		}
 	}
 },{
 	pathPrefix: '/user/invite'
