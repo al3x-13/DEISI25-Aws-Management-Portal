@@ -1,8 +1,8 @@
 import { inviteContractUnprotected } from "@deisi25/types/lib/api/contracts/invites/invite-contract";
 import { initServer } from "@ts-rest/express";
 import { ApiError } from "../../utils/errors";
-import { checkInviteValidity, getInviteRoleId } from "src/lib/invite/invite-utils";
-import { createNewUser } from "src/lib/users/user-manager";
+import { checkInviteValidity, getInviteRoleId } from "../../../src/lib/invite/invite-utils";
+import { createNewUser } from "../../../src/lib/users/user-manager";
 
 const server = initServer();
 

@@ -1,7 +1,7 @@
 import { inviteContractProtected } from "@deisi25/types/lib/api/contracts/invites/invite-contract";
 import { initServer } from "@ts-rest/express";
 import { ApiError } from "../../../src/utils/errors";
-import { createUserInvite, expireUserInvite } from "src/lib/invite/invite-utils";
+import { createUserInvite, expireUserInvite, getAllUserInvitesValidOnesFirst } from "../../../src/lib/invite/invite-utils";
 
 const server = initServer();
 
@@ -69,5 +69,31 @@ const inviteProtectedController = server.router(inviteContractProtected, {
 				success: await expireUserInvite(uuid)
 			}
 		}
+	},
+	getAllInvites: async ({ req }) => {
+		const maxResultsParam = Number(req.query.maxResults);
+		const validMaxResults = Number.isInteger(maxResultsParam) && maxResultsParam >= 1 && maxResultsParam < 1000;
+		const maxResults = validMaxResults ? maxResultsParam : undefined;
+
+		// return error when 'maxResults' is set but its format is not valid
+		if (req.query.maxResults && !validMaxResults) {
+			const error = new ApiError(
+				'Failed to get user invites', 
+				"Invalid 'maxResults' query parameter format"
+			);
+			return {
+				status: 400,
+				body: error.toJSON()
+			}
+		}
+
+		return {
+			status: 200,
+			body: {
+				invites: await getAllUserInvitesValidOnesFirst(maxResults)
+			}
+		}
 	}
 });
+
+export default inviteProtectedController;

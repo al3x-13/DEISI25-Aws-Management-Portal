@@ -1,5 +1,7 @@
+import { UserInvite } from "@deisi25/types/lib/invites/invites";
 import db from "../../db/db";
 import { v4 as uuidv4 } from "uuid";
+import exp from "constants";
 
 
 /**
@@ -74,4 +76,65 @@ export async function expireUserInvite(uuid: string): Promise<boolean> {
 		[ new Date(Date.now()), uuid ]
 	);
 	return query.rowCount === 1;
+}
+
+
+/**
+ * Returns all existing user invites (non expired first).
+ * @returns User invites
+ */
+export async function getAllUserInvitesValidOnesFirst(maxResults: number | undefined): Promise<UserInvite[]> {
+	const query = await db.query('SELECT * FROM user_invites');
+
+	const invites: UserInvite[] = [];
+
+	for (let i = 0; i < query.rows.length; i++) {
+		const inv = query.rows[i];
+		invites.push({
+			uuid: inv.uuid,
+			role: inv.role,
+			createdAt: new Date(inv.created_at).toString(),
+			expiresAt: new Date(inv.expires_at).toString(),
+			used: inv.used
+		});
+	}
+
+	invites.sort((i1, i2) => {
+		const i1Valid = isInviteValid(i1);
+		const i1Date = new Date(i1.expiresAt);
+		const i2Valid = isInviteValid(i2);
+		const i2Date = new Date(i2.expiresAt);
+
+		if (i1Valid && i2Valid) {
+			if (i1Date >= i2Date) {
+				return 1;
+			}
+			return -1;
+		}
+
+		if (i1Valid) {
+			return -1;
+		}
+
+		if (i2Valid) {
+			return 1;
+		}
+
+		return i1Date < i2Date ? -1 : 1;
+	});
+
+	return maxResults ? invites.slice(0, maxResults) : invites;
+}
+
+
+/**
+ * Check if an invite is valid, i.e. has not been used and has not expired.
+ * @param invite User invite
+ * @returns Whether the invite is valid
+ */
+export function isInviteValid(invite: UserInvite): boolean {
+	if (invite.used) return false;
+	const expDate = new Date(invite.expiresAt);
+	const nowDate = new Date(Date.now());
+	return expDate > nowDate;
 }
