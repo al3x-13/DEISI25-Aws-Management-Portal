@@ -183,7 +183,7 @@ export async function getAllUsers(): Promise<UserNoHash[]> {
  */
 export async function getRoleIdFromName(roleName: string): Promise<number | null> {
 	const query = await db.query(
-		'SELECT id, name FROM roles WHERE name = $1',
+		'SELECT id, role FROM roles WHERE role = $1',
 		[ roleName.toLowerCase() ]
 	);
 
