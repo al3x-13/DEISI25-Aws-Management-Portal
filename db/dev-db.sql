@@ -215,9 +215,10 @@ CREATE TABLE public.user_invites (
     id integer NOT NULL,
     uuid text NOT NULL,
     role integer NOT NULL,
+    created_by integer NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     expires_at timestamp without time zone NOT NULL,
-    used boolean DEFAULT false NOT NULL
+    used boolean DEFAULT false
 );
 
 
@@ -385,7 +386,7 @@ COPY public.ssh_keys (id, name, key_pair_type, private_key_file_format, key_acce
 -- Data for Name: user_invites; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
-COPY public.user_invites (id, uuid, role, created_at, expires_at, used) FROM stdin;
+COPY public.user_invites (id, uuid, role, created_by, created_at, expires_at, used) FROM stdin;
 \.
 
 
@@ -551,6 +552,14 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_username_key UNIQUE (username);
+
+
+--
+-- Name: user_invites fk_created_by; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.user_invites
+    ADD CONSTRAINT fk_created_by FOREIGN KEY (created_by) REFERENCES public.users(id);
 
 
 --

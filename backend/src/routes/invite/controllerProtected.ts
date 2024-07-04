@@ -2,6 +2,7 @@ import { inviteContractProtected } from "@deisi25/types/lib/api/contracts/invite
 import { initServer } from "@ts-rest/express";
 import { ApiError } from "../../../src/utils/errors";
 import { createUserInvite, expireUserInvite, getAllUserInvitesValidOnesFirst } from "../../../src/lib/invite/invite-utils";
+import { getUserIdFromRequestCookies } from "../../../src/auth/auth-utils";
 
 const server = initServer();
 
@@ -36,7 +37,9 @@ const inviteProtectedController = server.router(inviteContractProtected, {
 			}
 		}
 
-		const inviteUUID = await createUserInvite(role, expDate);
+		const userId = getUserIdFromRequestCookies(req);
+
+		const inviteUUID = await createUserInvite(role, expDate, userId);
 		if (inviteUUID === null) {
 			const error = new ApiError('Invite Creation Failed', "Could not create user invite");
 			return {

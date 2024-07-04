@@ -1,7 +1,7 @@
 import { UserInvite } from "@deisi25/types/lib/invites/invites";
 import db from "../../db/db";
 import { v4 as uuidv4 } from "uuid";
-import exp from "constants";
+import { getRoleIdFromName } from "../users/user-manager";
 
 
 /**
@@ -49,19 +49,17 @@ export async function getInviteRoleId(uuid: string): Promise<number | null> {
  * @param role The user role
  * @returns UUID of the user invite on success and null otherwise
  */
-export async function createUserInvite(role: string, expirationTimestamp: Date): Promise<string | null> {
-	const roleId = await getInviteRoleId(role);
-
+export async function createUserInvite(role: string, expirationTimestamp: Date, creatorId: number): Promise<string | null> {
+	const roleId = await getRoleIdFromName(role);
 	if (roleId === null) return null;
-	
-	const inviteId= uuidv4();
+
+	const inviteId = uuidv4();
 
 	const query = await db.query(
-		'INSERT INTO user_invites (uuid, role, expires_at) VALUES ($1, $2, $3)',
-		[ inviteId, roleId, expirationTimestamp.toISOString() ]
+		'INSERT INTO user_invites (uuid, role, expires_at, created_by) VALUES ($1, $2, $3, $4)',
+		[ inviteId, roleId, expirationTimestamp.toISOString(), creatorId ]
 	);
-
-	return query.rowCount === 1 ? query.rows[0].uuid : null;
+	return query.rowCount === 1 ? inviteId : null;
 }
 
 
@@ -72,7 +70,7 @@ export async function createUserInvite(role: string, expirationTimestamp: Date):
  */
 export async function expireUserInvite(uuid: string): Promise<boolean> {
 	const query = await db.query(
-		'UPDATE user_invites SET expirest_at = $1 WHERE uuid = $2',
+		'UPDATE user_invites SET expires_at = $1 WHERE uuid = $2',
 		[ new Date(Date.now()), uuid ]
 	);
 	return query.rowCount === 1;
@@ -84,19 +82,26 @@ export async function expireUserInvite(uuid: string): Promise<boolean> {
  * @returns User invites
  */
 export async function getAllUserInvitesValidOnesFirst(maxResults: number | undefined): Promise<UserInvite[]> {
-	const query = await db.query('SELECT * FROM user_invites');
+	const query = await db.query(
+		`SELECT i.uuid, i.role, u.username as usern, i.created_at, i.expires_at, i.used
+		 FROM user_invites i INNER JOIN users u ON i.created_by = u.id`
+	);
 
 	const invites: UserInvite[] = [];
 
 	for (let i = 0; i < query.rows.length; i++) {
 		const inv = query.rows[i];
+
 		invites.push({
 			uuid: inv.uuid,
 			role: inv.role,
+			createdBy: inv.usern,
 			createdAt: new Date(inv.created_at).toString(),
 			expiresAt: new Date(inv.expires_at).toString(),
-			used: inv.used
+			used: inv.used,
+			isValid: false
 		});
+		invites[i].isValid = isInviteValid(invites[i]);
 	}
 
 	invites.sort((i1, i2) => {
@@ -137,4 +142,18 @@ export function isInviteValid(invite: UserInvite): boolean {
 	const expDate = new Date(invite.expiresAt);
 	const nowDate = new Date(Date.now());
 	return expDate > nowDate;
+}
+
+
+/**
+ * Mark an user invite as used.
+ * @param uuid Invite uuid
+ * @returns Whether the operation was successfull
+ */
+export async function markUserInviteAsUsed(uuid: string): Promise<boolean> {
+	const query = await db.query(
+		'DELETE FROM user_invites WHERE uuid = $1',
+		[ uuid ]
+	);
+	return query.rowCount === 1;
 }
