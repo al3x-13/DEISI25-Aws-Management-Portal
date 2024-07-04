@@ -30,7 +30,7 @@
 	<div class="w-full h-full flex flex-col items-center justify-center">
 		{#if users.length === 0}
 			<p class="text-3xl font-semibold text-text-light dark:text-text-dark my-20">
-				No keys to display
+				No users to display
 			</p>
 		{/if}
 

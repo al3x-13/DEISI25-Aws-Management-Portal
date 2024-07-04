@@ -1,8 +1,8 @@
 import { inviteContractUnprotected } from "@deisi25/types/lib/api/contracts/invites/invite-contract";
 import { initServer } from "@ts-rest/express";
 import { ApiError } from "../../utils/errors";
-import { checkInviteValidity, getInviteRoleId } from "../../../src/lib/invite/invite-utils";
-import { createNewUser } from "../../../src/lib/users/user-manager";
+import { checkInviteValidity, getInviteRoleId, markUserInviteAsUsed } from "../../../src/lib/invite/invite-utils";
+import { createNewUser, usernameExists } from "../../../src/lib/users/user-manager";
 
 const server = initServer();
 
@@ -75,10 +75,31 @@ const inviteUnprotectedController = server.router(inviteContractUnprotected, {
 			}
 		}
 
+		const userCreationSuccess = await createNewUser(username, email, password, role);
+		if (userCreationSuccess) await markUserInviteAsUsed(uuid);
+
 		return {
 			status: 201,
 			body: {
-				success: await createNewUser(username, email, password, role)
+				success: userCreationSuccess
+			}
+		}
+	},
+	checkUsernameAvailability: async ({ req }) => {
+		const { username } = req.body;
+
+		if (!username) {
+			const error = new ApiError('Invite Submission Failed', "Missing 'username' field");
+			return {
+				status: 400,
+				body: error.toJSON()
+			}
+		}
+
+		return {
+			status: 200,
+			body: {
+				valid: !(await usernameExists(username))
 			}
 		}
 	}

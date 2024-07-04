@@ -17,7 +17,7 @@
 	});
 </script>
 
-<div class="w-full max-w-5xl flex flex-col items-center jusify-center pt-20">
+<div class="w-full max-w-5xl flex flex-col items-center jusify-center pt-20 pb-20">
 	<PageTitle title="Users" />
 
 	<div class="w-full h-full flex flex-col items-center justify-center">

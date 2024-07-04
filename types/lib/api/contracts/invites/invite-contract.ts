@@ -41,6 +41,24 @@ const inviteContractUnprotected = cUnprotected.router({
 		summary: 'Submit invite form',
 		description: 'Submits an invitation form'
 	},
+	checkUsernameAvailability: {
+		method: 'POST',
+		path: '/checkUsernameAvailability',
+		body: z.object({
+			username: z.string().openapi({
+				example: 'j0hn.w3ak'
+			})
+		}),
+		responses: {
+			200: z.object({
+				valid: z.boolean()
+			}),
+			400: ApiErrorSchema,
+			500: ApiErrorSchema
+		},
+		summary: 'Check username availability',
+		description: 'Checks if the given username is available.'
+	}
 },{
 	pathPrefix: '/user/invite'
 });

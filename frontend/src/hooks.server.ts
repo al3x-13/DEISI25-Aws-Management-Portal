@@ -3,13 +3,18 @@ import { validateUserToken } from "$lib/utils/auth-validation";
 import { routeIsProtected, userCanAccessRoute } from "$lib/utils/route-validation";
 import { redirect, type Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
+import { isValidUserInviteRoute } from "$lib/utils/route-validation";
 
 const authorizeRouteAccess: Handle = async ({ event, resolve }) => {
 	const reqPath = event.url.pathname;
+	const isValidInviteRoute = await isValidUserInviteRoute(reqPath);
 	const protectedRoute = routeIsProtected(reqPath);
 	const token = event.cookies.get('token');
 	const validToken = token ? await validateUserToken(token) : false;
 	const user: User | null | undefined = token ? getUserDataFromJwt(token) : undefined;
+
+	// handle invite routes
+	if (isValidInviteRoute) return resolve(event);
 
 	// set user info on 'locals'
 	if (validToken && user) {
