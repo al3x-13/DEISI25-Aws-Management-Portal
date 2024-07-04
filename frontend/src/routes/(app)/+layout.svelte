@@ -2,7 +2,7 @@
 	import Header from '$lib/widgets/Header.svelte';
 	import Sidebar from '$lib/widgets/Sidebar.svelte';
 	import SidebarItem from '$lib/widgets/SidebarItem.svelte';
-	import { Cpu, KeyRound, LayoutDashboard, Users } from 'lucide-svelte';
+	import { Cpu, KeyRound, LayoutDashboard, MailsIcon, Users } from 'lucide-svelte';
 	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;
@@ -22,6 +22,9 @@
 			<SidebarItem label="Users" href="/users" open={sidebarOpen}>
 				<Users size={32} class="text-color-primary-light dark:text-color-primary-dark" />
 			</SidebarItem>
+			<SidebarItem label="User Invites" href="/users/invite" open={sidebarOpen}>
+				<MailsIcon size={32} class="text-color-primary-light dark:text-color-primary-dark" />
+			</SidebarItem>
 		</Sidebar>
 	{/if}
 
@@ -38,6 +41,9 @@
 			</SidebarItem>
 			<SidebarItem label="Users" href="/users" open={sidebarOpen}>
 				<Users size={32} class="text-color-primary-light dark:text-color-primary-dark" />
+			</SidebarItem>
+			<SidebarItem label="User Invites" href="/users/invite" open={sidebarOpen}>
+				<MailsIcon size={32} class="text-color-primary-light dark:text-color-primary-dark" />
 			</SidebarItem>
 		</Sidebar>
 	{/if}
