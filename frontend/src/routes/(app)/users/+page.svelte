@@ -1,11 +1,11 @@
 <script lang="ts">
-	import PageTitle from '$lib/assets/PageTitle.svelte';
 	import type { UserNoHash } from '@deisi25/types/lib/users/users';
 	import type { PageData } from './$types';
 	import * as Table from '$lib/components/ui/table';
 	import { Trash2 } from 'lucide-svelte';
 	import { deleteUser, getAllUsers } from '../../../global/user-utils';
 	import { toast } from 'svelte-sonner';
+	import PageTitleWithButton from '$lib/assets/PageTitleWithButton.svelte';
 
 	export let data: PageData;
 	let users: UserNoHash[] = data.users;
@@ -24,8 +24,8 @@
 	}
 </script>
 
-<div class="w-full h-full max-w-6xl flex flex-col items-center jusify-center">
-	<PageTitle title="Users" />
+<div class="w-full h-full max-w-6xl flex flex-col items-center jusify-center pt-10">
+	<PageTitleWithButton title="Users" buttonText="+ New invite" buttonHref="/users/invite" />
 
 	<div class="w-full h-full flex flex-col items-center justify-center">
 		{#if users.length === 0}
