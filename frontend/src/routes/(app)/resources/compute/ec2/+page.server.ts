@@ -20,6 +20,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 	});
 
 	const instances = status === 200 ? body.instances as Ec2Instance[] : null;
+	console.log('INST: ' + instances);
 
 	return {
 		instances: instances,

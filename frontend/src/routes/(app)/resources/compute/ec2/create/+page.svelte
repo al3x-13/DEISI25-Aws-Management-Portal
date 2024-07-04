@@ -39,6 +39,7 @@
 	let selectedOs: Ec2ImageBaseOs | null = null;
 	let selectedAmi: Ec2Image | null = null;
 	let selectedInstanceType: Ec2InstanceType | null = null;
+	let storageSize = 8;
 
 	// selection data
 	let amis: Ec2Image[] = [];
@@ -59,7 +60,6 @@
 		clearTimeout(nameTimeout);
 		nameTimeout = setTimeout(() => {
 			validateEc2InstanceNameClientside(nameValue).then((valid) => {
-				console.log('OKK: ' + valid);
 				validInstanceName = valid;
 			});
 		}, 300);
@@ -83,6 +83,14 @@
 		}
 	}
 
+	function handleFormData(formData: FormData) {
+		formData.set('name', nameValue);
+		formData.set('ami', selectedAmi!.ImageId);
+		formData.set('instanceType', selectedInstanceType!.InstanceType);
+		formData.set('storageType', volumeTypeValue!.value);
+		formData.set('storageSize', storageSize.toString());
+	}
+
 	// Modals state
 	let showAmiModal = false;
 	let showInstanceTypeModal = false;
@@ -103,13 +111,14 @@
 		<form
 			method="POST"
 			action="?/createInstance"
-			use:enhance={() => {
+			use:enhance={({ formData }) => {
+				handleFormData(formData);
+
 				return async ({ result, update }) => {
 					await applyAction(result);
 
 					if (form) {
 						if (form.success) {
-							console.log('this working');
 							toast.success('EC2 instance created successfully');
 							goto('/resources/compute/ec2');
 							return;
@@ -142,7 +151,7 @@
 						<div class="flex items-center text-sm space-x-1 mt-1">
 							{#if validInstanceName}
 								<CircleCheckIcon size="12" class="text-green-600 dark:text-green-600" />
-								<p class="text-green-600 dark:text-green-600">Set a valid instance name</p>
+								<p class="text-green-600 dark:text-green-600">Valid instance name</p>
 							{:else}
 								<CircleX size="12" class="text-text2-light dark:text-text2-dark" />
 								<p class="text-text2-light dark:text-text2-dark">Invalid instance name</p>
@@ -194,9 +203,7 @@
 							<p class="text-text2-light dark:text-text2-dark mt-1">Select Base OS first</p>
 						{/if}
 					</div>
-				</div>
 
-				<div class="flex flex-col basis-1/2 space-y-12">
 					<div>
 						<h1 class="text-xl font text-color-primary-light dark:text-color-primary-dark mb-3">
 							Instance Type
@@ -236,7 +243,7 @@
 								<label for="storage" class="mb-2 text-text-light dark:text-text-dark">
 									Root Volume Type
 								</label>
-								<Select.Root portal={null} name="storageType" bind:selected={volumeTypeValue}>
+								<Select.Root portal={null} bind:selected={volumeTypeValue}>
 									<Select.Trigger id="storage" class="w-[270px]">
 										<Select.Value placeholder="Select volume" />
 									</Select.Trigger>
@@ -249,23 +256,20 @@
 											{/each}
 										</Select.Group>
 									</Select.Content>
-									<Select.Input name="storageType" />
+									<Select.Input />
 								</Select.Root>
 							</div>
 
 							<div class="flex flex-col">
 								<label for="storage" class="mb-2 text-text-light dark:text-text-dark">GiB</label>
-								<Input
-									id="storage"
-									name="storageSize"
-									type="number"
-									min="1"
-									max="10000"
-									value="8"
-								/>
+								<Input id="storage" type="number" min="1" max="10000" bind:value={storageSize} />
 							</div>
 						</div>
 					</div>
+				</div>
+
+				<div class="flex">
+					<p>WHAT</p>
 				</div>
 			</div>
 

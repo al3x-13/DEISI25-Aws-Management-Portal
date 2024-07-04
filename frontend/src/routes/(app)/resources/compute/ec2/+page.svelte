@@ -12,6 +12,7 @@
 	import { toast } from 'svelte-sonner';
 	import { Play, RotateCw, Square, Trash2 } from 'lucide-svelte';
 	import { Ec2State, type Ec2Instance } from '@deisi25/types';
+	import Ec2Container from '$lib/components/ec2/Ec2Container.svelte';
 
 	export let data: PageData;
 
@@ -31,7 +32,7 @@
 	}
 </script>
 
-<div class="w-full max-w-5xl flex flex-col items-center jusify-center">
+<div class="w-full max-w-5xl flex flex-col items-center jusify-center pt-20">
 	<PageTitleWithButton
 		title="EC2 Instances"
 		buttonText="+ New"
@@ -44,6 +45,12 @@
 	>
 		<RotateCw size={30} />
 	</button>
+
+	<div class="w-full flex flex-col space-y-2">
+		{#each instances as instance}
+			<Ec2Container {instance} />
+		{/each}
+	</div>
 
 	<Table.Root class="mt-4 text-base text-text-light dark:text-text-dark">
 		<Table.Header>
