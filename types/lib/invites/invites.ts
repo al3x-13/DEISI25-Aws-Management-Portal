@@ -11,6 +11,9 @@ export const UserInviteSchema = z.object({
 	role: z.string().openapi({
 		example: 'admin'
 	}),
+	createdBy: z.string().openapi({
+		example: 'j0hn.w3ak'
+	}),
 	createdAt: z.string().datetime().openapi({
 		example: '2024-06-13T00:00:00.000Z'
 	}),
@@ -19,7 +22,10 @@ export const UserInviteSchema = z.object({
 	}),
 	used: z.boolean().openapi({
 		example: false
-	})
+	}),
+	isValid: z.boolean().openapi({
+		example: false
+	}),
 });
 
 export type UserInvite = z.infer<typeof UserInviteSchema>;
