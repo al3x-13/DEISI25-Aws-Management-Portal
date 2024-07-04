@@ -105,7 +105,7 @@ CREATE TABLE public.resources (
     tags text[],
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     created_by integer NOT NULL,
-    active boolean DEFAULT false NOT NULL
+    active boolean DEFAULT true NOT NULL
 );
 
 
