@@ -9,15 +9,15 @@ WORKDIR /app
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .
 COPY types ./types
 COPY backend ./backend
-RUN pnpm install
+RUN pnpm install --no-frozen-lockfile
 
 # types setup
 WORKDIR /app/types
-RUN pnpm install --prod
+RUN pnpm install --prod --no-frozen-lockfile
 
 # backend setup
 WORKDIR /app/backend
-RUN pnpm install --prod
+RUN pnpm install --prod --no-frozen-lockfile
 RUN pnpm run build
 
 EXPOSE 3000
