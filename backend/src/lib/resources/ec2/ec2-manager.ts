@@ -6,10 +6,14 @@ import { logger } from "../../../logging/logging";
 import db from "../../../db/db";
 import { Ec2Instance } from "@deisi25/types";
 import { mapAwsEc2InstancesToLocal } from "./ec2-utils";
+import dotenv from "dotenv";
+
+
+dotenv.config();
 
 const client: EC2Client = new EC2Client({
 	credentials: fromEnv(),
-	region: 'eu-west-2',
+	region: process.env.AWS_DEFAULT_REGION,
 });
 
 /**

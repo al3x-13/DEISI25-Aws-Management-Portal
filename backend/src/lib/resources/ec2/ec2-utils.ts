@@ -1,6 +1,11 @@
 import { DescribeInstanceTypesCommandOutput, Instance, InstanceBlockDeviceMapping, InstanceState, InstanceStateName, InstanceTypeInfo } from "@aws-sdk/client-ec2";
 import db from "../../../db/db";
 import { BlockStorageDevice, BlockStorageDeviceSchema, Ec2Image, Ec2ImageBaseOs, Ec2Instance, Ec2InstanceSchema, Ec2InstanceType, Ec2State } from "@deisi25/types";
+import dotenv from "dotenv";
+
+
+dotenv.config();
+
 
 /**
  * Map AWS EC2 instances data to local EC2 instances data.
@@ -133,7 +138,8 @@ export async function localResourceIdsToAwsResourceIds(localResourceIds: number[
 }
 
 export async function fetchAwsQuickstartImages(baseOs: Ec2ImageBaseOs): Promise<Ec2Image[]> {
-	const quickstartAmisResource = 'https://prod.eu-west-1.qs.console.ec2.aws.dev/get_quickstart_list_en.json';
+	const region = process.env.AWS_DEFAULT_REGION;
+	const quickstartAmisResource = `https://prod.${region}.qs.console.ec2.aws.dev/get_quickstart_list_en.json`;
 
 	const data = (await fetch(quickstartAmisResource).then((res) => res.json())).amiList;
 
@@ -166,8 +172,6 @@ export async function fetchAwsQuickstartImages(baseOs: Ec2ImageBaseOs): Promise<
 	for (let i = 0; i < data.length; i++) {
 		const ami = data[i];
 		if (ami.platform.includes(platform)) {
-			console.log(ami);
-
 			if (ami.imageId64 !== undefined) {
 				amis.push({
 					Name: ami.title,

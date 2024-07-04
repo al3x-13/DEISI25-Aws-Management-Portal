@@ -25,16 +25,17 @@ export async function createResourceMetadata(
 	userId: number
 ): Promise<boolean> {
 	const data = await db.query(`
-		INSERT INTO resources (type, name, aws_resource_id, tags, created_by)
+		INSERT INTO resources (type, name, aws_resource_id, tags, created_by, active)
 		SELECT
 			(SELECT id from resource_types WHERE name = $1) AS type,
 			$2 AS name,
 			$3 AS aws_resource_id,
 			$4 AS tags,
-			$5 AS created_by
+			$5 AS created_by,
+			$6 AS active
 		RETURNING id
 		`,
-		[ type, name, awsResourceId, tags, userId.toString() ]
+		[ type, name, awsResourceId, tags, userId.toString(), true ]
 	);
 
 	// logging
