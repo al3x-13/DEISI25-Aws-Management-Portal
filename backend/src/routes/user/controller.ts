@@ -3,6 +3,7 @@ import { getJwtData, validateJwt } from '../../auth/jwt';
 import { ApiError } from '../../utils/errors';
 import { initServer } from '@ts-rest/express';
 import { userContract } from '@deisi25/types';
+import { deleteUser, getAllUsers } from '../../lib/users/user-manager';
 
 const userControllerDeprecated = express.Router();
 
@@ -190,6 +191,54 @@ const userController = server.router(userContract, {
 			status: 200,
 			body: {
 				valid: valid
+			}
+		}
+	},
+	listAllUsers: async ({ req }) => {
+		const jwtToken = req.cookies.token;
+		const role = getJwtData(jwtToken)?.role;
+
+		if (role == null || role === 'user') {
+			const error = new ApiError('Failed to list users', "Requester must be 'admin' or 'root'");
+			return {
+				status: 400,
+				body: error.toJSON()
+			}
+		}
+
+		return {
+			status: 200,
+			body: {
+				users: await getAllUsers()
+			}
+		}
+	},
+	delete: async ({ req }) => {
+		const { id } = req.body;
+		const jwtToken = req.cookies.token;
+		const jwtData = getJwtData(jwtToken);
+		const role = jwtData?.role;
+
+		if (!id) {
+			const error = new ApiError('Failed to list users', "Missing 'id' field");
+			return {
+				status: 400,
+				body: error.toJSON()
+			}
+		}
+
+		if (role == null || role === 'user') {
+			const error = new ApiError('Failed to list users', "Requester must be 'admin' or 'root'");
+			return {
+				status: 400,
+				body: error.toJSON()
+			}
+		}
+
+		return {
+			status: 200,
+			body: {
+				success: await deleteUser(id)
 			}
 		}
 	}

@@ -1,4 +1,7 @@
+import { UserNoHash } from "@deisi25/types/lib/users/users";
 import db from "../../db/db";
+import bcrypt from "bcryptjs";
+
 
 export type Role = {
 	id: number;
@@ -144,4 +147,80 @@ export async function getUserPasswordHash(username: string): Promise<string | nu
 	);
 	const passwordHash = result.rows[0];
 	return passwordHash ? passwordHash.password_hash : null;
+}
+
+
+/**
+ * Return all applicaction users;
+ * @returns All users
+ */
+export async function getAllUsers(): Promise<UserNoHash[]> {
+	const query = await db.query(
+		'SELECT * FROM users'
+	);
+
+	const data: UserNoHash[] = [];
+
+	for (let i = 0; i < query.rows.length; i++) {
+		const user = query.rows[i];
+		data.push({
+			id: user.id,
+			username: user.username,
+			email: user.email,
+			role: user.role,
+			createdAt: user.created_at
+		});
+	}
+
+	return data;
+}
+
+
+/**
+ * Get role id with role name.
+ * @param roleName Role name
+ * @returns Role id or null if role name does not exist
+ */
+export async function getRoleIdFromName(roleName: string): Promise<number | null> {
+	const query = await db.query(
+		'SELECT id, role FROM roles WHERE role = $1',
+		[ roleName.toLowerCase() ]
+	);
+
+	if (query.rows.length === 0) return null;
+	return query.rows[0].id;
+}
+
+
+/**
+ * Delete a user from the application.
+ * @param id User id
+ * @returns Whether the user was deleted successfully
+ */
+export async function deleteUser(id: number): Promise<boolean> {
+	const query = await db.query(
+		'DELETE FROM users WHERE id = $1',
+		[ id ]
+	);
+
+	return query.rowCount === 1;
+}
+
+/**
+ * Create a new user.
+ * @param username Username
+ * @param email Email
+ * @param password Password
+ * @param role Role
+ * @returns Whether the user creation succeeded
+ */
+export async function createNewUser(username: string, email: string, password: string, role: number): Promise<boolean> {
+	const passwordHash = bcrypt.hashSync(password);
+
+	const query = await db.query(
+		'INSERT INTO users (username, password_hash, email, role) VALUES ($1, $2, $3, $4)',
+		[ username, passwordHash, email, role ]
+	);
+
+	return query.rowCount === 1;
 }

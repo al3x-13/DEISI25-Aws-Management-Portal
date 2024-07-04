@@ -1,4 +1,5 @@
 import type { User } from "$lib/domain/user";
+import { isValidUserInviteUUID } from "../../global/invite-utils";
 
 // TODO: update this
 const UNPROTECTED_ROUTES = [
@@ -42,7 +43,16 @@ function routeIsProtected(route: string): boolean {
 }
 
 function isRootRoute(route: string): boolean {
-	return route.startsWith('/root');
+	return route.startsWith('/root') || route.startsWith('/users');
 }
 
-export { userCanAccessRoute, routeIsProtected };
+async function isValidUserInviteRoute(route: string): Promise<boolean> {
+	const isInviteRoute = route.startsWith('/invite');
+	if (!isInviteRoute) return false;
+
+	const uuid = route.substring(7).replaceAll('/', '');
+	const valid = await isValidUserInviteUUID(uuid);
+	return valid;
+}
+
+export { userCanAccessRoute, routeIsProtected, isValidUserInviteRoute };

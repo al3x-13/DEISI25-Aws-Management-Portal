@@ -17,6 +17,8 @@ import { generateOpenApi } from "@ts-rest/open-api";
 import { buildDocsFromTSRestOAS } from '../docs/docs';
 import { OpenAPIObject } from 'openapi3-ts/oas31';
 import sshController from './routes/resources/compute/ssh/controller';
+import inviteUnprotectedController from './routes/invite/controllerUnprotected';
+import inviteProtectedController from './routes/invite/controllerProtected';
 
 
 dotenv.config();
@@ -26,6 +28,7 @@ const port = 3000;
 
 // Checks for env variables
 if (!validateEnvironmentVariablesOnStartup()) {
+	console.error('[Startup Failure] Missing environment variables');
 	process.exit(1);
 }
 
@@ -87,6 +90,7 @@ const unprotectedRoutesRouter = server.router(unprotectedContract, {
 		},
 	},
 	auth: authController,
+	invite: inviteUnprotectedController,
 });
 
 createExpressEndpoints(unprotectedContract, unprotectedRoutesRouter, app, {
@@ -108,12 +112,13 @@ createExpressEndpoints(unprotectedContract, unprotectedRoutesRouter, app, {
 
 const protectedRoutesRouter = server.router(protectedContract, {
 	user: userController,
+	invite: inviteProtectedController,
 	resources: {
 		compute: {
 			ec2: ec2Controller,
 			ssh: sshController,
-		}
-	}
+		},
+	},
 });
 
 createExpressEndpoints(protectedContract, protectedRoutesRouter, app, {

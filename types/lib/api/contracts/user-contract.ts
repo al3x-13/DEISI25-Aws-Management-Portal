@@ -2,6 +2,7 @@ import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import { ApiErrorSchema } from "../types/error";
 import { SchemaID, apiSchemas } from "../schemas/response-objects";
+import { UserSchema } from "../../users/users";
 
 const c = initContract();
 
@@ -59,6 +60,35 @@ const userContract = c.router(
 				401: ApiErrorSchema
 			},
 			summary: 'Validate user JWT'
+		},
+		listAllUsers: {
+			method: 'GET',
+			path: '/listUsers',
+			responses: {
+				200: z.object({
+					users: z.array(UserSchema)
+				}),
+				400: ApiErrorSchema,
+				404: ApiErrorSchema,
+				500: ApiErrorSchema
+			}
+		},
+		delete: {
+			method: 'POST',
+			path: '/delete',
+			body: z.object({
+				id: z.number().openapi({
+					example: 1337
+				})
+			}),
+			responses: {
+				200: z.object({
+					success: z.boolean()
+				}),
+				400: ApiErrorSchema,
+				404: ApiErrorSchema,
+				500: ApiErrorSchema
+			}
 		}
 	},
 	{
